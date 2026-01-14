@@ -147,8 +147,25 @@ npx wrangler pages deploy . --project-name rikuo --branch main
 |------|-----------|-----------|
 | `/nintendo-philosophy/` | nintendo-philosophy.pages.dev | [link2004/nintendo-philosophy](https://github.com/link2004/nintendo-philosophy) |
 
+## 自動デプロイ
+
+GitHub Actions で `main` ブランチに push すると自動デプロイされる。
+
+### 必要なSecrets
+
+| Secret | 説明 |
+|--------|------|
+| `CLOUDFLARE_API_TOKEN` | Cloudflare APIトークン |
+| `CLOUDFLARE_ACCOUNT_ID` | CloudflareアカウントID |
+
+### Secretsの設定方法
+
+1. [Cloudflare API Tokens](https://dash.cloudflare.com/profile/api-tokens) でトークン作成
+   - テンプレート: **Edit Cloudflare Workers**
+2. GitHubリポジトリの Settings → Secrets and variables → Actions に設定
+
 ## 備考
 
 - 各プロジェクトは独立したリポジトリで管理
 - プロキシ先のプロジェクトが更新されると、`rikuo.pages.dev` 経由のアクセスにも自動反映
-- GitHub連携を設定すれば、push時に自動デプロイ可能
+- `main` に push すると GitHub Actions で自動デプロイ
