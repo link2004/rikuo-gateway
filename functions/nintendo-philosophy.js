@@ -1,7 +1,7 @@
+// /nintendo-philosophy へのアクセスもプロキシ（<base>タグ挿入）
 export async function onRequest(context) {
   const url = new URL(context.request.url);
-  const path = url.pathname.replace('/nintendo-philosophy', '') || '/';
-  const targetUrl = `https://nintendo-philosophy.pages.dev${path}${url.search}`;
+  const targetUrl = `https://nintendo-philosophy.pages.dev/${url.search}`;
 
   const response = await fetch(targetUrl, {
     method: context.request.method,
@@ -10,7 +10,6 @@ export async function onRequest(context) {
 
   const contentType = response.headers.get('content-type') || '';
 
-  // HTMLの場合、<base>タグを挿入して相対パスを正しく解決
   if (contentType.includes('text/html')) {
     let html = await response.text();
     html = html.replace('<head>', '<head>\n<base href="/nintendo-philosophy/">');
