@@ -2,23 +2,54 @@
 
 `rikuo.pages.dev` のゲートウェイ。複数の独立したリポジトリをサブパスで公開する。
 
-## 構成
+## アーキテクチャ
 
 ```
-rikuo.pages.dev/                     → index.html（ランディング）
-rikuo.pages.dev/nintendo-philosophy/ → nintendo-philosophy.pages.dev へプロキシ
-rikuo.pages.dev/xxx/                 → xxx.pages.dev へプロキシ
+┌─────────────────────────────────────────────────────────────────┐
+│                        rikuo.pages.dev                          │
+│                       (このリポジトリ)                            │
+├─────────────────────────────────────────────────────────────────┤
+│  /                      → index.html (ランディング)              │
+│  /nintendo-philosophy/* → nintendo-philosophy.pages.dev へプロキシ│
+│  /xxx/*                 → xxx.pages.dev へプロキシ               │
+└─────────────────────────────────────────────────────────────────┘
+                                 │
+                                 │ プロキシ (Pages Functions)
+                                 ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              nintendo-philosophy.pages.dev                      │
+│              (別リポジトリ・別Pagesプロジェクト)                   │
+└─────────────────────────────────────────────────────────────────┘
 ```
+
+## アクセス方法
+
+各プロジェクトは **2つのURL** でアクセス可能:
+
+| URL | 説明 |
+|-----|------|
+| `rikuo.pages.dev/nintendo-philosophy/` | 本番URL（推奨） |
+| `nintendo-philosophy.pages.dev` | 直接アクセス（プロキシなし） |
+
+※ リダイレクトはしない。どちらも同じ内容が表示される。
 
 ## 仕組み
 
-Cloudflare Pages Functions を使用。各サブパスへのリクエストを対応する Pages プロジェクトにプロキシする。
+### プロキシ処理
+
+Cloudflare Pages Functions でリクエストを対応する Pages プロジェクトにプロキシ。
 
 ```
 functions/
+├── nintendo-philosophy.js        ← /nintendo-philosophy をハンドル
 └── nintendo-philosophy/
-    └── [[path]].js      ← /nintendo-philosophy/* を nintendo-philosophy.pages.dev にプロキシ
+    └── [[path]].js               ← /nintendo-philosophy/* をハンドル
 ```
+
+### 相対パスの解決
+
+プロキシ時に `<base href="/nintendo-philosophy/">` タグをHTMLに挿入。
+これにより、画像やリンクの相対パスが正しく解決される。
 
 ## 新しいプロジェクトを追加する方法
 
@@ -37,13 +68,42 @@ npx wrangler pages deploy . --project-name <project-name> --branch main
 
 ### 3. ルーティング用の Function を追加
 
-`functions/<project-name>/[[path]].js` を作成:
+2つのファイルを作成:
+
+**`functions/<project-name>.js`** (末尾スラッシュなしのパス用):
+
+```javascript
+export async function onRequest(context) {
+  const url = new URL(context.request.url);
+  const targetUrl = `https://<project-name>.pages.dev/${url.search}`;
+
+  const response = await fetch(targetUrl, {
+    method: context.request.method,
+    headers: context.request.headers,
+  });
+
+  const contentType = response.headers.get('content-type') || '';
+
+  if (contentType.includes('text/html')) {
+    let html = await response.text();
+    html = html.replace('<head>', '<head>\n<base href="/<project-name>/">');
+
+    const headers = new Headers(response.headers);
+    headers.delete('content-length');
+
+    return new Response(html, { status: response.status, headers });
+  }
+
+  return response;
+}
+```
+
+**`functions/<project-name>/[[path]].js`** (サブパス用):
 
 ```javascript
 export async function onRequest(context) {
   const url = new URL(context.request.url);
   const path = url.pathname.replace('/<project-name>', '') || '/';
-
   const targetUrl = `https://<project-name>.pages.dev${path}${url.search}`;
 
   const response = await fetch(targetUrl, {
@@ -51,10 +111,19 @@ export async function onRequest(context) {
     headers: context.request.headers,
   });
 
-  return new Response(response.body, {
-    status: response.status,
-    headers: response.headers,
-  });
+  const contentType = response.headers.get('content-type') || '';
+
+  if (contentType.includes('text/html')) {
+    let html = await response.text();
+    html = html.replace('<head>', '<head>\n<base href="/<project-name>/">');
+
+    const headers = new Headers(response.headers);
+    headers.delete('content-length');
+
+    return new Response(html, { status: response.status, headers });
+  }
+
+  return response;
 }
 ```
 
@@ -77,3 +146,9 @@ npx wrangler pages deploy . --project-name rikuo --branch main
 | パス | プロキシ先 | リポジトリ |
 |------|-----------|-----------|
 | `/nintendo-philosophy/` | nintendo-philosophy.pages.dev | [link2004/nintendo-philosophy](https://github.com/link2004/nintendo-philosophy) |
+
+## 備考
+
+- 各プロジェクトは独立したリポジトリで管理
+- プロキシ先のプロジェクトが更新されると、`rikuo.pages.dev` 経由のアクセスにも自動反映
+- GitHub連携を設定すれば、push時に自動デプロイ可能
