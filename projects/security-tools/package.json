@@ -1,0 +1,11 @@
+{
+  "name": "security-tools-knowledge",
+  "version": "1.0.0",
+  "description": "セキュリティツールナレッジベース",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "dependencies": {
+    "marked": "^17.0.1"
+  }
+}

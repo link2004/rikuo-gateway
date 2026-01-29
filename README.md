@@ -1,6 +1,6 @@
 # rikuo-gateway
 
-`rikuo.pages.dev` のゲートウェイ。複数の独立したリポジトリをサブパスで公開する。
+`rikuo.pages.dev` のモノレポ。複数のナレッジブログを統合管理。
 
 ## アーキテクチャ
 
@@ -9,147 +9,104 @@
 │                        rikuo.pages.dev                          │
 │                       (このリポジトリ)                            │
 ├─────────────────────────────────────────────────────────────────┤
-│  /                      → index.html (ランディング)              │
-│  /nintendo-philosophy/* → nintendo-philosophy.pages.dev へプロキシ│
-│  /xxx/*                 → xxx.pages.dev へプロキシ               │
+│  /                      → ランディングページ                     │
+│  /nintendo-philosophy/  → 任天堂の哲学                           │
+│  /security-tools/       → セキュリティツール                      │
+│  /claude-code/          → Claude Codeベストプラクティス           │
+│  /levelsio/             → Levelsioプロダクト調査                  │
 └─────────────────────────────────────────────────────────────────┘
-                                 │
-                                 │ プロキシ (Pages Functions)
-                                 ▼
+         ↑
+         │ npm run build で静的ファイル生成
+         │
 ┌─────────────────────────────────────────────────────────────────┐
-│              nintendo-philosophy.pages.dev                      │
-│              (別リポジトリ・別Pagesプロジェクト)                   │
+│  projects/                                                       │
+│  ├── nintendo-philosophy/  (Markdown + build.js → index.html)   │
+│  ├── security-tools/                                             │
+│  ├── claude-code/                                                │
+│  └── levelsio/                                                   │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-## アクセス方法
-
-各プロジェクトは **2つのURL** でアクセス可能:
-
-| URL | 説明 |
-|-----|------|
-| `rikuo.pages.dev/nintendo-philosophy/` | 本番URL（推奨） |
-| `nintendo-philosophy.pages.dev` | 直接アクセス（プロキシなし） |
-
-※ リダイレクトはしない。どちらも同じ内容が表示される。
-
-## 仕組み
-
-### プロキシ処理
-
-Cloudflare Pages Functions でリクエストを対応する Pages プロジェクトにプロキシ。
+## ディレクトリ構成
 
 ```
-functions/
-├── nintendo-philosophy.js        ← /nintendo-philosophy をハンドル
-└── nintendo-philosophy/
-    └── [[path]].js               ← /nintendo-philosophy/* をハンドル
+rikuo-gateway/
+├── projects/               # 各プロジェクトのソースコード
+│   ├── nintendo-philosophy/
+│   ├── security-tools/
+│   ├── claude-code/
+│   └── levelsio/
+├── dist/                   # ビルド出力 (デプロイ対象)
+├── build.js                # 統合ビルドスクリプト
+├── package.json
+└── .github/workflows/
+    └── deploy.yml          # CI/CD
 ```
 
-### 相対パスの解決
+## プロジェクト一覧
 
-プロキシ時に `<base href="/nintendo-philosophy/">` タグをHTMLに挿入。
-これにより、画像やリンクの相対パスが正しく解決される。
+| パス | 名前 | 説明 |
+|------|------|------|
+| `/nintendo-philosophy/` | Nintendo Philosophy | 任天堂を作った伝説の人々と哲学 |
+| `/security-tools/` | Security Tools | セキュリティツールの知識集 |
+| `/claude-code/` | Claude Code | Claude Codeベストプラクティス |
+| `/levelsio/` | Levelsio Research | Pieter Levelsのプロダクトと戦略 |
+
+## 開発
+
+### ローカル確認
+
+```bash
+npm install
+npm run build
+npm run dev
+```
+
+### ビルド
+
+```bash
+npm run build
+```
+
+各プロジェクトの `build.js` を実行し、結果を `dist/` に集約。
+
+### 手動デプロイ
+
+```bash
+npm run build
+npx wrangler pages deploy dist --project-name rikuo --branch main
+```
 
 ## 新しいプロジェクトを追加する方法
 
-### 1. 新プロジェクト用の Pages プロジェクトを作成
+### 1. プロジェクトを作成
 
 ```bash
-npx wrangler pages project create <project-name> --production-branch main
+mkdir -p projects/<project-name>
+cd projects/<project-name>
+# package.json, build.js, index.html を作成
 ```
 
-### 2. プロジェクトをデプロイ
-
-```bash
-cd /path/to/project
-npx wrangler pages deploy . --project-name <project-name> --branch main
-```
-
-### 3. ルーティング用の Function を追加
-
-2つのファイルを作成:
-
-**`functions/<project-name>.js`** (末尾スラッシュなしのパス用):
+### 2. build.js にプロジェクト設定を追加
 
 ```javascript
-export async function onRequest(context) {
-  const url = new URL(context.request.url);
-  const targetUrl = `https://<project-name>.pages.dev/${url.search}`;
-
-  const response = await fetch(targetUrl, {
-    method: context.request.method,
-    headers: context.request.headers,
-  });
-
-  const contentType = response.headers.get('content-type') || '';
-
-  if (contentType.includes('text/html')) {
-    let html = await response.text();
-    html = html.replace('<head>', '<head>\n<base href="/<project-name>/">');
-
-    const headers = new Headers(response.headers);
-    headers.delete('content-length');
-
-    return new Response(html, { status: response.status, headers });
-  }
-
-  return response;
-}
+const projects = [
+  // ...既存プロジェクト
+  { dir: '<project-name>', name: 'Project Name', icon: '🆕', desc: '説明' },
+];
 ```
 
-**`functions/<project-name>/[[path]].js`** (サブパス用):
-
-```javascript
-export async function onRequest(context) {
-  const url = new URL(context.request.url);
-  const path = url.pathname.replace('/<project-name>', '') || '/';
-  const targetUrl = `https://<project-name>.pages.dev${path}${url.search}`;
-
-  const response = await fetch(targetUrl, {
-    method: context.request.method,
-    headers: context.request.headers,
-  });
-
-  const contentType = response.headers.get('content-type') || '';
-
-  if (contentType.includes('text/html')) {
-    let html = await response.text();
-    html = html.replace('<head>', '<head>\n<base href="/<project-name>/">');
-
-    const headers = new Headers(response.headers);
-    headers.delete('content-length');
-
-    return new Response(html, { status: response.status, headers });
-  }
-
-  return response;
-}
-```
-
-### 4. ランディングページにリンクを追加（任意）
-
-`index.html` にリンクを追加:
-
-```html
-<a href="/<project-name>/">Project Name</a>
-```
-
-### 5. デプロイ
+### 3. ビルド & デプロイ
 
 ```bash
-npx wrangler pages deploy . --project-name rikuo --branch main
+npm run build
+git add . && git commit -m "Add <project-name>"
+git push
 ```
-
-## 現在のプロジェクト一覧
-
-| パス | プロキシ先 | リポジトリ |
-|------|-----------|-----------|
-| `/nintendo-philosophy/` | nintendo-philosophy.pages.dev | [link2004/nintendo-philosophy](https://github.com/link2004/nintendo-philosophy) |
 
 ## 自動デプロイ
 
-GitHub Actions で `main` ブランチに push すると自動デプロイされる。
+GitHub Actions で `main` ブランチに push すると自動デプロイ。
 
 ### 必要なSecrets
 
@@ -163,9 +120,3 @@ GitHub Actions で `main` ブランチに push すると自動デプロイされ
 1. [Cloudflare API Tokens](https://dash.cloudflare.com/profile/api-tokens) でトークン作成
    - テンプレート: **Edit Cloudflare Workers**
 2. GitHubリポジトリの Settings → Secrets and variables → Actions に設定
-
-## 備考
-
-- 各プロジェクトは独立したリポジトリで管理
-- プロキシ先のプロジェクトが更新されると、`rikuo.pages.dev` 経由のアクセスにも自動反映
-- `main` に push すると GitHub Actions で自動デプロイ

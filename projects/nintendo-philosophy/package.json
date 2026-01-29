@@ -1,0 +1,25 @@
+{
+  "name": "nintendo-philosophy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build.js",
+  "scripts": {
+    "build": "node build.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/link2004/nintendo-philosophy.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/link2004/nintendo-philosophy/issues"
+  },
+  "homepage": "https://github.com/link2004/nintendo-philosophy#readme",
+  "dependencies": {
+    "marked": "^17.0.1"
+  }
+}

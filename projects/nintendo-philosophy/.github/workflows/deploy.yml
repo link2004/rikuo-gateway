@@ -15,19 +15,10 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install root dependencies
-        run: npm install
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Install project dependencies
-        run: |
-          for dir in projects/*/; do
-            if [ -f "$dir/package.json" ]; then
-              echo "Installing dependencies in $dir"
-              (cd "$dir" && npm install)
-            fi
-          done
-
-      - name: Build all projects
+      - name: Build
         run: npm run build
 
       - name: Deploy to Cloudflare Pages
@@ -35,4 +26,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name rikuo --branch main
+          command: pages deploy . --project-name nintendo-philosophy --branch main

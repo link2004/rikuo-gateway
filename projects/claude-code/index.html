@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#fafafa">
+    <title>Claude Code Best Practices</title>
+    <meta name="description" content="Claude Codeのベストプラクティス - 効果的なプロンプト、セッション管理、自動化のガイド">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="images/icons/robot.png">
+    <link rel="apple-touch-icon" href="images/icons/robot.png">
+
+    <!-- OGP -->
+    <meta property="og:title" content="Claude Code Best Practices">
+    <meta property="og:description" content="Claude Codeのベストプラクティス - 効果的なプロンプト、セッション管理、自動化のガイド">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="ja_JP">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Claude Code Best Practices">
+    <meta name="twitter:description" content="Claude Codeのベストプラクティス - 効果的なプロンプト、セッション管理、自動化のガイド">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --bg: #fafafa;
+            --card-bg: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #6b6b6b;
+            --text-tertiary: #9a9a9a;
+            --border: rgba(0,0,0,0.06);
+            --dot-color: rgba(0,0,0,0.06);
+            --accent: #6366f1;
+            --radius: 24px;
+            --shadow: 0 2px 40px rgba(0,0,0,0.04);
+            --shadow-hover: 0 12px 60px rgba(0,0,0,0.1);
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
+            --safe-left: env(safe-area-inset-left);
+            --safe-right: env(safe-area-inset-right);
+        }
+
+        html {
+            scroll-behavior: smooth;
+            overscroll-behavior: none;
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -webkit-text-size-adjust: 100%;
+            padding-top: var(--safe-top);
+            padding-bottom: var(--safe-bottom);
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+        }
+
+        /* Header */
+        .header {
+            position: relative;
+            padding: 80px 24px 60px;
+            text-align: center;
+            max-width: 680px;
+            margin: 0 auto;
+            padding-left: max(24px, var(--safe-left));
+            padding-right: max(24px, var(--safe-right));
+        }
+
+        .header h1 {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            margin-bottom: 16px;
+        }
+
+        .header p {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.03em;
+            line-height: 1.25;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px calc(100px + var(--safe-bottom));
+            padding-left: max(20px, var(--safe-left));
+            padding-right: max(20px, var(--safe-right));
+        }
+
+        /* Section */
+        .section {
+            margin-bottom: 64px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 24px;
+            padding: 0 4px;
+        }
+
+        .section-icon {
+            font-size: 18px;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        /* Card Grid */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        /* Card */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 40px 28px 36px;
+            cursor: pointer;
+            transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1),
+                        box-shadow 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            will-change: transform;
+            touch-action: manipulation;
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .card:active {
+            transform: scale(0.96);
+            transition: transform 0.12s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        /* Ripple effect */
+        .card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: var(--radius);
+            background: radial-gradient(circle at var(--tap-x, 50%) var(--tap-y, 50%), rgba(0,0,0,0.06) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .card.tapped::after {
+            opacity: 1;
+        }
+
+        /* Read/Clear badge */
+        .card.read::before {
+            content: '✓ READ';
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #34c759;
+            background: rgba(52, 199, 89, 0.1);
+            padding: 4px 10px;
+            border-radius: 999px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Card Icon */
+        .card-icon {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 24px;
+            image-rendering: pixelated;
+            transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            filter: drop-shadow(0 12px 24px rgba(0,0,0,0.1));
+        }
+
+        .card:hover .card-icon,
+        .card:active .card-icon {
+            transform: scale(1.08);
+        }
+
+        .card-label {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            margin-bottom: 10px;
+        }
+
+        .card-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.45;
+            letter-spacing: -0.01em;
+        }
+
+        .card-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 6px;
+        }
+
+        /* Back Button - Fixed */
+        .back-button {
+            position: fixed;
+            top: max(20px, var(--safe-top));
+            left: max(14px, var(--safe-left));
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 30%;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+            touch-action: manipulation;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .back-button svg {
+            width: 20px;
+            height: 20px;
+            stroke: var(--text-primary);
+            stroke-width: 2.5;
+            fill: none;
+        }
+
+        .back-button:active {
+            transform: scale(0.9) !important;
+            transition: transform 0.1s;
+        }
+
+        .back-button.visible {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+        /* Article View */
+        #article-view {
+            display: none;
+            animation: slideIn 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        #article-view.visible {
+            display: block;
+        }
+
+        #list-view {
+            transition: opacity 0.3s;
+        }
+
+        #list-view.hidden {
+            display: none;
+        }
+
+        .article {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 60px 24px calc(120px + var(--safe-bottom));
+            padding-left: max(24px, var(--safe-left));
+            padding-right: max(24px, var(--safe-right));
+        }
+
+        .article h1 {
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: -0.025em;
+            margin-bottom: 48px;
+            color: var(--text-primary);
+        }
+
+        .article h2 {
+            font-size: 22px;
+            font-weight: 600;
+            margin: 56px 0 20px;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .article h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 40px 0 14px;
+            color: var(--text-primary);
+        }
+
+        .article p {
+            font-size: 16px;
+            line-height: 1.9;
+            margin-bottom: 24px;
+            color: var(--text-secondary);
+        }
+
+        .article ul, .article ol {
+            margin: 24px 0 32px 20px;
+            line-height: 1.85;
+        }
+
+        .article li {
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        .article blockquote {
+            border-left: 3px solid var(--accent);
+            padding: 20px 24px;
+            margin: 40px 0;
+            background: rgba(99, 102, 241, 0.05);
+            border-radius: 0 16px 16px 0;
+        }
+
+        .article blockquote p {
+            font-size: 16px;
+            font-style: italic;
+            color: var(--text-primary);
+            margin-bottom: 0;
+            line-height: 1.75;
+        }
+
+        .article a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        .article a:active {
+            opacity: 0.5;
+        }
+
+        .article strong {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .article code {
+            background: rgba(0,0,0,0.05);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+            font-size: 14px;
+        }
+
+        .article pre {
+            background: #1a1a1a;
+            color: #f5f5f5;
+            padding: 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 24px 0;
+        }
+
+        .article pre code {
+            background: transparent;
+            padding: 0;
+            color: inherit;
+        }
+
+        .article table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 32px 0;
+            font-size: 14px;
+            overflow-x: auto;
+            display: block;
+        }
+
+        .article th, .article td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+        }
+
+        .article th {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Skeleton Loading */
+        .loading {
+            text-align: center;
+            padding: 80px 24px;
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, var(--border) 25%, rgba(0,0,0,0.03) 50%, var(--border) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+
+        .skeleton-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 32px;
+            border-radius: 20px;
+        }
+
+        .skeleton-title {
+            height: 32px;
+            width: 80%;
+            margin-bottom: 48px;
+        }
+
+        .skeleton-line {
+            height: 16px;
+            margin-bottom: 16px;
+        }
+
+        /* Article Hero */
+        .article-hero {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .article-hero-icon {
+            width: 120px;
+            height: 120px;
+            image-rendering: pixelated;
+            filter: drop-shadow(0 16px 32px rgba(0,0,0,0.12));
+            animation: heroFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes heroFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 60px 14px 48px;
+            }
+
+            .header p {
+                font-size: 28px;
+            }
+
+            .container {
+                padding-left: 14px;
+                padding-right: 14px;
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+
+            .card {
+                padding: 28px 20px 24px;
+                border-radius: 20px;
+            }
+
+            .card-icon {
+                width: 80px;
+                height: 80px;
+                margin-bottom: 20px;
+            }
+
+            .card-title {
+                font-size: 16px;
+            }
+
+            .article {
+                padding: 48px 14px calc(100px + var(--safe-bottom));
+            }
+
+            .article h1 {
+                font-size: 26px;
+                margin-bottom: 40px;
+            }
+
+            .article h2 {
+                font-size: 20px;
+                margin: 48px 0 16px;
+            }
+
+            .article p, .article li {
+                font-size: 15px;
+                line-height: 1.85;
+            }
+
+            .section {
+                margin-bottom: 48px;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .card {
+            opacity: 0;
+            animation: fadeIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+
+        .card:nth-child(1) { animation-delay: 0.03s; }
+        .card:nth-child(2) { animation-delay: 0.06s; }
+        .card:nth-child(3) { animation-delay: 0.09s; }
+        .card:nth-child(4) { animation-delay: 0.12s; }
+        .card:nth-child(5) { animation-delay: 0.15s; }
+        .card:nth-child(6) { animation-delay: 0.18s; }
+        .card:nth-child(7) { animation-delay: 0.21s; }
+        .card:nth-child(8) { animation-delay: 0.24s; }
+        .card:nth-child(9) { animation-delay: 0.27s; }
+        .card:nth-child(10) { animation-delay: 0.30s; }
+
+        /* Scroll to top button */
+        .scroll-top {
+            position: fixed;
+            bottom: calc(24px + var(--safe-bottom));
+            right: max(14px, var(--safe-right));
+            width: 40px;
+            height: 40px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 30%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            pointer-events: none;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+            z-index: 90;
+            touch-action: manipulation;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .scroll-top svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--text-primary);
+            stroke-width: 2.5;
+            fill: none;
+        }
+
+        .scroll-top.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .scroll-top:active {
+            transform: scale(0.92);
+        }
+
+        /* Theme toggle */
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 30%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            touch-action: manipulation;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .theme-toggle svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--text-primary);
+            stroke-width: 2;
+            fill: none;
+            transition: transform 0.3s;
+        }
+
+        .theme-toggle:active {
+            transform: scale(0.9);
+        }
+
+        /* Dark mode */
+        html.dark {
+            --bg: #0a0a0a;
+            --card-bg: #1a1a1a;
+            --text-primary: #f5f5f5;
+            --text-secondary: #a0a0a0;
+            --text-tertiary: #666666;
+            --border: rgba(255,255,255,0.08);
+            --dot-color: rgba(255,255,255,0.06);
+        }
+
+        html.dark .back-button,
+        html.dark .scroll-top {
+            background: rgba(40,40,40,0.95);
+        }
+
+        html.dark .theme-toggle {
+            background: rgba(40,40,40,0.95);
+        }
+
+        html.dark .article code {
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* Reset button */
+        .reset-button {
+            display: block;
+            margin: 60px auto 20px;
+            padding: 8px 16px;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-tertiary);
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .reset-button:hover {
+            color: var(--text-secondary);
+            border-color: var(--text-tertiary);
+        }
+
+        /* Back button hide on scroll */
+        .back-button.hidden-scroll {
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+        }
+
+        /* Source Link */
+        .source-link {
+            margin-top: 64px;
+            padding-top: 32px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .source-link a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+            box-shadow: var(--shadow);
+        }
+
+        .source-link a:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .source-link a:active {
+            transform: scale(0.98);
+        }
+
+        .source-link svg {
+            flex-shrink: 0;
+        }
+
+        /* Article Navigation */
+        .article-nav {
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 1px solid var(--border);
+        }
+
+        .article-nav-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            margin-bottom: 16px;
+        }
+
+        .article-nav-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            box-shadow: var(--shadow);
+        }
+
+        .article-nav-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .article-nav-card:active {
+            transform: scale(0.98);
+        }
+
+        .article-nav-icon {
+            width: 64px;
+            height: 64px;
+            image-rendering: pixelated;
+            flex-shrink: 0;
+        }
+
+        .article-nav-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .article-nav-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .article-nav-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .article-nav-arrow {
+            width: 24px;
+            height: 24px;
+            stroke: var(--text-tertiary);
+            stroke-width: 2;
+            fill: none;
+            flex-shrink: 0;
+        }
+    </style>
+<script>window.__ARTICLES__ = {"ベストプラクティス/01_検証方法を提供する.md":"<h1>検証方法を提供する</h1>\n<h2>概要</h2>\n<p>Claude Codeを使う上で、最も効果を発揮する単一のアドバイス。それは「Claudeが自分の作業を検証できる方法を与える」ということである。</p>\n<p>テストを実行させる、スクリーンショットを比較させる、出力を検証させる。明確な成功基準がなければ、見た目は正しくても動かないコードを生成してしまう可能性がある。</p>\n<hr>\n<h2>なぜ検証が重要なのか</h2>\n<h3>自律的な品質保証</h3>\n<p>Claudeは指示されたタスクを実行する際、自分自身で結果を確認できると、劇的にパフォーマンスが向上する。これは人間のエンジニアが「書いたコードをテストする」のと同じ理由だ。</p>\n<blockquote>\n<p>検証なしでは、Claudeは「それっぽいもの」を作ることはできても、「確実に動くもの」を作ることは難しい。</p>\n</blockquote>\n<h3>フィードバックループの確立</h3>\n<p>検証を組み込むことで、以下のサイクルが回る：</p>\n<ol>\n<li><strong>実装</strong> → コードを書く</li>\n<li><strong>検証</strong> → テストを実行する</li>\n<li><strong>修正</strong> → 失敗した部分を直す</li>\n<li><strong>再検証</strong> → 再度テストを実行する</li>\n</ol>\n<hr>\n<h2>具体的な改善例</h2>\n<h3>検証基準を提供する</h3>\n<table>\n<thead>\n<tr>\n<th>改善前</th>\n<th>改善後</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>「メールアドレスを検証する関数を実装して」</td>\n<td>「validateEmail関数を書いて。テストケース: <code>test@example.com</code>はtrue、<code>invalid</code>はfalse、<code>@missing.com</code>はfalse。実装後にテストを実行して」</td>\n</tr>\n</tbody></table>\n<h3>UI変更を視覚的に検証する</h3>\n<table>\n<thead>\n<tr>\n<th>改善前</th>\n<th>改善後</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>「ダッシュボードをもっと良くして」</td>\n<td>「[スクリーンショットを貼り付け] このデザインを実装して。結果のスクリーンショットを撮って元と比較し、差分をリストアップして修正して」</td>\n</tr>\n</tbody></table>\n<h3>根本原因に対処する</h3>\n<table>\n<thead>\n<tr>\n<th>改善前</th>\n<th>改善後</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>「ビルドが失敗してる」</td>\n<td>「このエラーでビルドが失敗してる: [エラーを貼り付け]。修正してビルドが成功することを確認して。エラーを抑制するんじゃなく、根本原因に対処して」</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>実践的なヒント</h2>\n<h3>1. テストファイルを指定する</h3>\n<pre><code>「src/utils/validation.ts に変更を加えたら、\n対応する src/utils/validation.test.ts のテストを実行して\nすべてパスすることを確認して」\n</code></pre>\n<h3>2. ビルドコマンドを明示する</h3>\n<pre><code>「変更を加えたら npm run build を実行して、\n型エラーがないことを確認して」\n</code></pre>\n<h3>3. 期待する出力を示す</h3>\n<pre><code>「このAPIエンドポイントは以下のJSONを返すべき:\n{\n  &quot;status&quot;: &quot;success&quot;,\n  &quot;data&quot;: { ... }\n}\n実際にcurlで叩いて確認して」\n</code></pre>\n<hr>\n<h2>よくある落とし穴</h2>\n<h3>「動いてるように見える」罠</h3>\n<p>検証基準を与えないと、Claudeは以下のような状態で完了と判断してしまうことがある：</p>\n<ul>\n<li>構文エラーはないが、ロジックが間違っている</li>\n<li>一見正しいが、エッジケースで失敗する</li>\n<li>型は通るが、実行時にクラッシュする</li>\n</ul>\n<h3>対策</h3>\n<ul>\n<li><strong>明示的なテストケース</strong>を提供する</li>\n<li><strong>失敗時の挙動</strong>も定義する</li>\n<li><strong>実行して確認</strong>という指示を含める</li>\n</ul>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「Claudeに検証手段を与えよ」</p>\n</blockquote>\n<p>これが、Claude Codeを最大限に活用するための最も重要な原則である。テストの実行、スクリーンショットの比較、出力の検証—これらを指示に組み込むことで、Claudeは自律的に品質を担保しながら作業を進められるようになる。</p>\n","ベストプラクティス/02_探索から計画そして実装へ.md":"<h1>探索から計画、そして実装へ</h1>\n<h2>概要</h2>\n<p>効果的な開発は「調査」と「実装」を分離することから始まる。闇雲にコードを書き始めるのではなく、まず探索し、計画を立て、それから実装に移る。この4段階のワークフローが、間違った問題を解決してしまうリスクを大幅に減らす。</p>\n<hr>\n<h2>4段階ワークフロー</h2>\n<h3>フェーズ1: 探索（プランモード）</h3>\n<p>プランモードに入り、Claudeにファイルを読ませ、変更を加えずに質問に答えさせる。</p>\n<pre><code>claude (プランモード)\n\n質問: 「src/authを読んで、セッションとログインの\n処理方法を理解して。\nあと、シークレット用の環境変数の管理方法も確認して」\n</code></pre>\n<p><strong>ポイント</strong>: この段階では一切変更を加えない。理解に徹する。</p>\n<h3>フェーズ2: 計画</h3>\n<p>Claudeに詳細な実装計画を作成させる。</p>\n<pre><code>質問: 「Google OAuthを追加したい。\nどのファイルを変更する必要がある？\nセッションフローはどうなる？\n計画を作成して」\n</code></pre>\n<p><strong>成果物</strong>: 変更が必要なファイルのリスト、実装の順序、考慮すべきエッジケース</p>\n<h3>フェーズ3: 実装（通常モード）</h3>\n<p>通常モードに戻り、計画に基づいてClaudeにコードを書かせ、検証する。</p>\n<pre><code>質問: 「計画通りにOAuthフローを実装して。\nコールバックハンドラのテストを書いて、\nテストスイートを実行して失敗があれば修正して」\n</code></pre>\n<h3>フェーズ4: コミット</h3>\n<pre><code>質問: 「説明的なメッセージでコミットして、PRを開いて」\n</code></pre>\n<hr>\n<h2>計画をスキップしてもいい場合</h2>\n<p>以下のような単純で明確な修正の場合は、直接実行を依頼してOK：</p>\n<ul>\n<li><strong>タイポの修正</strong></li>\n<li><strong>ログ行の追加</strong></li>\n<li><strong>変数名の変更</strong></li>\n</ul>\n<blockquote>\n<p>計画のオーバーヘッドが価値を持つのは、アプローチが不確実な場合、複数ファイルにまたがる変更、または不慣れなコードを扱う場合。</p>\n</blockquote>\n<hr>\n<h2>プランモードの使い方</h2>\n<h3>基本コマンド</h3>\n<pre><code class=\"language-bash\"># プランモードに入る\n/plan\n\n# 通常モードに戻る\n（プランモードで計画を立てた後、実装開始を指示）\n</code></pre>\n<h3>プランモードでできること</h3>\n<ul>\n<li>ファイルの読み取り</li>\n<li>コードベースの探索</li>\n<li>質問への回答</li>\n<li>計画の作成</li>\n</ul>\n<h3>プランモードでできないこと</h3>\n<ul>\n<li>ファイルの編集</li>\n<li>コマンドの実行（読み取り以外）</li>\n<li>実際の変更</li>\n</ul>\n<hr>\n<h2>実践例: 認証システムの追加</h2>\n<h3>Step 1: 探索</h3>\n<pre><code>/plan\n\n「このプロジェクトの認証の仕組みを調べて。\n- 既存のユーザー管理はある？\n- セッション管理はどうなってる？\n- 使われてる認証ライブラリは？」\n</code></pre>\n<h3>Step 2: 計画</h3>\n<pre><code>「JWTベースの認証を追加したい。計画を立てて：\n1. 必要なパッケージ\n2. 変更するファイル\n3. 実装の順序\n4. テスト戦略」\n</code></pre>\n<h3>Step 3: 実装</h3>\n<pre><code>「計画に従って実装を開始して。\nまずユーザーモデルとauth middlewareから。\n各ステップでテストを実行して」\n</code></pre>\n<hr>\n<h2>なぜこのワークフローが効果的なのか</h2>\n<h3>1. コンテキストの効率的な利用</h3>\n<p>探索フェーズで全体像を把握してから実装に移ることで、手戻りが減る。</p>\n<h3>2. 明確な成功基準</h3>\n<p>計画段階で「何をもって完了とするか」が明確になる。</p>\n<h3>3. 分離された関心事</h3>\n<ul>\n<li>探索 = 理解</li>\n<li>計画 = 設計</li>\n<li>実装 = コーディング</li>\n<li>コミット = 記録</li>\n</ul>\n<p>それぞれの段階で異なる思考モードが必要であり、分離することで各段階に集中できる。</p>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「まず探索し、次に計画し、それから実装せよ」</p>\n</blockquote>\n<p>この原則に従うことで、間違った方向に進むリスクを最小化し、効率的な開発が可能になる。特に複雑なタスクや不慣れなコードベースでは、このワークフローが真価を発揮する。</p>\n","ベストプラクティス/03_具体的なコンテキストを提供する.md":"<h1>具体的なコンテキストを提供する</h1>\n<h2>概要</h2>\n<p>より精密な指示は、より少ない修正で済む結果につながる。曖昧な依頼は曖昧な結果を生み、具体的な依頼は具体的な結果を生む。これはClaude Codeに限らず、あらゆるコミュニケーションに通じる原則だ。</p>\n<hr>\n<h2>具体性がもたらす効果</h2>\n<h3>Before と After</h3>\n<table>\n<thead>\n<tr>\n<th>戦略</th>\n<th>改善前</th>\n<th>改善後</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>タスクのスコープを絞る</strong></td>\n<td>「foo.pyにテストを追加して」</td>\n<td>「foo.pyにテストを書いて。ユーザーがログアウトしている場合のエッジケースをカバー。モックは避けて」</td>\n</tr>\n<tr>\n<td><strong>ソースを指定する</strong></td>\n<td>「なぜExecutionFactoryはこんな変なAPIなの？」</td>\n<td>「ExecutionFactoryのgit履歴を調べて、APIがどのように変遷してきたかまとめて」</td>\n</tr>\n<tr>\n<td><strong>パターンを参照する</strong></td>\n<td>「カレンダーウィジェットを追加して」</td>\n<td>「ホームページにある既存のウィジェットの実装を見て、パターンを理解して。HotDogWidget.phpが良い例。そのパターンに従って新しいカレンダーウィジェットを実装して...」</td>\n</tr>\n<tr>\n<td><strong>症状を記述する</strong></td>\n<td>「ログインのバグを直して」</td>\n<td>「セッションタイムアウト後にログインが失敗するとユーザーから報告があった。src/auth/のauth flowを調べて、特にトークンリフレッシュ周り。問題を再現する失敗テストを書いてから修正して」</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>良いプロンプトの構成要素</h2>\n<h3>1. 何をするか（What）</h3>\n<p>具体的なゴールを明示する。</p>\n<pre><code>✗ 「コードを改善して」\n✓ 「validateUserInput関数のエラーハンドリングを追加して」\n</code></pre>\n<h3>2. どこで（Where）</h3>\n<p>対象となるファイルやモジュールを指定する。</p>\n<pre><code>✗ 「認証を修正して」\n✓ 「src/services/auth/tokenRefresh.tsのリフレッシュロジックを修正して」\n</code></pre>\n<h3>3. どのように（How）</h3>\n<p>期待する実装方法やパターンを示す。</p>\n<pre><code>✗ 「テストを書いて」\n✓ 「既存のsrc/tests/のパターンに従って、Jest + Testing Libraryでテストを書いて」\n</code></pre>\n<h3>4. なぜ（Why）</h3>\n<p>背景を共有することで、より適切な判断ができる。</p>\n<pre><code>✗ 「APIレスポンスを変更して」\n✓ 「モバイルアプリのパフォーマンス向上のため、不要なフィールドを削除してレスポンスサイズを減らしたい」\n</code></pre>\n<hr>\n<h2>コンテキストの提供方法</h2>\n<h3><code>@</code>でファイルを参照</h3>\n<pre><code>「@src/components/UserProfile.tsx を見て、\n同じパターンで @src/components/Settings.tsx を作成して」\n</code></pre>\n<h3>画像を貼り付け</h3>\n<ul>\n<li>スクリーンショットをコピー&amp;ペースト</li>\n<li>ドラッグ&amp;ドロップでプロンプトに追加</li>\n</ul>\n<h3>URLを提供</h3>\n<pre><code>「このAPIドキュメントを参考に実装して:\nhttps://docs.example.com/api/v2」\n</code></pre>\n<h3>パイプでデータを渡す</h3>\n<pre><code class=\"language-bash\">cat error.log | claude &quot;このエラーログを分析して原因を特定して&quot;\n</code></pre>\n<h3>Claudeに自分で取得させる</h3>\n<pre><code>「src/configディレクトリを読んで、\n設定の構造を理解してから作業を開始して」\n</code></pre>\n<hr>\n<h2>症状の記述テクニック</h2>\n<h3>バグ報告の例</h3>\n<p><strong>悪い例:</strong></p>\n<pre><code>「ログインが壊れてる」\n</code></pre>\n<p><strong>良い例:</strong></p>\n<pre><code>「ユーザーからの報告:\n- セッションタイムアウト後にログインしようとすると失敗\n- エラーメッセージ: &quot;Invalid token&quot;\n- 再現手順: 1時間放置後にログイン試行\n\n調査して、失敗テストを書いてから修正して」\n</code></pre>\n<h3>機能追加の例</h3>\n<p><strong>悪い例:</strong></p>\n<pre><code>「検索機能を追加して」\n</code></pre>\n<p><strong>良い例:</strong></p>\n<pre><code>「ユーザー一覧ページに検索機能を追加したい:\n- 名前とメールで検索可能\n- リアルタイムフィルタリング（デバウンス300ms）\n- 検索結果は既存のUserListコンポーネントで表示\n- 既存のuseUsersフックを拡張して実装」\n</code></pre>\n<hr>\n<h2>パターンを示す重要性</h2>\n<p>既存のコードベースにはすでに確立されたパターンがある。それを明示的に示すことで、一貫性のあるコードが生成される。</p>\n<pre><code>「新しいAPIエンドポイントを追加して。\n@src/routes/users.ts の構造を参考にして:\n- バリデーション → サービス呼び出し → レスポンス\n- エラーハンドリングのパターンも同じにして」\n</code></pre>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「具体的な指示は具体的な結果を生む」</p>\n</blockquote>\n<p>曖昧さを排除し、コンテキストを豊富に提供することで、Claudeはより正確で期待通りの結果を出せる。ファイル参照、画像、URL、パイプ入力など、あらゆる手段を使ってコンテキストを充実させよう。</p>\n","ベストプラクティス/04_環境を設定する.md":"<h1>環境を設定する</h1>\n<h2>概要</h2>\n<p>Claude Codeは高度にカスタマイズ可能なツールである。CLAUDE.md、パーミッション、MCPサーバー、カスタムコマンド、プラグイン、フック、サブエージェント、スキル—これらを適切に設定することで、あなたのワークフローに完全に最適化された開発環境を構築できる。</p>\n<hr>\n<h2>CLAUDE.mdを効果的に書く</h2>\n<h3>概要</h3>\n<p><code>/init</code>を実行すると、スターターのCLAUDE.mdファイルが生成される。これはClaudeが毎回のセッション開始時に読み込む特別なファイルだ。</p>\n<h3>含めるべきもの</h3>\n<p>✅ <strong>含める:</strong></p>\n<ul>\n<li>Claudeが推測できないBashコマンド</li>\n<li>デフォルトと異なるコードスタイルルール</li>\n<li>テスト実行の指示と好みのテストランナー</li>\n<li>リポジトリのエチケット</li>\n<li>プロジェクト固有のアーキテクチャ決定</li>\n<li>開発環境の癖（必須の環境変数など）</li>\n<li>よくある落とし穴や非自明な挙動</li>\n</ul>\n<p>❌ <strong>含めない:</strong></p>\n<ul>\n<li>コードを読めばわかること</li>\n<li>標準的な言語の慣習</li>\n<li>詳細なAPIドキュメント（代わりにリンクを貼る）</li>\n<li>頻繁に変わる情報</li>\n<li>長い説明やチュートリアル</li>\n<li>自明なプラクティス</li>\n</ul>\n<h3>良いCLAUDE.mdの例</h3>\n<pre><code class=\"language-markdown\"># コードスタイル\n- ES modules構文（import/export）を使用、CommonJS（require）は使わない\n- importはできるだけ分割代入する（例: import { foo } from &#39;bar&#39;）\n\n# ワークフロー\n- コード変更の一連の作業が終わったら必ず型チェックを実行\n- パフォーマンスのため、テストスイート全体ではなく単一テストを優先\n</code></pre>\n<h3>追加ファイルのインポート</h3>\n<pre><code class=\"language-markdown\">プロジェクト概要は @README.md、npmコマンドは @package.json を参照。\n\n# 追加指示\n- Git ワークフロー: @docs/git-instructions.md\n- 個人設定: @~/.claude/my-project-instructions.md\n</code></pre>\n<h3>CLAUDE.mdの配置場所</h3>\n<table>\n<thead>\n<tr>\n<th>場所</th>\n<th>用途</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>~/.claude/CLAUDE.md</code></td>\n<td>すべてのセッションに適用</td>\n</tr>\n<tr>\n<td><code>./CLAUDE.md</code></td>\n<td>プロジェクトルート（gitにコミット推奨）</td>\n</tr>\n<tr>\n<td><code>CLAUDE.local.md</code></td>\n<td>ローカルオーバーライド</td>\n</tr>\n<tr>\n<td>親/子ディレクトリ</td>\n<td>モノレポで自動検出</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>パーミッションの設定</h2>\n<h3>基本コマンド</h3>\n<p><code>/permissions</code>で安全なコマンドを許可リストに追加、<code>/sandbox</code>でOS レベルの分離を有効化。</p>\n<h3>オプション</h3>\n<ul>\n<li><strong>パーミッション許可リスト</strong>: 特定のツールを許可（<code>npm run lint</code>、<code>git commit</code>）</li>\n<li><strong>サンドボックス</strong>: ファイルシステム/ネットワークアクセスを制限するOS レベルの分離</li>\n<li><strong><code>--dangerously-skip-permissions</code></strong>: すべてのパーミッションチェックをバイパス（インターネットなしのサンドボックスでのみ使用）</li>\n</ul>\n<hr>\n<h2>CLIツールの活用</h2>\n<p>Claude Codeに外部サービスとやり取りする際、<code>gh</code>、<code>aws</code>、<code>gcloud</code>、<code>sentry-cli</code>などのCLIツールを使わせる。</p>\n<pre><code class=\"language-bash\"># GitHub CLIの例\nclaude -p &quot;gh issue listを使ってオープンなissueを表示して&quot;\n</code></pre>\n<hr>\n<h2>MCPサーバーの接続</h2>\n<p><code>claude mcp add</code>で外部ツールを接続:</p>\n<ul>\n<li>Notion</li>\n<li>Figma</li>\n<li>データベース</li>\n<li>Issue トラッカー</li>\n<li>モニタリングツール</li>\n</ul>\n<hr>\n<h2>カスタムスラッシュコマンド</h2>\n<p>繰り返しのワークフローを<code>.claude/commands/</code>や<code>~/.claude/commands/</code>にマークダウンファイルとして保存。</p>\n<p><strong>.claude/commands/fix-github-issue.md:</strong></p>\n<pre><code class=\"language-markdown\">---\ndescription: GitHub issueを修正\n---\nGitHub issue: $ARGUMENTS を分析して修正してください。\n\n以下の手順に従ってください:\n1. `gh issue view`でissueの詳細を取得\n2. issueに記述された問題を理解\n3. 関連ファイルをコードベースから検索\n4. 問題を修正するために必要な変更を実装\n5. 修正を検証するテストを書いて実行\n6. リントと型チェックをパス\n7. 説明的なコミットメッセージを作成\n8. プッシュしてPRを作成\n</code></pre>\n<p><strong>使用方法:</strong> <code>/fix-github-issue 1234</code></p>\n<hr>\n<h2>プラグインのインストール</h2>\n<p><code>/plugin</code>でマーケットプレイスを閲覧。プラグインは以下を追加:</p>\n<ul>\n<li><strong>カスタムコマンド</strong>: 新しいスラッシュコマンド</li>\n<li><strong>MCPサーバー</strong>: 事前設定済みの接続</li>\n<li><strong>サブエージェント</strong>: 専門化されたアシスタント</li>\n<li><strong>スキル</strong>: ドメイン知識</li>\n</ul>\n<hr>\n<h2>フックの設定</h2>\n<p><code>/hooks</code>で決定論的な動作を保証:</p>\n<pre><code class=\"language-bash\"># 編集時に自動フォーマット\nprettier on .ts files\n\n# ファイル編集後にリント\neslint on .js files\n\n# 機密ファイルへの書き込みをブロック\nblock writes to .env, secrets/\n\n# すべてのコマンドをログ\nlog all executed commands\n</code></pre>\n<h3>フックとCLAUDE.mdの使い分け</h3>\n<table>\n<thead>\n<tr>\n<th>機能</th>\n<th>使い所</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>フック</strong></td>\n<td>例外なく毎回必ず実行すべきこと</td>\n</tr>\n<tr>\n<td><strong>CLAUDE.md</strong></td>\n<td>判断が必要なガイダンス</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>カスタムサブエージェント</h2>\n<p><code>.claude/agents/</code>に専門化されたアシスタントを定義:</p>\n<p><strong>.claude/agents/security-reviewer.md:</strong></p>\n<pre><code class=\"language-markdown\">---\nname: security-reviewer\ndescription: セキュリティ脆弱性のコードレビュー\ntools: Read, Grep, Glob, Bash\nmodel: opus\n---\nあなたはシニアセキュリティエンジニアです。以下の観点でコードをレビューしてください:\n- インジェクション脆弱性（SQL、XSS、コマンドインジェクション）\n- 認証・認可の欠陥\n- コード内のシークレットや認証情報\n- 安全でないデータ処理\n\n具体的な行番号の参照と修正案を提供してください。\n</code></pre>\n<h3>サブエージェントの活用場面</h3>\n<ul>\n<li>コードレビュー（メイン会話のバイアスなし）</li>\n<li>調査（メインのコンテキストを消費しない）</li>\n<li>専門タスク（セキュリティ、ドキュメント、テスト）</li>\n<li>検証</li>\n</ul>\n<hr>\n<h2>エージェントスキル</h2>\n<p><code>.claude/skills/</code>にドメイン知識を作成。Claudeが自動的に適用:</p>\n<p><strong>.claude/skills/api-conventions.md:</strong></p>\n<pre><code class=\"language-markdown\">---\nname: api-conventions\ndescription: サービスのREST API設計規約\n---\n# API規約\n- URLパスにはケバブケースを使用\n- JSONプロパティにはキャメルケースを使用\n- リストエンドポイントには必ずページネーションを含める\n- URLパスでAPIをバージョニング（/v1/、/v2/）\n</code></pre>\n<h3>機能の使い分け</h3>\n<table>\n<thead>\n<tr>\n<th>機能</th>\n<th>トリガー</th>\n<th>最適な用途</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>CLAUDE.md</td>\n<td>常に読み込み</td>\n<td>グローバルなプロジェクトコンテキスト</td>\n</tr>\n<tr>\n<td>スラッシュコマンド</td>\n<td>明示的な呼び出し</td>\n<td>繰り返しワークフロー</td>\n</tr>\n<tr>\n<td>スキル</td>\n<td>コンテキスト（自動）</td>\n<td>ドメイン知識</td>\n</tr>\n<tr>\n<td>サブエージェント</td>\n<td>委任</td>\n<td>分離されたタスク</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「環境設定は一度の投資で継続的なリターンを生む」</p>\n</blockquote>\n<p>CLAUDE.md、パーミッション、フック、カスタムコマンド、サブエージェント、スキル—これらを適切に設定することで、Claude Codeはあなた専用の開発環境に進化する。</p>\n","ベストプラクティス/05_効果的にコミュニケーションする.md":"<h1>効果的にコミュニケーションする</h1>\n<h2>概要</h2>\n<p>Claude Codeとの対話は、シニアエンジニアとの対話と同じように考えよう。コードベースについて質問したり、インタビュー形式で要件を深掘りしたり。効果的なコミュニケーションが、効果的な結果につながる。</p>\n<hr>\n<h2>コードベースについて質問する</h2>\n<h3>シニアエンジニアに聞くように質問する</h3>\n<p>Claudeには、あなたがシニアエンジニアに聞くのと同じ質問ができる:</p>\n<pre><code>- ロギングはどう動いてる？\n- 新しいAPIエンドポイントはどうやって作る？\n- foo.rsの134行目の `async move { ... }` は何をしてる？\n- CustomerOnboardingFlowImplはどんなエッジケースを処理してる？\n- なぜこのコードは333行目で bar() ではなく foo() を呼んでるの？\n</code></pre>\n<h3>質問の種類</h3>\n<h4>アーキテクチャの理解</h4>\n<pre><code>「このプロジェクトのディレクトリ構造を説明して。\n各ディレクトリの役割は？」\n</code></pre>\n<h4>実装の詳細</h4>\n<pre><code>「認証フローを追ってくれる？\nログインからトークン発行までの流れを説明して」\n</code></pre>\n<h4>設計判断の背景</h4>\n<pre><code>「なぜここでReduxを使ってるの？\nContext APIではダメだった理由は？」\n</code></pre>\n<h4>コードの挙動</h4>\n<pre><code>「この再帰関数の終了条件は何？\n無限ループになる可能性は？」\n</code></pre>\n<hr>\n<h2>Claudeにインタビューさせる</h2>\n<h3>大きな機能の場合</h3>\n<p>より大きな機能を作る場合、まずClaudeにインタビューをさせることで、見落としがちなポイントを洗い出せる。</p>\n<pre><code>質問: 「[簡単な説明]を作りたい。AskUserQuestionツールを使って\n詳細にインタビューして。\n\n技術的な実装、UI/UX、エッジケース、懸念点、トレードオフについて\n質問して。明らかな質問はしないで、私が考えていなかった\n難しい部分を掘り下げて。\n\nすべてカバーするまでインタビューを続けて、\nその後完全な仕様書をSPEC.mdに書いて」\n</code></pre>\n<h3>なぜインタビューが効果的か</h3>\n<ol>\n<li><strong>盲点の発見</strong>: 自分では気づかなかった考慮点が見つかる</li>\n<li><strong>要件の明確化</strong>: 曖昧な部分が具体的になる</li>\n<li><strong>実装前の問題発見</strong>: コーディング後ではなく前に問題を発見できる</li>\n</ol>\n<h3>インタビュー後のワークフロー</h3>\n<p>インタビューで仕様が固まったら、新しいセッションを開始して実装に集中:</p>\n<pre><code class=\"language-bash\"># 新しいセッションで\nclaude --continue  # または新規セッション\n\n「SPEC.mdの仕様に従って実装を開始して」\n</code></pre>\n<blockquote>\n<p>新しいセッションを開始することで、実装に完全に集中できるクリーンなコンテキストが得られる。</p>\n</blockquote>\n<hr>\n<h2>質問の仕方のコツ</h2>\n<h3>具体的に聞く</h3>\n<p><strong>悪い例:</strong></p>\n<pre><code>「このコードどう思う？」\n</code></pre>\n<p><strong>良い例:</strong></p>\n<pre><code>「このコードのパフォーマンスは問題ない？\nN+1クエリの可能性は？」\n</code></pre>\n<h3>コンテキストを含める</h3>\n<p><strong>悪い例:</strong></p>\n<pre><code>「バグがある」\n</code></pre>\n<p><strong>良い例:</strong></p>\n<pre><code>「ユーザー登録でメール確認後に500エラーが発生する。\n再現手順: 1) 登録 2) メール確認リンクをクリック 3) エラー」\n</code></pre>\n<h3>期待する回答の形式を示す</h3>\n<pre><code>「このAPIの認証フローを説明して。\nシーケンス図のマークダウン形式で」\n</code></pre>\n<hr>\n<h2>対話のパターン</h2>\n<h3>探索的対話</h3>\n<pre><code>User: 「このプロジェクトの認証の仕組みを教えて」\nClaude: [説明]\nUser: 「JWTトークンの有効期限はどこで設定されてる？」\nClaude: [説明]\nUser: 「リフレッシュトークンの実装はある？」\nClaude: [説明]\n</code></pre>\n<h3>決定支援対話</h3>\n<pre><code>User: 「状態管理にReduxとZustandのどちらを使うべき？」\nClaude: [両方の特徴と推奨]\nUser: 「このプロジェクトの規模だとどちら？」\nClaude: [具体的な推奨]\n</code></pre>\n<h3>実装ガイド対話</h3>\n<pre><code>User: 「新しいAPIエンドポイントの追加方法を教えて」\nClaude: [ステップバイステップの説明]\nUser: 「認証が必要なエンドポイントの場合は？」\nClaude: [追加説明]\n</code></pre>\n<hr>\n<h2>フィードバックループ</h2>\n<h3>早めの軌道修正</h3>\n<p>Claudeの回答が期待と違う場合は、すぐにフィードバックする:</p>\n<pre><code>User: 「そうじゃなくて、クライアント側のバリデーションの話」\n</code></pre>\n<pre><code>User: 「もっと詳しく。特にエラーハンドリングについて」\n</code></pre>\n<pre><code>User: 「シンプルにして。フレームワークは使わないで」\n</code></pre>\n<h3>確認を求める</h3>\n<p>重要な判断の前には確認を求める:</p>\n<pre><code>「この理解で合ってる？\n- ユーザーはメール認証必須\n- セッションは24時間で期限切れ\n- リフレッシュトークンはなし\n\n合ってたら実装を始めて」\n</code></pre>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「シニアエンジニアと話すように対話せよ」</p>\n</blockquote>\n<p>Claude Codeとの効果的なコミュニケーションは、明確な質問、適切なコンテキスト、そしてインタラクティブな対話から生まれる。インタビュー機能を活用して要件を深掘りし、具体的な質問で必要な情報を引き出そう。</p>\n","ベストプラクティス/06_セッションを管理する.md":"<h1>セッションを管理する</h1>\n<h2>概要</h2>\n<p>Claude Codeの最大の制約はコンテキストウィンドウだ。コンテキストが埋まると、パフォーマンスが低下する。セッションを効果的に管理することで、常に最高のパフォーマンスを維持できる。</p>\n<hr>\n<h2>早期かつ頻繁に軌道修正する</h2>\n<h3>Claudeが脱線したらすぐに修正</h3>\n<p>間違った方向に進んでいるのに気づいたら、即座に修正する。</p>\n<h3>利用可能なツール</h3>\n<table>\n<thead>\n<tr>\n<th>ツール</th>\n<th>説明</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong><code>Esc</code></strong></td>\n<td>Claudeの作業を途中で停止。コンテキストは保持され、リダイレクトが可能</td>\n</tr>\n<tr>\n<td><strong><code>Esc + Esc</code></strong> or <strong><code>/rewind</code></strong></td>\n<td>リワインドメニューを開き、以前の会話とコード状態を復元</td>\n</tr>\n<tr>\n<td><strong><code>「それを元に戻して」</code></strong></td>\n<td>Claudeに変更を取り消させる</td>\n</tr>\n<tr>\n<td><strong><code>/clear</code></strong></td>\n<td>無関係なタスク間でコンテキストをリセット</td>\n</tr>\n</tbody></table>\n<h3>経験則</h3>\n<blockquote>\n<p>同じ問題で2回以上修正したら、<code>/clear</code>して、より具体的なプロンプトで新しくやり直す。</p>\n</blockquote>\n<hr>\n<h2>コンテキストを積極的に管理する</h2>\n<h3>基本原則</h3>\n<p>無関係なタスク間では<code>/clear</code>を実行。Claudeはコンテキスト制限に近づくと、自動的に会話履歴を圧縮する。</p>\n<h3>コマンド</h3>\n<pre><code class=\"language-bash\"># コンテキストを完全にリセット\n/clear\n\n# 焦点を絞って強制圧縮\n/compact API変更に焦点を当てて\n</code></pre>\n<h3>いつclearすべきか</h3>\n<ul>\n<li><strong>別のタスクに移る時</strong></li>\n<li><strong>無関係な議論が長くなった時</strong></li>\n<li><strong>Claudeのレスポンスが遅くなった時</strong></li>\n<li><strong>同じミスを繰り返すようになった時</strong></li>\n</ul>\n<hr>\n<h2>サブエージェントで調査を委任する</h2>\n<h3>概要</h3>\n<p>調査作業は別のコンテキストウィンドウで実行させ、メインの会話を汚さない。</p>\n<pre><code>質問: 「サブエージェントを使って、認証システムがトークンリフレッシュを\nどう処理しているか調査して。また、再利用すべき既存の\nOAuthユーティリティがあるかも確認して」\n</code></pre>\n<h3>サブエージェントの利点</h3>\n<ul>\n<li><strong>分離されたコンテキスト</strong>: メイン会話に影響しない</li>\n<li><strong>要約された結果</strong>: 必要な情報だけが返ってくる</li>\n<li><strong>並列実行</strong>: 複数の調査を同時に進められる</li>\n</ul>\n<h3>活用シーン</h3>\n<pre><code>「サブエージェントに以下を調査させて:\n1. データベースのマイグレーション履歴\n2. 既存のAPIエンドポイントのパターン\n3. テストの構造とカバレッジ」\n</code></pre>\n<hr>\n<h2>チェックポイントでリワインド</h2>\n<h3>概要</h3>\n<p>Claudeが行うすべてのアクションはチェックポイントを作成する。<code>Escape</code>をダブルタップまたは<code>/rewind</code>で復元可能:</p>\n<h3>復元オプション</h3>\n<ul>\n<li><strong>会話のみ</strong>（コード変更は保持）</li>\n<li><strong>コードのみ</strong>（会話は保持）</li>\n<li><strong>両方</strong></li>\n</ul>\n<h3>チェックポイントの特徴</h3>\n<ul>\n<li>セッションをまたいで永続化</li>\n<li>安全に実験できる</li>\n<li>失敗しても戻れる</li>\n</ul>\n<h3>実践的な使い方</h3>\n<pre><code>1. 実験的な変更を試す\n2. 結果が良くなければ /rewind\n3. 別のアプローチを試す\n</code></pre>\n<hr>\n<h2>会話を再開する</h2>\n<h3>コマンド</h3>\n<pre><code class=\"language-bash\"># 最新の会話を再開\nclaude --continue\n\n# 最近の会話から選択\nclaude --resume\n</code></pre>\n<h3>セッションの命名</h3>\n<p><code>/rename</code>でセッションにわかりやすい名前をつける:</p>\n<pre><code>/rename oauth-migration\n/rename debugging-memory-leak\n</code></pre>\n<h3>命名のコツ</h3>\n<ul>\n<li>タスクの内容を簡潔に</li>\n<li>日付は不要（自動で記録される）</li>\n<li>検索しやすい名前に</li>\n</ul>\n<hr>\n<h2>コンテキスト管理の戦略</h2>\n<h3>スモールタスクの連続</h3>\n<pre><code>[タスク1] → /clear → [タスク2] → /clear → [タスク3]\n</code></pre>\n<p>各タスクをクリーンなコンテキストで開始。</p>\n<h3>大きなタスクの分割</h3>\n<pre><code>[探索フェーズ] → /compact → [計画フェーズ] → /compact → [実装フェーズ]\n</code></pre>\n<p>各フェーズ後に圧縮して、必要な情報だけを保持。</p>\n<h3>並列調査</h3>\n<pre><code>[メイン会話]\n    ├── [サブエージェント: 調査A]\n    ├── [サブエージェント: 調査B]\n    └── [サブエージェント: 調査C]\n</code></pre>\n<p>サブエージェントに調査を委任し、結果だけをメインに統合。</p>\n<hr>\n<h2>よくある問題と対処</h2>\n<h3>「Claudeが遅くなった」</h3>\n<p>→ <code>/compact</code>または<code>/clear</code>を実行</p>\n<h3>「同じミスを繰り返す」</h3>\n<p>→ <code>/clear</code>して、より具体的なプロンプトでやり直し</p>\n<h3>「前にやったことを忘れている」</h3>\n<p>→ <code>/compact</code>で要点を保持しつつ圧縮</p>\n<h3>「探索に時間がかかりすぎる」</h3>\n<p>→ サブエージェントに委任</p>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「コンテキストは貴重なリソース。賢く管理せよ」</p>\n</blockquote>\n<p>セッション管理は、Claude Codeのパフォーマンスを最大化する鍵だ。<code>/clear</code>で定期的にリセットし、サブエージェントで調査を委任し、チェックポイントを活用して安全に実験しよう。</p>\n","ベストプラクティス/07_自動化とスケーリング.md":"<h1>自動化とスケーリング</h1>\n<h2>概要</h2>\n<p>Claude Codeは単なる対話ツールではない。CI/CD、プリコミットフック、スクリプトに組み込んで自動化できる。さらに、複数のセッションを並列実行することで、開発速度を大幅に向上させられる。</p>\n<hr>\n<h2>ヘッドレスモードで実行</h2>\n<h3>基本コマンド</h3>\n<p><code>claude -p &quot;プロンプト&quot;</code>でCI、プリコミットフック、またはスクリプトから実行:</p>\n<pre><code class=\"language-bash\"># ワンオフクエリ\nclaude -p &quot;このプロジェクトが何をしているか説明して&quot;\n\n# スクリプト用の構造化出力\nclaude -p &quot;すべてのAPIエンドポイントをリストして&quot; --output-format json\n\n# リアルタイム処理用ストリーミング\nclaude -p &quot;このログファイルを分析して&quot; --output-format stream-json\n</code></pre>\n<h3>活用例</h3>\n<h4>CIでのコードレビュー</h4>\n<pre><code class=\"language-bash\"># GitHub Actions\nclaude -p &quot;このPRの変更をレビューして。セキュリティとパフォーマンスに注目&quot;\n</code></pre>\n<h4>プリコミットフック</h4>\n<pre><code class=\"language-bash\"># .git/hooks/pre-commit\nclaude -p &quot;ステージングされた変更をチェックして。問題があれば報告&quot;\n</code></pre>\n<h4>自動ドキュメント生成</h4>\n<pre><code class=\"language-bash\">claude -p &quot;src/api/のコードからAPIドキュメントを生成して&quot; &gt; docs/api.md\n</code></pre>\n<hr>\n<h2>複数のClaudeセッションを実行</h2>\n<h3>概要</h3>\n<p>並列セッションで開発速度を向上:</p>\n<ol>\n<li><strong>Claude Desktop</strong>: 複数のローカルセッションを視覚的に管理、それぞれ分離されたワークツリー</li>\n<li><strong>Claude Code on the web</strong>: Anthropicのクラウドインフラで分離されたVMで実行</li>\n</ol>\n<h3>Writer/Reviewerパターン</h3>\n<table>\n<thead>\n<tr>\n<th>セッションA（Writer）</th>\n<th>セッションB（Reviewer）</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>APIエンドポイントにレートリミッターを実装して</code></td>\n<td><code>@src/middleware/rateLimiter.ts のレートリミッター実装をレビューして。エッジケース、レース条件を探して...</code></td>\n</tr>\n<tr>\n<td><code>レビューのフィードバック: [セッションBの出力]。これらの問題に対処して</code></td>\n<td></td>\n</tr>\n</tbody></table>\n<h3>なぜ効果的か</h3>\n<ul>\n<li><strong>バイアスの排除</strong>: レビュアーは実装者のコンテキストに影響されない</li>\n<li><strong>並列作業</strong>: 実装とレビューを同時に進められる</li>\n<li><strong>専門化</strong>: 各セッションが異なる役割に集中</li>\n</ul>\n<hr>\n<h2>ファイル全体にファンアウト</h2>\n<h3>概要</h3>\n<p>大規模なマイグレーションや分析では、並列Claudeインスタンスに作業を分散:</p>\n<h3>ワークフロー</h3>\n<pre><code class=\"language-bash\"># 1. タスクリストを生成\n# Claudeにマイグレーションが必要なすべてのファイルをリストさせる\n\n# 2. ループスクリプトを作成\nfor file in $(cat files.txt); do\n  claude -p &quot;$file をReactからVueにマイグレート。OKまたはFAILを返して&quot; \\\n    --allowedTools &quot;Edit,Bash(git commit:*)&quot;\ndone\n\n# 3. 数ファイルでテストしてからスケール\n# 最初の2-3ファイルでプロンプトを改良、その後フルセットを実行\n</code></pre>\n<h3>実践的なヒント</h3>\n<ol>\n<li><strong>小さく始める</strong>: 最初は2-3ファイルで試す</li>\n<li><strong>プロンプトを改良</strong>: 結果を見てプロンプトを調整</li>\n<li><strong>スケールアップ</strong>: 確信が持てたら全ファイルに適用</li>\n</ol>\n<hr>\n<h2>安全な自律モード</h2>\n<h3>警告</h3>\n<p><code>claude --dangerously-skip-permissions</code>ですべてのパーミッションチェックをバイパス。</p>\n<p>⚠️ <strong>リスク</strong>: データ損失、システム破損、データ流出の可能性。<strong>インターネットアクセスのないコンテナでのみ使用。</strong></p>\n<h3>より安全な代替案</h3>\n<p><code>/sandbox</code>で同様の自律性を、より良いセキュリティで実現:</p>\n<pre><code class=\"language-bash\"># サンドボックスを有効化\n/sandbox\n\n# 安全に自律実行\nclaude -p &quot;すべてのテストを実行して失敗を修正して&quot;\n</code></pre>\n<h3>サンドボックスの制限</h3>\n<ul>\n<li>ファイルシステムアクセスの制限</li>\n<li>ネットワークアクセスの制限</li>\n<li>危険なコマンドのブロック</li>\n</ul>\n<hr>\n<h2>CI/CDへの統合</h2>\n<h3>GitHub Actions例</h3>\n<pre><code class=\"language-yaml\">name: Claude Code Review\n\non: [pull_request]\n\njobs:\n  review:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v3\n\n      - name: Run Claude Review\n        run: |\n          claude -p &quot;このPRをレビューして。変更: $(git diff main)&quot; \\\n            --output-format json &gt; review.json\n\n      - name: Post Review\n        run: |\n          # review.jsonの内容をPRにコメント\n</code></pre>\n<h3>プリコミットフック</h3>\n<pre><code class=\"language-bash\">#!/bin/bash\n# .git/hooks/pre-commit\n\n# ステージングされた変更を取得\nSTAGED=$(git diff --cached --name-only)\n\n# Claudeでチェック\nRESULT=$(claude -p &quot;以下のファイルの変更をチェックして: $STAGED&quot; --output-format json)\n\n# 問題があればコミットを中止\nif echo &quot;$RESULT&quot; | jq -e &#39;.issues | length &gt; 0&#39; &gt; /dev/null; then\n  echo &quot;問題が見つかりました:&quot;\n  echo &quot;$RESULT&quot; | jq &#39;.issues&#39;\n  exit 1\nfi\n</code></pre>\n<hr>\n<h2>バッチ処理のパターン</h2>\n<h3>マイグレーション</h3>\n<pre><code class=\"language-bash\"># ファイルリストを生成\nclaude -p &quot;CommonJSからES Modulesに変換が必要なファイルをリストして&quot; &gt; files.txt\n\n# 並列処理\ncat files.txt | xargs -P 4 -I {} claude -p &quot;{}をES Modulesに変換して&quot;\n</code></pre>\n<h3>コード分析</h3>\n<pre><code class=\"language-bash\"># 各モジュールの分析\nfor dir in src/*/; do\n  claude -p &quot;$dir のコード品質を分析して&quot; --output-format json &gt;&gt; analysis.json\ndone\n</code></pre>\n<h3>ドキュメント生成</h3>\n<pre><code class=\"language-bash\"># 各パッケージのREADMEを生成\nfor pkg in packages/*/; do\n  claude -p &quot;$pkg のREADME.mdを生成して&quot; &gt; &quot;$pkg/README.md&quot;\ndone\n</code></pre>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「Claude Codeは対話ツールを超えた自動化プラットフォーム」</p>\n</blockquote>\n<p>ヘッドレスモード、並列セッション、ファンアウトパターン—これらを組み合わせることで、開発ワークフローを大幅に効率化できる。ただし、自動化のパワーには責任が伴う。サンドボックスを活用し、安全に自動化しよう。</p>\n","ベストプラクティス/08_リッチなコンテンツを提供する.md":"<h1>リッチなコンテンツを提供する</h1>\n<h2>概要</h2>\n<p>テキストだけでなく、ファイル参照、画像、URL、パイプ入力—あらゆる形式でコンテキストを提供することで、Claudeはより正確な結果を出せる。視覚的な情報やデータを直接渡すことで、コミュニケーションの精度が飛躍的に向上する。</p>\n<hr>\n<h2>コンテンツ提供の方法</h2>\n<h3><code>@</code>でファイルを参照</h3>\n<pre><code>「@src/components/UserProfile.tsx を見て、\n同じパターンで新しいコンポーネントを作成して」\n</code></pre>\n<p>Claudeは応答前にファイルを読み込む。</p>\n<h3>画像を貼り付け</h3>\n<ul>\n<li><strong>コピー&amp;ペースト</strong>: スクリーンショットをそのまま貼り付け</li>\n<li><strong>ドラッグ&amp;ドロップ</strong>: 画像ファイルをプロンプトにドロップ</li>\n</ul>\n<h3>URLを提供</h3>\n<pre><code>「このドキュメントを参考に実装して:\nhttps://docs.example.com/api/v2」\n</code></pre>\n<p>外部ドキュメントやAPI仕様を直接参照できる。</p>\n<h3>パイプでデータを渡す</h3>\n<pre><code class=\"language-bash\"># エラーログを分析\ncat error.log | claude &quot;このエラーログを分析して原因を特定して&quot;\n\n# ファイル内容を直接送信\ncat config.json | claude &quot;この設定ファイルの問題点を指摘して&quot;\n</code></pre>\n<h3>Claudeに自分で取得させる</h3>\n<pre><code>「src/configディレクトリを読んで、\n設定の構造を理解してから作業を開始して」\n</code></pre>\n<p>Claudeにファイル読み取り、Bashコマンド、MCPツールを使わせることで、必要なコンテキストを自分で収集させられる。</p>\n<hr>\n<h2>画像の活用</h2>\n<h3>スクリーンショットの用途</h3>\n<ol>\n<li><strong>デザイン実装</strong>: UIデザインの画像を見せて実装</li>\n<li><strong>バグ報告</strong>: エラー画面のスクリーンショットを共有</li>\n<li><strong>比較検証</strong>: 変更前後のスクリーンショットを比較</li>\n</ol>\n<h3>効果的な画像の使い方</h3>\n<pre><code>「[スクリーンショットを貼り付け]\n\nこのデザインを実装して。\n- フォントサイズやカラーは画像から読み取って\n- レスポンシブ対応は必須\n- 実装後にスクリーンショットを撮って比較して」\n</code></pre>\n<h3>複数画像の活用</h3>\n<pre><code>「[デザイン画像]\n[現在の実装のスクリーンショット]\n\nデザインと現在の実装の差分を特定して、\n修正してください」\n</code></pre>\n<hr>\n<h2>URLの活用</h2>\n<h3>ドキュメント参照</h3>\n<pre><code>「Stripe APIのドキュメントに従って決済機能を実装して:\nhttps://stripe.com/docs/api/charges/create」\n</code></pre>\n<h3>仕様書の参照</h3>\n<pre><code>「このRFCに準拠したパーサーを実装して:\nhttps://datatracker.ietf.org/doc/html/rfc7230」\n</code></pre>\n<h3>例コードの参照</h3>\n<pre><code>「このGitHubリポジトリの実装パターンを参考にして:\nhttps://github.com/example/repo」\n</code></pre>\n<hr>\n<h2>パイプ入力の活用</h2>\n<h3>ログ分析</h3>\n<pre><code class=\"language-bash\"># アプリケーションログを分析\ntail -n 100 app.log | claude &quot;このログから異常なパターンを特定して&quot;\n\n# エラーログを分析\ngrep &quot;ERROR&quot; logs/*.log | claude &quot;これらのエラーの共通原因を分析して&quot;\n</code></pre>\n<h3>データ処理</h3>\n<pre><code class=\"language-bash\"># JSONデータを分析\ncat data.json | claude &quot;このJSONの構造を分析して、TypeScriptの型定義を生成して&quot;\n\n# CSVデータを処理\ncat users.csv | claude &quot;このCSVをSQLのINSERT文に変換して&quot;\n</code></pre>\n<h3>Git差分の分析</h3>\n<pre><code class=\"language-bash\"># コミット差分を分析\ngit diff HEAD~5 | claude &quot;この5コミットの変更を要約して&quot;\n\n# プルリクエストの差分\ngit diff main...feature-branch | claude &quot;この変更のコードレビューをして&quot;\n</code></pre>\n<hr>\n<h2>コンテキスト提供のベストプラクティス</h2>\n<h3>必要十分な情報を</h3>\n<p><strong>悪い例:</strong></p>\n<pre><code>「バグを直して」\n</code></pre>\n<p><strong>良い例:</strong></p>\n<pre><code>「[エラーログを貼り付け]\n[スタックトレースを貼り付け]\n@src/services/auth.ts\n\nこのエラーが発生する原因を調査して修正して」\n</code></pre>\n<h3>関連ファイルを明示</h3>\n<pre><code>「@src/models/User.ts\n@src/services/UserService.ts\n@src/routes/users.ts\n\nこれらのファイルを確認して、\n新しいフィールド `phoneNumber` を追加する変更を行って」\n</code></pre>\n<h3>段階的に情報を追加</h3>\n<pre><code>1. まず問題を説明\n2. Claudeが質問したら、追加情報を提供\n3. 必要に応じてファイルや画像を追加\n</code></pre>\n<hr>\n<h2>マルチモーダルの活用例</h2>\n<h3>UIデバッグ</h3>\n<pre><code>「[バグのスクリーンショット]\n[期待する表示のモックアップ]\n@src/components/Header.tsx\n\nなぜこの表示になっているのか調査して、\n期待する表示になるように修正して」\n</code></pre>\n<h3>デザイン実装</h3>\n<pre><code>「[Figmaのエクスポート画像]\n@src/styles/theme.ts\n\nこのデザインを実装して。\n既存のテーマ変数を最大限活用すること」\n</code></pre>\n<h3>データ可視化</h3>\n<pre><code>「[現在のグラフのスクリーンショット]\n@src/components/Chart.tsx\n\nこのグラフを改善して:\n- 色をもっとアクセシブルに\n- ラベルを見やすく\n- ホバー時の情報を追加」\n</code></pre>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「リッチなコンテキストがリッチな結果を生む」</p>\n</blockquote>\n<p>テキストだけでなく、ファイル参照、画像、URL、パイプ入力を組み合わせることで、Claudeに必要なすべてのコンテキストを提供できる。視覚的な情報は特に強力で、UIの実装やデバッグにおいて言葉だけでは伝えにくいニュアンスを正確に伝えられる。</p>\n","ベストプラクティス/09_よくある失敗パターンを避ける.md":"<h1>よくある失敗パターンを避ける</h1>\n<h2>概要</h2>\n<p>Claude Codeを使っていると、誰もが陥りがちな失敗パターンがある。これらを認識し、事前に対策することで、より効果的にClaudeを活用できる。</p>\n<hr>\n<h2>失敗パターン一覧</h2>\n<h3>1. キッチンシンク・セッション</h3>\n<table>\n<thead>\n<tr>\n<th>パターン</th>\n<th>問題</th>\n<th>解決策</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>1つのタスクを終え、その後無関係なタスクを次々と追加</td>\n<td>コンテキストが無関係な情報で埋まる</td>\n<td>無関係なタスク間で<code>/clear</code>を実行</td>\n</tr>\n</tbody></table>\n<h4>詳細</h4>\n<pre><code>悪い例:\n「ログイン機能を実装して」\n→ 完了\n「データベースのバックアップスクリプトを書いて」\n→ 完了\n「CSSのバグを直して」\n→ コンテキストがごちゃ混ぜ、パフォーマンス低下\n</code></pre>\n<pre><code>良い例:\n「ログイン機能を実装して」\n→ 完了\n/clear\n「データベースのバックアップスクリプトを書いて」\n→ 完了\n/clear\n「CSSのバグを直して」\n</code></pre>\n<hr>\n<h3>2. 繰り返しの修正</h3>\n<table>\n<thead>\n<tr>\n<th>パターン</th>\n<th>問題</th>\n<th>解決策</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Claudeが何か間違える、繰り返し修正する</td>\n<td>同じコンテキストで同じミスを繰り返す</td>\n<td>2回失敗したら、<code>/clear</code>してより良い初期プロンプトでやり直し</td>\n</tr>\n</tbody></table>\n<h4>詳細</h4>\n<pre><code>悪い例:\n「ES Modulesを使って」\n→ CommonJSで書かれる\n「だからES Modulesで」\n→ また間違える\n「import/exportを使って」\n→ まだ間違える...\n</code></pre>\n<pre><code>良い例:\n「ES Modulesを使って」\n→ CommonJSで書かれる\n「だからES Modulesで」\n→ まだ間違える\n\n/clear\n\n「ES Modules構文（import/export）でモジュールを書いて。\nrequire()は絶対に使わないこと。\n例: import { foo } from &#39;./bar.js&#39;」\n</code></pre>\n<hr>\n<h3>3. 過剰なCLAUDE.md</h3>\n<table>\n<thead>\n<tr>\n<th>パターン</th>\n<th>問題</th>\n<th>解決策</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>CLAUDE.mdが長すぎる</td>\n<td>重要なルールがノイズに埋もれる</td>\n<td>容赦なく削減。Claudeがすでに正しくやっていることは削除</td>\n</tr>\n</tbody></table>\n<h4>詳細</h4>\n<pre><code>悪い例 (CLAUDE.md):\n# コードスタイル\n- インデントは2スペース\n- セミコロンを使う\n- シングルクォートを使う\n- 関数宣言よりアロー関数を優先\n- constを使う、letは必要な時だけ\n- ... (50行続く)\n\n# テスト\n- Jestを使う\n- describeとitでテストを構造化\n- expectでアサーション\n- ... (30行続く)\n</code></pre>\n<pre><code>良い例 (CLAUDE.md):\n# 重要なルール\n- ES Modules構文を使用（CommonJS禁止）\n- テストは`npm test -- --watch=false`で実行\n\n# プロジェクト固有\n- envファイルは`.env.local`\n- APIキーは環境変数から取得\n</code></pre>\n<hr>\n<h3>4. 信頼してから検証のギャップ</h3>\n<table>\n<thead>\n<tr>\n<th>パターン</th>\n<th>問題</th>\n<th>解決策</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>もっともらしい実装がエッジケースを処理していない</td>\n<td>見た目は正しいが、実際には動かない</td>\n<td>常に検証を提供（テスト、スクリプト、スクリーンショット）</td>\n</tr>\n</tbody></table>\n<h4>詳細</h4>\n<pre><code>悪い例:\n「メールバリデーション関数を書いて」\n→ 実装を受け取る\n→ そのまま使う\n→ 本番で「user@.com」が通ってしまう\n</code></pre>\n<pre><code>良い例:\n「メールバリデーション関数を書いて。\nテストケース:\n- user@example.com → true\n- invalid → false\n- user@.com → false\n- @example.com → false\n\nテストを書いて実行して」\n</code></pre>\n<hr>\n<h3>5. 無限の探索</h3>\n<table>\n<thead>\n<tr>\n<th>パターン</th>\n<th>問題</th>\n<th>解決策</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>スコープを絞らずに「調査して」と依頼</td>\n<td>数百のファイルを読んでしまう</td>\n<td>スコープを狭く絞るか、サブエージェントを使う</td>\n</tr>\n</tbody></table>\n<h4>詳細</h4>\n<pre><code>悪い例:\n「このコードベースを調査して、問題点を報告して」\n→ Claudeが何百ものファイルを読み始める\n→ コンテキストがいっぱいに\n→ 具体的な結果が得られない\n</code></pre>\n<pre><code>良い例:\n「src/auth/ディレクトリを調査して、\nセキュリティ上の懸念点を報告して」\n\nまたは:\n\n「サブエージェントを使って認証モジュールを調査して。\n特にトークン処理に焦点を当てて」\n</code></pre>\n<hr>\n<h2>チェックリスト</h2>\n<h3>セッション開始前</h3>\n<ul>\n<li><input disabled=\"\" type=\"checkbox\"> タスクのスコープは明確か？</li>\n<li><input disabled=\"\" type=\"checkbox\"> 検証方法は決まっているか？</li>\n<li><input disabled=\"\" type=\"checkbox\"> 必要なコンテキストは準備したか？</li>\n</ul>\n<h3>セッション中</h3>\n<ul>\n<li><input disabled=\"\" type=\"checkbox\"> コンテキストが無関係な情報で埋まっていないか？</li>\n<li><input disabled=\"\" type=\"checkbox\"> 同じ修正を2回以上していないか？</li>\n<li><input disabled=\"\" type=\"checkbox\"> Claudeの出力を検証しているか？</li>\n</ul>\n<h3>セッション後</h3>\n<ul>\n<li><input disabled=\"\" type=\"checkbox\"> CLAUDE.mdに追加すべきルールはあるか？</li>\n<li><input disabled=\"\" type=\"checkbox\"> 次回のためにプロンプトを改善できるか？</li>\n</ul>\n<hr>\n<h2>アンチパターンの早期発見</h2>\n<h3>警告サイン</h3>\n<ol>\n<li><strong>レスポンスが遅くなった</strong> → コンテキスト過負荷</li>\n<li><strong>同じミスを繰り返す</strong> → より良いプロンプトが必要</li>\n<li><strong>出力が曖昧になった</strong> → スコープが広すぎる</li>\n<li><strong>予期せぬ結果</strong> → 検証が不足</li>\n</ol>\n<h3>対処アクション</h3>\n<table>\n<thead>\n<tr>\n<th>サイン</th>\n<th>アクション</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>遅くなった</td>\n<td><code>/compact</code>または<code>/clear</code></td>\n</tr>\n<tr>\n<td>同じミス</td>\n<td><code>/clear</code>して具体的なプロンプト</td>\n</tr>\n<tr>\n<td>曖昧な出力</td>\n<td>スコープを絞る</td>\n</tr>\n<tr>\n<td>予期せぬ結果</td>\n<td>検証を追加</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「失敗パターンを知ることは、成功パターンを知ることと同じくらい重要」</p>\n</blockquote>\n<p>キッチンシンク・セッション、繰り返しの修正、過剰なCLAUDE.md、検証の欠如、無限の探索—これらの失敗パターンを認識し、事前に対策することで、Claude Codeをより効果的に活用できる。</p>\n","ベストプラクティス/10_直感を養う.md":"<h1>直感を養う</h1>\n<h2>概要</h2>\n<p>このガイドで紹介したパターンは出発点に過ぎない。最終的には、いつ具体的に、いつオープンエンドに指示すべきか、いつ計画すべきか、いつコンテキストをクリアすべきかの直感を養うことが重要だ。</p>\n<hr>\n<h2>時にはルールを破る</h2>\n<h3>コンテキストを蓄積させるべき時</h3>\n<blockquote>\n<p>通常: 無関係なタスク間で<code>/clear</code></p>\n</blockquote>\n<p><strong>例外</strong>: 1つの複雑な問題を深く掘り下げている時、履歴は価値がある。</p>\n<pre><code>「このメモリリークの調査を続けて...」\n「さっきのスタックトレースと比較して...」\n「最初に見つけた問題と関連があるかも...」\n</code></pre>\n<p>会話の履歴が文脈として重要な場合、あえてクリアしない。</p>\n<h3>計画をスキップすべき時</h3>\n<blockquote>\n<p>通常: 探索 → 計画 → 実装</p>\n</blockquote>\n<p><strong>例外</strong>: タスクが探索的で、結果が予測できない場合。</p>\n<pre><code>「このAPIの挙動を試してみて、何が起こるか見てみたい」\n「いくつかのアプローチを実験して、どれが良いか確認したい」\n</code></pre>\n<p>計画が意味を持たない探索的なタスクでは、直接実行。</p>\n<h3>曖昧なプロンプトを使うべき時</h3>\n<blockquote>\n<p>通常: 具体的なプロンプトが具体的な結果を生む</p>\n</blockquote>\n<p><strong>例外</strong>: Claudeの解釈を見てから制約を加えたい場合。</p>\n<pre><code>「このコードをリファクタリングして、どう改善できるか見せて」\n「このデータ構造を最適化して」\n</code></pre>\n<p>まずClaudeの提案を見てから、方向性を決める。</p>\n<hr>\n<h2>何がうまくいくかを観察する</h2>\n<h3>成功パターンの記録</h3>\n<p>Claudeが素晴らしい出力を生成したとき、何をしたかを振り返る:</p>\n<ul>\n<li><strong>プロンプトの構造</strong>: どのように指示した？</li>\n<li><strong>コンテキスト</strong>: 何を提供した？</li>\n<li><strong>モード</strong>: 計画モード？通常モード？</li>\n<li><strong>セッションの状態</strong>: クリア直後？蓄積後？</li>\n</ul>\n<h3>失敗からの学習</h3>\n<p>Claudeが苦戦したとき、なぜかを考える:</p>\n<ul>\n<li><strong>ノイズの多いコンテキスト?</strong>: 無関係な情報が多すぎた？</li>\n<li><strong>曖昧なプロンプト?</strong>: より具体的にすべきだった？</li>\n<li><strong>大きすぎるタスク?</strong>: 分割すべきだった？</li>\n<li><strong>検証の欠如?</strong>: テストケースを提供すべきだった？</li>\n</ul>\n<hr>\n<h2>直感を養うための実験</h2>\n<h3>同じタスクを異なるアプローチで</h3>\n<pre><code>試行1: 詳細な計画を立ててから実装\n試行2: 直接実装を依頼\n試行3: サブエージェントに調査させてから実装\n</code></pre>\n<p>どのアプローチが最も効果的だったかを比較。</p>\n<h3>コンテキストの影響を観察</h3>\n<pre><code>試行1: クリーンなコンテキストで開始\n試行2: 関連する会話の後に依頼\n試行3: 無関係な会話の後に依頼\n</code></pre>\n<p>コンテキストの状態がどう影響するかを観察。</p>\n<h3>プロンプトのバリエーション</h3>\n<pre><code>試行1: 最小限の指示\n試行2: 詳細な指示\n試行3: 例を含む指示\n</code></pre>\n<p>どのレベルの詳細さが最適かを発見。</p>\n<hr>\n<h2>時間とともに発達する感覚</h2>\n<h3>初心者段階</h3>\n<ul>\n<li>ガイドのパターンに忠実に従う</li>\n<li>毎回<code>/clear</code>を使う</li>\n<li>常に詳細なプロンプトを書く</li>\n</ul>\n<h3>中級者段階</h3>\n<ul>\n<li>パターンを状況に応じて適用</li>\n<li>いつクリアすべきか判断できる</li>\n<li>プロンプトの詳細さを調整</li>\n</ul>\n<h3>上級者段階</h3>\n<ul>\n<li>直感的に最適なアプローチを選択</li>\n<li>ルールを意識的に破る</li>\n<li>新しいパターンを発見する</li>\n</ul>\n<hr>\n<h2>個人的なベストプラクティスを見つける</h2>\n<h3>プロジェクトによる違い</h3>\n<ul>\n<li><strong>フロントエンド</strong>: ビジュアル検証が重要</li>\n<li><strong>バックエンド</strong>: テストとログ分析が中心</li>\n<li><strong>データ処理</strong>: パイプ入力が便利</li>\n<li><strong>レガシーコード</strong>: 探索に時間をかける</li>\n</ul>\n<h3>作業スタイルによる違い</h3>\n<ul>\n<li><strong>対話型</strong>: 頻繁に質問と修正</li>\n<li><strong>バッチ型</strong>: 詳細なプロンプトで一発実行</li>\n<li><strong>探索型</strong>: オープンエンドな質問から始める</li>\n</ul>\n<h3>タスクの種類による違い</h3>\n<table>\n<thead>\n<tr>\n<th>タスク</th>\n<th>アプローチ</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>バグ修正</td>\n<td>症状 → 調査 → テスト → 修正</td>\n</tr>\n<tr>\n<td>新機能</td>\n<td>計画 → 実装 → 検証</td>\n</tr>\n<tr>\n<td>リファクタリング</td>\n<td>探索 → 計画 → 段階的実行</td>\n</tr>\n<tr>\n<td>学習</td>\n<td>オープンな質問 → 深掘り</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「ルールを知り、いつ破るかを知れ」</p>\n</blockquote>\n<p>Claude Codeを効果的に使うための直感は、経験を通じて養われる。このガイドのパターンは出発点であり、最終的にはあなた自身のワークフローに最適化されたアプローチを見つけることが目標だ。</p>\n<p>何がうまくいくかを観察し、失敗から学び、実験を恐れない。時間とともに、Claude Codeはあなたの開発フローの自然な延長となるだろう。</p>\n"};</script>
+<script>window.__ARTICLES__ = {"ベストプラクティス/01_検証方法を提供する.md":"<h1>検証方法を提供する</h1>\n<h2>概要</h2>\n<p>Claude Codeを使う上で、最も効果を発揮する単一のアドバイス。それは「Claudeが自分の作業を検証できる方法を与える」ということである。</p>\n<p>テストを実行させる、スクリーンショットを比較させる、出力を検証させる。明確な成功基準がなければ、見た目は正しくても動かないコードを生成してしまう可能性がある。</p>\n<hr>\n<h2>なぜ検証が重要なのか</h2>\n<h3>自律的な品質保証</h3>\n<p>Claudeは指示されたタスクを実行する際、自分自身で結果を確認できると、劇的にパフォーマンスが向上する。これは人間のエンジニアが「書いたコードをテストする」のと同じ理由だ。</p>\n<blockquote>\n<p>検証なしでは、Claudeは「それっぽいもの」を作ることはできても、「確実に動くもの」を作ることは難しい。</p>\n</blockquote>\n<h3>フィードバックループの確立</h3>\n<p>検証を組み込むことで、以下のサイクルが回る：</p>\n<ol>\n<li><strong>実装</strong> → コードを書く</li>\n<li><strong>検証</strong> → テストを実行する</li>\n<li><strong>修正</strong> → 失敗した部分を直す</li>\n<li><strong>再検証</strong> → 再度テストを実行する</li>\n</ol>\n<hr>\n<h2>具体的な改善例</h2>\n<h3>検証基準を提供する</h3>\n<table>\n<thead>\n<tr>\n<th>改善前</th>\n<th>改善後</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>「メールアドレスを検証する関数を実装して」</td>\n<td>「validateEmail関数を書いて。テストケース: <code>test@example.com</code>はtrue、<code>invalid</code>はfalse、<code>@missing.com</code>はfalse。実装後にテストを実行して」</td>\n</tr>\n</tbody></table>\n<h3>UI変更を視覚的に検証する</h3>\n<table>\n<thead>\n<tr>\n<th>改善前</th>\n<th>改善後</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>「ダッシュボードをもっと良くして」</td>\n<td>「[スクリーンショットを貼り付け] このデザインを実装して。結果のスクリーンショットを撮って元と比較し、差分をリストアップして修正して」</td>\n</tr>\n</tbody></table>\n<h3>根本原因に対処する</h3>\n<table>\n<thead>\n<tr>\n<th>改善前</th>\n<th>改善後</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>「ビルドが失敗してる」</td>\n<td>「このエラーでビルドが失敗してる: [エラーを貼り付け]。修正してビルドが成功することを確認して。エラーを抑制するんじゃなく、根本原因に対処して」</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>実践的なヒント</h2>\n<h3>1. テストファイルを指定する</h3>\n<pre><code>「src/utils/validation.ts に変更を加えたら、\n対応する src/utils/validation.test.ts のテストを実行して\nすべてパスすることを確認して」\n</code></pre>\n<h3>2. ビルドコマンドを明示する</h3>\n<pre><code>「変更を加えたら npm run build を実行して、\n型エラーがないことを確認して」\n</code></pre>\n<h3>3. 期待する出力を示す</h3>\n<pre><code>「このAPIエンドポイントは以下のJSONを返すべき:\n{\n  &quot;status&quot;: &quot;success&quot;,\n  &quot;data&quot;: { ... }\n}\n実際にcurlで叩いて確認して」\n</code></pre>\n<hr>\n<h2>よくある落とし穴</h2>\n<h3>「動いてるように見える」罠</h3>\n<p>検証基準を与えないと、Claudeは以下のような状態で完了と判断してしまうことがある：</p>\n<ul>\n<li>構文エラーはないが、ロジックが間違っている</li>\n<li>一見正しいが、エッジケースで失敗する</li>\n<li>型は通るが、実行時にクラッシュする</li>\n</ul>\n<h3>対策</h3>\n<ul>\n<li><strong>明示的なテストケース</strong>を提供する</li>\n<li><strong>失敗時の挙動</strong>も定義する</li>\n<li><strong>実行して確認</strong>という指示を含める</li>\n</ul>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「Claudeに検証手段を与えよ」</p>\n</blockquote>\n<p>これが、Claude Codeを最大限に活用するための最も重要な原則である。テストの実行、スクリーンショットの比較、出力の検証—これらを指示に組み込むことで、Claudeは自律的に品質を担保しながら作業を進められるようになる。</p>\n","ベストプラクティス/02_探索から計画そして実装へ.md":"<h1>探索から計画、そして実装へ</h1>\n<h2>概要</h2>\n<p>効果的な開発は「調査」と「実装」を分離することから始まる。闇雲にコードを書き始めるのではなく、まず探索し、計画を立て、それから実装に移る。この4段階のワークフローが、間違った問題を解決してしまうリスクを大幅に減らす。</p>\n<hr>\n<h2>4段階ワークフロー</h2>\n<h3>フェーズ1: 探索（プランモード）</h3>\n<p>プランモードに入り、Claudeにファイルを読ませ、変更を加えずに質問に答えさせる。</p>\n<pre><code>claude (プランモード)\n\n質問: 「src/authを読んで、セッションとログインの\n処理方法を理解して。\nあと、シークレット用の環境変数の管理方法も確認して」\n</code></pre>\n<p><strong>ポイント</strong>: この段階では一切変更を加えない。理解に徹する。</p>\n<h3>フェーズ2: 計画</h3>\n<p>Claudeに詳細な実装計画を作成させる。</p>\n<pre><code>質問: 「Google OAuthを追加したい。\nどのファイルを変更する必要がある？\nセッションフローはどうなる？\n計画を作成して」\n</code></pre>\n<p><strong>成果物</strong>: 変更が必要なファイルのリスト、実装の順序、考慮すべきエッジケース</p>\n<h3>フェーズ3: 実装（通常モード）</h3>\n<p>通常モードに戻り、計画に基づいてClaudeにコードを書かせ、検証する。</p>\n<pre><code>質問: 「計画通りにOAuthフローを実装して。\nコールバックハンドラのテストを書いて、\nテストスイートを実行して失敗があれば修正して」\n</code></pre>\n<h3>フェーズ4: コミット</h3>\n<pre><code>質問: 「説明的なメッセージでコミットして、PRを開いて」\n</code></pre>\n<hr>\n<h2>計画をスキップしてもいい場合</h2>\n<p>以下のような単純で明確な修正の場合は、直接実行を依頼してOK：</p>\n<ul>\n<li><strong>タイポの修正</strong></li>\n<li><strong>ログ行の追加</strong></li>\n<li><strong>変数名の変更</strong></li>\n</ul>\n<blockquote>\n<p>計画のオーバーヘッドが価値を持つのは、アプローチが不確実な場合、複数ファイルにまたがる変更、または不慣れなコードを扱う場合。</p>\n</blockquote>\n<hr>\n<h2>プランモードの使い方</h2>\n<h3>基本コマンド</h3>\n<pre><code class=\"language-bash\"># プランモードに入る\n/plan\n\n# 通常モードに戻る\n（プランモードで計画を立てた後、実装開始を指示）\n</code></pre>\n<h3>プランモードでできること</h3>\n<ul>\n<li>ファイルの読み取り</li>\n<li>コードベースの探索</li>\n<li>質問への回答</li>\n<li>計画の作成</li>\n</ul>\n<h3>プランモードでできないこと</h3>\n<ul>\n<li>ファイルの編集</li>\n<li>コマンドの実行（読み取り以外）</li>\n<li>実際の変更</li>\n</ul>\n<hr>\n<h2>実践例: 認証システムの追加</h2>\n<h3>Step 1: 探索</h3>\n<pre><code>/plan\n\n「このプロジェクトの認証の仕組みを調べて。\n- 既存のユーザー管理はある？\n- セッション管理はどうなってる？\n- 使われてる認証ライブラリは？」\n</code></pre>\n<h3>Step 2: 計画</h3>\n<pre><code>「JWTベースの認証を追加したい。計画を立てて：\n1. 必要なパッケージ\n2. 変更するファイル\n3. 実装の順序\n4. テスト戦略」\n</code></pre>\n<h3>Step 3: 実装</h3>\n<pre><code>「計画に従って実装を開始して。\nまずユーザーモデルとauth middlewareから。\n各ステップでテストを実行して」\n</code></pre>\n<hr>\n<h2>なぜこのワークフローが効果的なのか</h2>\n<h3>1. コンテキストの効率的な利用</h3>\n<p>探索フェーズで全体像を把握してから実装に移ることで、手戻りが減る。</p>\n<h3>2. 明確な成功基準</h3>\n<p>計画段階で「何をもって完了とするか」が明確になる。</p>\n<h3>3. 分離された関心事</h3>\n<ul>\n<li>探索 = 理解</li>\n<li>計画 = 設計</li>\n<li>実装 = コーディング</li>\n<li>コミット = 記録</li>\n</ul>\n<p>それぞれの段階で異なる思考モードが必要であり、分離することで各段階に集中できる。</p>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「まず探索し、次に計画し、それから実装せよ」</p>\n</blockquote>\n<p>この原則に従うことで、間違った方向に進むリスクを最小化し、効率的な開発が可能になる。特に複雑なタスクや不慣れなコードベースでは、このワークフローが真価を発揮する。</p>\n","ベストプラクティス/03_具体的なコンテキストを提供する.md":"<h1>具体的なコンテキストを提供する</h1>\n<h2>概要</h2>\n<p>より精密な指示は、より少ない修正で済む結果につながる。曖昧な依頼は曖昧な結果を生み、具体的な依頼は具体的な結果を生む。</p>\n<hr>\n<h2>具体性がもたらす効果</h2>\n<h3>Before と After</h3>\n<table>\n<thead>\n<tr>\n<th>戦略</th>\n<th>改善前</th>\n<th>改善後</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>タスクのスコープを絞る</strong></td>\n<td>「foo.pyにテストを追加して」</td>\n<td>「foo.pyにテストを書いて。ユーザーがログアウトしている場合のエッジケースをカバー。モックは避けて」</td>\n</tr>\n<tr>\n<td><strong>ソースを指定する</strong></td>\n<td>「なぜExecutionFactoryはこんな変なAPIなの？」</td>\n<td>「ExecutionFactoryのgit履歴を調べて、APIがどのように変遷してきたかまとめて」</td>\n</tr>\n<tr>\n<td><strong>既存パターンを参照する</strong></td>\n<td>「カレンダーウィジェットを追加して」</td>\n<td>「ホームページにある既存のウィジェットの実装を見て、パターンを理解して。HotDogWidget.phpが良い例。そのパターンに従って、月を選択して年を前後にページネーションできる新しいカレンダーウィジェットを実装して。コードベースで既に使われているもの以外のライブラリは使わずスクラッチで構築して」</td>\n</tr>\n<tr>\n<td><strong>症状を記述する</strong></td>\n<td>「ログインのバグを直して」</td>\n<td>「セッションタイムアウト後にログインが失敗するとユーザーから報告があった。src/auth/のauthフローを調べて、特にトークンリフレッシュ周り。問題を再現する失敗テストを書いてから修正して」</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>良いプロンプトの構成要素</h2>\n<h3>1. 何をするか（What）</h3>\n<p>具体的なゴールを明示する。</p>\n<pre><code>✗ 「コードを改善して」\n✓ 「validateUserInput関数のエラーハンドリングを追加して」\n</code></pre>\n<h3>2. どこで（Where）</h3>\n<p>対象となるファイルやモジュールを指定する。</p>\n<pre><code>✗ 「認証を修正して」\n✓ 「src/services/auth/tokenRefresh.tsのリフレッシュロジックを修正して」\n</code></pre>\n<h3>3. どのように（How）</h3>\n<p>期待する実装方法やパターンを示す。</p>\n<pre><code>✗ 「テストを書いて」\n✓ 「既存のsrc/tests/のパターンに従って、Jest + Testing Libraryでテストを書いて」\n</code></pre>\n<h3>4. なぜ（Why）</h3>\n<p>背景を共有することで、より適切な判断ができる。</p>\n<pre><code>✗ 「APIレスポンスを変更して」\n✓ 「モバイルアプリのパフォーマンス向上のため、不要なフィールドを削除してレスポンスサイズを減らしたい」\n</code></pre>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「具体的な指示は具体的な結果を生む」</p>\n</blockquote>\n<p>曖昧さを排除し、コンテキストを豊富に提供することで、Claudeはより正確で期待通りの結果を出せる。</p>\n","ベストプラクティス/04_リッチなコンテンツを提供する.md":"<h1>リッチなコンテンツを提供する</h1>\n<h2>概要</h2>\n<p>テキストだけでなく、ファイル参照、画像、URL、パイプ入力—あらゆる形式でコンテキストを提供できる。</p>\n<hr>\n<h2>コンテンツ提供の方法</h2>\n<h3><code>@</code>でファイルを参照</h3>\n<p>場所を説明する代わりに、ファイルを直接参照する。</p>\n<pre><code>@src/auth/handlers.ts\n@README.md\n</code></pre>\n<p>Claudeは応答前にファイルを読み込む。</p>\n<h3>画像を直接貼り付け</h3>\n<ul>\n<li><strong>コピー&amp;ペースト</strong>: スクリーンショットをそのまま貼り付け</li>\n<li><strong>ドラッグ&amp;ドロップ</strong>: 画像ファイルをプロンプトにドロップ</li>\n</ul>\n<h3>URLを提供</h3>\n<p>ドキュメントのURLを与える。<code>/permissions</code>でドメインを許可リストに追加できる。</p>\n<pre><code>「このドキュメントを参考に実装して:\nhttps://docs.example.com/api/v2」\n</code></pre>\n<h3>パイプでデータを渡す</h3>\n<pre><code class=\"language-bash\">cat error.log | claude\n</code></pre>\n<p>ファイル内容を直接送信できる。</p>\n<h3>Claudeに自分で取得させる</h3>\n<p>Bashコマンド、MCPツール、ファイル読み取りを使って、Claudeに必要なコンテキストを自分で収集させることもできる。</p>\n<pre><code>「src/configディレクトリを読んで、\n設定の構造を理解してから作業を開始して」\n</code></pre>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「リッチなコンテキストがリッチな結果を生む」</p>\n</blockquote>\n<p>テキストだけでなく、ファイル参照、画像、URL、パイプ入力を組み合わせることで、Claudeに必要なすべてのコンテキストを提供できる。</p>\n","ベストプラクティス/05_環境を設定する.md":"<h1>環境を設定する</h1>\n<h2>概要</h2>\n<p>Claude Codeは高度にカスタマイズ可能。CLAUDE.md、パーミッション、MCPサーバー、カスタムコマンド、プラグイン、フック、サブエージェント、スキル—これらを適切に設定することで、あなたのワークフローに最適化された開発環境を構築できる。</p>\n<hr>\n<h2>5.1 効果的なCLAUDE.mdを書く</h2>\n<h3>スターターファイルを生成</h3>\n<pre><code class=\"language-bash\">/init\n</code></pre>\n<h3>CLAUDE.mdの例</h3>\n<pre><code class=\"language-markdown\"># コードスタイル\n- ES modules構文（import/export）を使用、CommonJS（require）は使わない\n- importはできるだけ分割代入する（例: import { foo } from &#39;bar&#39;）\n\n# ワークフロー\n- コード変更の一連の作業が終わったら必ず型チェックを実行\n- パフォーマンスのため、テストスイート全体ではなく単一テストを優先\n</code></pre>\n<h3>含めるべきもの</h3>\n<p>✅ <strong>含める:</strong></p>\n<ul>\n<li>Claudeが推測できないBashコマンド</li>\n<li>デフォルトと異なるコードスタイルルール</li>\n<li>テスト実行の指示と好みのテストランナー</li>\n<li>リポジトリのエチケット（ブランチ命名、PRの慣習）</li>\n<li>プロジェクト固有のアーキテクチャ決定</li>\n<li>開発環境の癖（必須の環境変数など）</li>\n<li>よくある落とし穴や非自明な挙動</li>\n</ul>\n<p>❌ <strong>含めない:</strong></p>\n<ul>\n<li>コードを読めばわかること</li>\n<li>Claudeがすでに知っている標準的な言語の慣習</li>\n<li>詳細なAPIドキュメント（代わりにリンクを貼る）</li>\n<li>頻繁に変わる情報</li>\n<li>長い説明やチュートリアル</li>\n<li>「きれいなコードを書く」のような自明なプラクティス</li>\n</ul>\n<h3>追加ファイルのインポート</h3>\n<pre><code class=\"language-markdown\">プロジェクト概要は @README.md、npmコマンドは @package.json を参照。\n\n# 追加指示\n- Git ワークフロー: @docs/git-instructions.md\n- 個人設定: @~/.claude/my-project-instructions.md\n</code></pre>\n<h3>CLAUDE.mdの配置場所</h3>\n<table>\n<thead>\n<tr>\n<th>場所</th>\n<th>用途</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>~/.claude/CLAUDE.md</code></td>\n<td>すべてのセッションに適用</td>\n</tr>\n<tr>\n<td><code>./CLAUDE.md</code></td>\n<td>プロジェクトルート（gitにコミット、またはチームと共有、または<code>CLAUDE.local.md</code>として.gitignore）</td>\n</tr>\n<tr>\n<td>親ディレクトリ</td>\n<td>モノレポで便利</td>\n</tr>\n<tr>\n<td>子ディレクトリ</td>\n<td>Claudeがオンデマンドで読み込み</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>5.2 パーミッションの設定</h2>\n<pre><code class=\"language-bash\">/permissions\n</code></pre>\n<p>2つのアプローチ:</p>\n<ul>\n<li><strong>パーミッション許可リスト</strong>: 安全とわかっている特定のツールを許可</li>\n<li><strong>サンドボックス</strong>: OSレベルの分離を有効化</li>\n</ul>\n<h3>危険なコマンド（注意）</h3>\n<pre><code class=\"language-bash\">claude --dangerously-skip-permissions\n</code></pre>\n<p>⚠️ インターネットアクセスのないサンドボックスでのみ使用。</p>\n<hr>\n<h2>5.3 CLIツールの活用</h2>\n<p>Claudeに以下のCLIツールを使わせる:</p>\n<ul>\n<li><code>gh</code> - GitHub CLI</li>\n<li><code>aws</code> - AWS CLI</li>\n<li><code>gcloud</code> - Google Cloud CLI</li>\n<li><code>sentry-cli</code> - Sentry CLI</li>\n</ul>\n<p>プロンプト例:</p>\n<pre><code>&#39;foo-cli-tool --help&#39;を使ってfooツールについて学び、それを使ってA、B、Cを解決して。\n</code></pre>\n<hr>\n<h2>5.4 MCPサーバーの接続</h2>\n<pre><code class=\"language-bash\">claude mcp add\n</code></pre>\n<p>以下と統合可能:</p>\n<ul>\n<li>Notion</li>\n<li>Figma</li>\n<li>データベース</li>\n<li>モニタリングツール</li>\n<li>Issueトラッカー</li>\n</ul>\n<hr>\n<h2>5.5 カスタムスラッシュコマンド</h2>\n<p><strong>場所:</strong> <code>.claude/commands/</code>（プロジェクト）または <code>~/.claude/commands/</code>（グローバル）</p>\n<h3>例: .claude/commands/fix-github-issue.md</h3>\n<pre><code class=\"language-markdown\">---\ndescription: GitHub issueを修正\n---\nGitHub issue: $ARGUMENTS を分析して修正してください。\n\n以下の手順に従ってください:\n1. `gh issue view`でissueの詳細を取得\n2. issueに記述された問題を理解\n3. 関連ファイルをコードベースから検索\n4. 問題を修正するために必要な変更を実装\n5. 修正を検証するテストを書いて実行\n6. リントと型チェックをパス\n7. 説明的なコミットメッセージを作成\n8. プッシュしてPRを作成\n</code></pre>\n<p><strong>使用方法:</strong></p>\n<pre><code class=\"language-bash\">/fix-github-issue 1234\n</code></pre>\n<p><strong>特殊キーワード:</strong></p>\n<ul>\n<li><code>$ARGUMENTS</code> - すべてのパラメータを渡す</li>\n<li><code>$1</code>, <code>$2</code>, etc. - 位置引数</li>\n</ul>\n<hr>\n<h2>5.6 プラグインのインストール</h2>\n<pre><code class=\"language-bash\">/plugin\n</code></pre>\n<p>マーケットプレイスで事前構築された機能を閲覧:</p>\n<ul>\n<li>特定ワークフロー用のカスタムコマンド</li>\n<li>事前設定済みのMCPサーバー</li>\n<li>専門化されたサブエージェント</li>\n<li>ドメイン知識スキル</li>\n</ul>\n<hr>\n<h2>5.7 フックの設定</h2>\n<pre><code class=\"language-bash\">/hooks\n</code></pre>\n<p>ワークフローの特定のポイントでスクリプトを自動実行:</p>\n<p><strong>ユースケース:</strong></p>\n<ul>\n<li>編集後の自動フォーマット</li>\n<li>変更ファイルのリント</li>\n<li>機密ファイルへの変更をブロック</li>\n<li>すべてのコマンドをログ</li>\n<li>Claudeが待機中に通知</li>\n</ul>\n<p><strong>プロンプト例:</strong></p>\n<pre><code>ファイル編集後にeslintを実行するフックを書いて\nmigrationsフォルダへの書き込みをブロックするフックを書いて\n</code></pre>\n<p><strong>設定方法:</strong></p>\n<ul>\n<li>インタラクティブ: <code>/hooks</code></li>\n<li>手動: <code>.claude/settings.json</code>を編集</li>\n</ul>\n<h3>フックとCLAUDE.mdの使い分け</h3>\n<table>\n<thead>\n<tr>\n<th>機能</th>\n<th>特徴</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>フック</strong></td>\n<td>決定論的制御（必ず実行される）</td>\n</tr>\n<tr>\n<td><strong>CLAUDE.md</strong></td>\n<td>アドバイス的ガイダンス（判断ベース）</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>5.8 カスタムサブエージェント</h2>\n<p><strong>場所:</strong> <code>.claude/agents/</code></p>\n<h3>例: .claude/agents/security-reviewer.md</h3>\n<pre><code class=\"language-markdown\">---\nname: security-reviewer\ndescription: セキュリティ脆弱性のコードレビュー\ntools: Read, Grep, Glob, Bash\nmodel: opus\n---\nあなたはシニアセキュリティエンジニアです。以下の観点でコードをレビューしてください:\n- インジェクション脆弱性（SQL、XSS、コマンドインジェクション）\n- 認証・認可の欠陥\n- コード内のシークレットや認証情報\n- 安全でないデータ処理\n\n具体的な行番号の参照と修正案を提供してください。\n</code></pre>\n<p><strong>使用方法:</strong></p>\n<pre><code>サブエージェントを使ってこのコードのセキュリティ問題をレビューして。\n</code></pre>\n<p><strong>ユースケース:</strong></p>\n<ul>\n<li>メイン会話のバイアスなしでコードレビュー</li>\n<li>不慣れなコードの調査</li>\n<li>専門タスク（セキュリティ、ドキュメント、テスト）</li>\n<li>メインエージェントの作業の検証</li>\n</ul>\n<hr>\n<h2>5.9 エージェントスキル</h2>\n<p><strong>場所:</strong> <code>.claude/skills/</code></p>\n<h3>例: .claude/skills/api-conventions.md</h3>\n<pre><code class=\"language-markdown\">---\nname: api-conventions\ndescription: サービスのREST API設計規約\n---\n# API規約\n- URLパスにはケバブケースを使用\n- JSONプロパティにはキャメルケースを使用\n- リストエンドポイントには必ずページネーションを含める\n- URLパスでAPIをバージョニング（/v1/、/v2/）\n</code></pre>\n<h3>機能の使い分け</h3>\n<table>\n<thead>\n<tr>\n<th>機能</th>\n<th>トリガー</th>\n<th>最適な用途</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>CLAUDE.md</td>\n<td>常に読み込み</td>\n<td>グローバルなプロジェクトコンテキスト</td>\n</tr>\n<tr>\n<td>スラッシュコマンド</td>\n<td>明示的な<code>/command</code></td>\n<td>繰り返しワークフロー</td>\n</tr>\n<tr>\n<td>スキル</td>\n<td>コンテキスト（自動）</td>\n<td>ドメイン知識</td>\n</tr>\n<tr>\n<td>サブエージェント</td>\n<td>委任</td>\n<td>分離されたタスク</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「環境設定は一度の投資で継続的なリターンを生む」</p>\n</blockquote>\n<p>CLAUDE.md、パーミッション、フック、カスタムコマンド、サブエージェント、スキル—これらを適切に設定することで、Claude Codeはあなた専用の開発環境に進化する。</p>\n","ベストプラクティス/06_効果的にコミュニケーションする.md":"<h1>効果的にコミュニケーションする</h1>\n<h2>概要</h2>\n<p>Claude Codeとの対話は、シニアエンジニアとの対話と同じように考えよう。コードベースについて質問したり、インタビュー形式で要件を深掘りしたり。効果的なコミュニケーションが、効果的な結果につながる。</p>\n<hr>\n<h2>コードベースについて質問する</h2>\n<h3>シニアエンジニアに聞くように質問する</h3>\n<p>Claudeには、あなたがシニアエンジニアに聞くのと同じ質問ができる:</p>\n<pre><code>- ロギングはどう動いてる？\n- 新しいAPIエンドポイントはどうやって作る？\n- foo.rsの134行目の `async move { ... }` は何をしてる？\n- CustomerOnboardingFlowImplはどんなエッジケースを処理してる？\n- なぜこのコードは333行目で bar() ではなく foo() を呼んでるの？\n</code></pre>\n<h3>質問の種類</h3>\n<h4>アーキテクチャの理解</h4>\n<pre><code>「このプロジェクトのディレクトリ構造を説明して。\n各ディレクトリの役割は？」\n</code></pre>\n<h4>実装の詳細</h4>\n<pre><code>「認証フローを追ってくれる？\nログインからトークン発行までの流れを説明して」\n</code></pre>\n<h4>設計判断の背景</h4>\n<pre><code>「なぜここでReduxを使ってるの？\nContext APIではダメだった理由は？」\n</code></pre>\n<h4>コードの挙動</h4>\n<pre><code>「この再帰関数の終了条件は何？\n無限ループになる可能性は？」\n</code></pre>\n<hr>\n<h2>Claudeにインタビューさせる</h2>\n<h3>大きな機能の場合</h3>\n<p>より大きな機能を作る場合、まずClaudeにインタビューをさせることで、見落としがちなポイントを洗い出せる。</p>\n<pre><code>質問: 「[簡単な説明]を作りたい。AskUserQuestionツールを使って\n詳細にインタビューして。\n\n技術的な実装、UI/UX、エッジケース、懸念点、トレードオフについて\n質問して。明らかな質問はしないで、私が考えていなかった\n難しい部分を掘り下げて。\n\nすべてカバーするまでインタビューを続けて、\nその後完全な仕様書をSPEC.mdに書いて」\n</code></pre>\n<h3>なぜインタビューが効果的か</h3>\n<ol>\n<li><strong>盲点の発見</strong>: 自分では気づかなかった考慮点が見つかる</li>\n<li><strong>要件の明確化</strong>: 曖昧な部分が具体的になる</li>\n<li><strong>実装前の問題発見</strong>: コーディング後ではなく前に問題を発見できる</li>\n</ol>\n<h3>インタビュー後のワークフロー</h3>\n<p>インタビューで仕様が固まったら、新しいセッションを開始して実装に集中:</p>\n<pre><code class=\"language-bash\"># 新しいセッションで\nclaude --continue  # または新規セッション\n\n「SPEC.mdの仕様に従って実装を開始して」\n</code></pre>\n<blockquote>\n<p>新しいセッションを開始することで、実装に完全に集中できるクリーンなコンテキストが得られる。</p>\n</blockquote>\n<hr>\n<h2>質問の仕方のコツ</h2>\n<h3>具体的に聞く</h3>\n<p><strong>悪い例:</strong></p>\n<pre><code>「このコードどう思う？」\n</code></pre>\n<p><strong>良い例:</strong></p>\n<pre><code>「このコードのパフォーマンスは問題ない？\nN+1クエリの可能性は？」\n</code></pre>\n<h3>コンテキストを含める</h3>\n<p><strong>悪い例:</strong></p>\n<pre><code>「バグがある」\n</code></pre>\n<p><strong>良い例:</strong></p>\n<pre><code>「ユーザー登録でメール確認後に500エラーが発生する。\n再現手順: 1) 登録 2) メール確認リンクをクリック 3) エラー」\n</code></pre>\n<h3>期待する回答の形式を示す</h3>\n<pre><code>「このAPIの認証フローを説明して。\nシーケンス図のマークダウン形式で」\n</code></pre>\n<hr>\n<h2>対話のパターン</h2>\n<h3>探索的対話</h3>\n<pre><code>User: 「このプロジェクトの認証の仕組みを教えて」\nClaude: [説明]\nUser: 「JWTトークンの有効期限はどこで設定されてる？」\nClaude: [説明]\nUser: 「リフレッシュトークンの実装はある？」\nClaude: [説明]\n</code></pre>\n<h3>決定支援対話</h3>\n<pre><code>User: 「状態管理にReduxとZustandのどちらを使うべき？」\nClaude: [両方の特徴と推奨]\nUser: 「このプロジェクトの規模だとどちら？」\nClaude: [具体的な推奨]\n</code></pre>\n<h3>実装ガイド対話</h3>\n<pre><code>User: 「新しいAPIエンドポイントの追加方法を教えて」\nClaude: [ステップバイステップの説明]\nUser: 「認証が必要なエンドポイントの場合は？」\nClaude: [追加説明]\n</code></pre>\n<hr>\n<h2>フィードバックループ</h2>\n<h3>早めの軌道修正</h3>\n<p>Claudeの回答が期待と違う場合は、すぐにフィードバックする:</p>\n<pre><code>User: 「そうじゃなくて、クライアント側のバリデーションの話」\n</code></pre>\n<pre><code>User: 「もっと詳しく。特にエラーハンドリングについて」\n</code></pre>\n<pre><code>User: 「シンプルにして。フレームワークは使わないで」\n</code></pre>\n<h3>確認を求める</h3>\n<p>重要な判断の前には確認を求める:</p>\n<pre><code>「この理解で合ってる？\n- ユーザーはメール認証必須\n- セッションは24時間で期限切れ\n- リフレッシュトークンはなし\n\n合ってたら実装を始めて」\n</code></pre>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「シニアエンジニアと話すように対話せよ」</p>\n</blockquote>\n<p>Claude Codeとの効果的なコミュニケーションは、明確な質問、適切なコンテキスト、そしてインタラクティブな対話から生まれる。インタビュー機能を活用して要件を深掘りし、具体的な質問で必要な情報を引き出そう。</p>\n","ベストプラクティス/07_セッションを管理する.md":"<h1>セッションを管理する</h1>\n<h2>概要</h2>\n<p>Claude Codeの最大の制約はコンテキストウィンドウだ。コンテキストが埋まると、パフォーマンスが低下する。セッションを効果的に管理することで、常に最高のパフォーマンスを維持できる。</p>\n<hr>\n<h2>7.1 早期かつ頻繁に軌道修正する</h2>\n<h3>ショートカット</h3>\n<table>\n<thead>\n<tr>\n<th>ショートカット</th>\n<th>動作</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong><code>Esc</code></strong></td>\n<td>Claudeの作業を途中で停止（コンテキストは保持）</td>\n</tr>\n<tr>\n<td><strong><code>Esc + Esc</code></strong> or <strong><code>/rewind</code></strong></td>\n<td>リワインドメニューを開き、会話とコード状態を復元</td>\n</tr>\n<tr>\n<td><strong><code>「それを元に戻して」</code></strong></td>\n<td>Claudeに変更を取り消させる</td>\n</tr>\n<tr>\n<td><strong><code>/clear</code></strong></td>\n<td>無関係なタスク間でコンテキストをリセット</td>\n</tr>\n</tbody></table>\n<h3>ルール</h3>\n<blockquote>\n<p>同じセッションで同じ問題を2回修正したら、<code>/clear</code>して、学んだことを組み込んだより良いプロンプトでやり直す。</p>\n</blockquote>\n<hr>\n<h2>7.2 コンテキストを積極的に管理する</h2>\n<pre><code class=\"language-bash\">/clear                    # コンテキストを完全にリセット\n/compact &lt;instructions&gt;   # 特定のフォーカスで自動圧縮\n</code></pre>\n<h3>自動圧縮</h3>\n<ul>\n<li>コンテキスト制限に近づくとトリガーされる</li>\n<li><strong>保持</strong>: コードパターン、ファイル状態、重要な決定</li>\n<li><strong>削除</strong>: 無関係な会話履歴、ファイル内容、古いコマンド</li>\n</ul>\n<hr>\n<h2>7.3 サブエージェントで調査を委任</h2>\n<pre><code>サブエージェントを使って、認証システムがトークンリフレッシュを\nどう処理しているか調査して。また、再利用すべき既存の\nOAuthユーティリティがあるかも確認して。\n</code></pre>\n<h3>メリット</h3>\n<ul>\n<li>探索用の別コンテキストウィンドウ</li>\n<li>メイン会話をクリーンに保つ</li>\n<li>サブエージェントがコンテキストを散らかさずに結果を報告</li>\n</ul>\n<h3>検証に使う場合</h3>\n<pre><code>サブエージェントを使ってこのコードのエッジケースをレビューして。\n</code></pre>\n<hr>\n<h2>7.4 チェックポイントでリワインド</h2>\n<h3>アクセス方法</h3>\n<ul>\n<li><code>Escape</code>をダブルタップ</li>\n<li><code>/rewind</code>を実行</li>\n</ul>\n<h3>機能</h3>\n<ul>\n<li>会話のみ復元（コード変更は保持）</li>\n<li>コードのみ復元（会話は保持）</li>\n<li>両方復元</li>\n<li>セッションをまたいで永続化</li>\n</ul>\n<p>⚠️ <strong>注意:</strong> Claudeの変更のみ追跡。外部プロセスの変更はgitを使う。</p>\n<hr>\n<h2>7.5 会話を再開する</h2>\n<pre><code class=\"language-bash\">claude --continue    # 最新の会話を再開\nclaude --resume      # 最近の会話から選択\n</code></pre>\n<h3>セッションの命名</h3>\n<pre><code class=\"language-bash\">/rename &quot;oauth-migration&quot;\n/rename &quot;debugging-memory-leak&quot;\n</code></pre>\n<blockquote>\n<p>セッションをブランチのように使う—異なるワークストリーム用に永続的なコンテキストを持たせる。</p>\n</blockquote>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「コンテキストは貴重なリソース。賢く管理せよ」</p>\n</blockquote>\n<p>セッション管理は、Claude Codeのパフォーマンスを最大化する鍵。<code>/clear</code>で定期的にリセットし、サブエージェントで調査を委任し、チェックポイントを活用して安全に実験しよう。</p>\n","ベストプラクティス/08_自動化とスケーリング.md":"<h1>自動化とスケーリング</h1>\n<h2>概要</h2>\n<p>Claude Codeは単なる対話ツールではない。CI/CD、プリコミットフック、スクリプトに組み込んで自動化できる。複数のセッションを並列実行することで、開発速度を大幅に向上させられる。</p>\n<hr>\n<h2>8.1 ヘッドレスモードで実行</h2>\n<pre><code class=\"language-bash\"># ワンオフクエリ\nclaude -p &quot;このプロジェクトが何をしているか説明して&quot;\n\n# スクリプト用の構造化出力\nclaude -p &quot;すべてのAPIエンドポイントをリストして&quot; --output-format json\n\n# リアルタイム処理用ストリーミング\nclaude -p &quot;このログファイルを分析して&quot; --output-format stream-json\n</code></pre>\n<h3>出力フォーマット</h3>\n<ul>\n<li>プレーンテキスト</li>\n<li>JSON</li>\n<li>ストリーミングJSON</li>\n</ul>\n<hr>\n<h2>8.2 複数のClaudeセッションを実行</h2>\n<h3>2つのアプローチ</h3>\n<ol>\n<li><p><strong>Claude Desktop</strong> - 複数のローカルセッションを視覚的に管理</p>\n<ul>\n<li>各セッションが分離されたワークツリーを持つ</li>\n</ul>\n</li>\n<li><p><strong>Claude Code on the Web</strong> - クラウドインフラ</p>\n<ul>\n<li>Anthropicのセキュアなインフラで実行</li>\n<li>分離されたVM</li>\n</ul>\n</li>\n</ol>\n<h3>品質ワークフロー - Writer/Reviewerパターン</h3>\n<p><strong>セッションA（Writer）:</strong></p>\n<pre><code>APIエンドポイントにレートリミッターを実装して\n</code></pre>\n<p><strong>セッションB（Reviewer）:</strong></p>\n<pre><code>@src/middleware/rateLimiter.ts のレートリミッター実装をレビューして。\nエッジケース、レース条件、既存のミドルウェアパターンとの一貫性を確認して。\n</code></pre>\n<p><strong>セッションA（対応）:</strong></p>\n<pre><code>レビューのフィードバック: [セッションBの出力]。これらの問題に対処して。\n</code></pre>\n<h3>代替パターン</h3>\n<ul>\n<li>一方のClaudeがテストを書き、もう一方がそれをパスするコードを書く</li>\n<li>コードレビュー用のフレッシュなコンテキスト（書いた時のバイアスなし）</li>\n</ul>\n<hr>\n<h2>8.3 ファイル全体にファンアウト</h2>\n<h3>大規模なマイグレーション/分析向け</h3>\n<p><strong>Step 1:</strong> タスクリストを生成</p>\n<pre><code class=\"language-bash\">マイグレーションが必要な2,000個のPythonファイルをすべてリストして\n</code></pre>\n<p><strong>Step 2:</strong> ループスクリプトを作成</p>\n<pre><code class=\"language-bash\">for file in $(cat files.txt); do\n  claude -p &quot;$file をReactからVueにマイグレート。OKまたはFAILを返して&quot; \\\n    --allowedTools &quot;Edit,Bash(git commit:*)&quot;\ndone\n</code></pre>\n<p><strong>Step 3:</strong> 数ファイルでテストしてからスケール</p>\n<ul>\n<li>最初の2-3ファイルでプロンプトを改良</li>\n<li><code>--allowedTools</code>で無人実行用にフルセットを実行</li>\n</ul>\n<h3>結果をパイプ</h3>\n<pre><code class=\"language-bash\">claude -p &quot;&lt;プロンプト&gt;&quot; --output-format json | your_command\n</code></pre>\n<h3>デバッグ</h3>\n<pre><code class=\"language-bash\">--verbose  # 詳細を表示（開発時）\n</code></pre>\n<hr>\n<h2>8.4 安全な自律モード</h2>\n<pre><code class=\"language-bash\">claude --dangerously-skip-permissions\n</code></pre>\n<h3>ユースケース</h3>\n<ul>\n<li>リントエラーの修正</li>\n<li>ボイラープレートの生成</li>\n</ul>\n<h3>リスク</h3>\n<ul>\n<li>データ損失、システム破損、データ流出</li>\n<li>インターネットなしのコンテナでのみ使用</li>\n</ul>\n<h3>より安全な代替</h3>\n<p>代わりに<code>/sandbox</code>でサンドボックスを使用。</p>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「Claude Codeは対話ツールを超えた自動化プラットフォーム」</p>\n</blockquote>\n<p>ヘッドレスモード、並列セッション、ファンアウトパターン—これらを組み合わせることで、開発ワークフローを大幅に効率化できる。</p>\n","ベストプラクティス/09_よくある失敗パターンを避ける.md":"<h1>よくある失敗パターンを避ける</h1>\n<h2>概要</h2>\n<p>Claude Codeを使っていると、誰もが陥りがちな失敗パターンがある。これらを認識し、事前に対策することで、より効果的にClaudeを活用できる。</p>\n<hr>\n<h2>失敗パターン一覧</h2>\n<table>\n<thead>\n<tr>\n<th>パターン</th>\n<th>問題</th>\n<th>解決策</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>キッチンシンク・セッション</strong></td>\n<td>無関係なタスクがコンテキストをノイズで埋める</td>\n<td>無関係なタスク間で<code>/clear</code>を実行</td>\n</tr>\n<tr>\n<td><strong>繰り返しの修正</strong></td>\n<td>失敗したアプローチがコンテキストを汚染</td>\n<td>2回失敗したら: <code>/clear</code> + より良いプロンプト</td>\n</tr>\n<tr>\n<td><strong>過剰なCLAUDE.md</strong></td>\n<td>長いファイルで重要なルールが無視される</td>\n<td>容赦なく削減、自明なプラクティスは削除</td>\n</tr>\n<tr>\n<td><strong>信頼してから検証のギャップ</strong></td>\n<td>もっともらしいコードにエッジケースのバグ</td>\n<td>常に検証を提供（テスト、スクリプト、スクリーンショット）</td>\n</tr>\n<tr>\n<td><strong>無限の探索</strong></td>\n<td>調査プロンプトが数百のファイルを読む</td>\n<td>スコープを狭くするか、サブエージェントを使う</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>詳細解説</h2>\n<h3>キッチンシンク・セッション</h3>\n<pre><code>悪い例:\n「ログイン機能を実装して」→ 完了\n「データベースのバックアップスクリプトを書いて」→ 完了\n「CSSのバグを直して」→ コンテキストがごちゃ混ぜ\n</code></pre>\n<pre><code>良い例:\n「ログイン機能を実装して」→ 完了\n/clear\n「データベースのバックアップスクリプトを書いて」→ 完了\n/clear\n「CSSのバグを直して」\n</code></pre>\n<h3>繰り返しの修正</h3>\n<pre><code>悪い例:\n「ES Modulesを使って」→ CommonJSで書かれる\n「だからES Modulesで」→ また間違える\n「import/exportを使って」→ まだ間違える...\n</code></pre>\n<pre><code>良い例:\n「ES Modulesを使って」→ CommonJSで書かれる\n「だからES Modulesで」→ まだ間違える\n\n/clear\n\n「ES Modules構文（import/export）でモジュールを書いて。\nrequire()は絶対に使わないこと。\n例: import { foo } from &#39;./bar.js&#39;」\n</code></pre>\n<h3>過剰なCLAUDE.md</h3>\n<pre><code>悪い例:\n# コードスタイル\n- インデントは2スペース\n- セミコロンを使う\n- シングルクォートを使う\n- ... (50行続く)\n</code></pre>\n<pre><code>良い例:\n# 重要なルール\n- ES Modules構文を使用（CommonJS禁止）\n- テストは`npm test -- --watch=false`で実行\n</code></pre>\n<h3>信頼してから検証のギャップ</h3>\n<pre><code>悪い例:\n「メールバリデーション関数を書いて」\n→ 実装を受け取る\n→ そのまま使う\n→ 本番で「user@.com」が通ってしまう\n</code></pre>\n<pre><code>良い例:\n「メールバリデーション関数を書いて。\nテストケース:\n- user@example.com → true\n- invalid → false\n- user@.com → false\n\nテストを書いて実行して」\n</code></pre>\n<h3>無限の探索</h3>\n<pre><code>悪い例:\n「このコードベースを調査して、問題点を報告して」\n→ 何百ものファイルを読み始める\n</code></pre>\n<pre><code>良い例:\n「src/auth/ディレクトリを調査して、\nセキュリティ上の懸念点を報告して」\n\nまたは:\n\n「サブエージェントを使って認証モジュールを調査して。\n特にトークン処理に焦点を当てて」\n</code></pre>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「失敗パターンを知ることは、成功パターンを知ることと同じくらい重要」</p>\n</blockquote>\n<p>キッチンシンク・セッション、繰り返しの修正、過剰なCLAUDE.md、検証の欠如、無限の探索—これらの失敗パターンを認識し、事前に対策しよう。</p>\n","ベストプラクティス/10_直感を養う.md":"<h1>直感を養う</h1>\n<h2>概要</h2>\n<p><strong>ルールは絶対ではない。</strong> 時間をかけて、以下の直感を養おう:</p>\n<ul>\n<li>いつコンテキストを蓄積し、いつクリアすべきか</li>\n<li>いつ計画し、いつ探索すべきか</li>\n<li>いつ具体的に、いつ曖昧に指示すべきか</li>\n<li>いつ手を動かし、いつ任せるべきか</li>\n</ul>\n<hr>\n<h2>時にはルールを破る</h2>\n<h3>コンテキストを蓄積させるべき時</h3>\n<blockquote>\n<p>通常: 無関係なタスク間で<code>/clear</code></p>\n</blockquote>\n<p><strong>例外</strong>: 1つの複雑な問題を深く掘り下げている時、履歴は価値がある。</p>\n<h3>計画をスキップすべき時</h3>\n<blockquote>\n<p>通常: 探索 → 計画 → 実装</p>\n</blockquote>\n<p><strong>例外</strong>: タスクが探索的で、結果が予測できない場合。</p>\n<h3>曖昧なプロンプトを使うべき時</h3>\n<blockquote>\n<p>通常: 具体的なプロンプトが具体的な結果を生む</p>\n</blockquote>\n<p><strong>例外</strong>: Claudeの解釈を見てから制約を加えたい場合。</p>\n<hr>\n<h2>観察から学ぶ</h2>\n<h3>素晴らしい出力が得られた時</h3>\n<p>何を違うようにしたか気づく:</p>\n<ul>\n<li>プロンプトの構造</li>\n<li>提供したコンテキスト</li>\n<li>セッションの状態</li>\n</ul>\n<h3>Claudeが苦戦している時</h3>\n<p>なぜかを考える:</p>\n<ul>\n<li>ノイズの多いコンテキスト？</li>\n<li>曖昧なプロンプト？</li>\n<li>大きすぎるタスク？</li>\n</ul>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「ルールを知り、いつ破るかを知れ」</p>\n</blockquote>\n<p>このガイドのパターンは出発点。最終的には、あなた自身のワークフローに最適化されたアプローチを見つけることが目標だ。</p>\n"};</script>
+<script>window.__ARTICLES__ = {"ベストプラクティス/01_検証方法を提供する.md":"<h1>検証方法を提供する</h1>\n<h2>概要</h2>\n<p>Claude Codeを使う上で、最も効果を発揮する単一のアドバイス。それは「Claudeが自分の作業を検証できる方法を与える」ということである。</p>\n<p>テストを実行させる、スクリーンショットを比較させる、出力を検証させる。明確な成功基準がなければ、見た目は正しくても動かないコードを生成してしまう可能性がある。</p>\n<hr>\n<h2>なぜ検証が重要なのか</h2>\n<h3>自律的な品質保証</h3>\n<p>Claudeは指示されたタスクを実行する際、自分自身で結果を確認できると、劇的にパフォーマンスが向上する。これは人間のエンジニアが「書いたコードをテストする」のと同じ理由だ。</p>\n<blockquote>\n<p>検証なしでは、Claudeは「それっぽいもの」を作ることはできても、「確実に動くもの」を作ることは難しい。</p>\n</blockquote>\n<h3>フィードバックループの確立</h3>\n<p>検証を組み込むことで、以下のサイクルが回る：</p>\n<ol>\n<li><strong>実装</strong> → コードを書く</li>\n<li><strong>検証</strong> → テストを実行する</li>\n<li><strong>修正</strong> → 失敗した部分を直す</li>\n<li><strong>再検証</strong> → 再度テストを実行する</li>\n</ol>\n<hr>\n<h2>具体的な改善例</h2>\n<h3>検証基準を提供する</h3>\n<table>\n<thead>\n<tr>\n<th>改善前</th>\n<th>改善後</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>「メールアドレスを検証する関数を実装して」</td>\n<td>「validateEmail関数を書いて。テストケース: <code>test@example.com</code>はtrue、<code>invalid</code>はfalse、<code>@missing.com</code>はfalse。実装後にテストを実行して」</td>\n</tr>\n</tbody></table>\n<h3>UI変更を視覚的に検証する</h3>\n<table>\n<thead>\n<tr>\n<th>改善前</th>\n<th>改善後</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>「ダッシュボードをもっと良くして」</td>\n<td>「[スクリーンショットを貼り付け] このデザインを実装して。結果のスクリーンショットを撮って元と比較し、差分をリストアップして修正して」</td>\n</tr>\n</tbody></table>\n<h3>根本原因に対処する</h3>\n<table>\n<thead>\n<tr>\n<th>改善前</th>\n<th>改善後</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>「ビルドが失敗してる」</td>\n<td>「このエラーでビルドが失敗してる: [エラーを貼り付け]。修正してビルドが成功することを確認して。エラーを抑制するんじゃなく、根本原因に対処して」</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>実践的なヒント</h2>\n<h3>1. テストファイルを指定する</h3>\n<pre><code>「src/utils/validation.ts に変更を加えたら、\n対応する src/utils/validation.test.ts のテストを実行して\nすべてパスすることを確認して」\n</code></pre>\n<h3>2. ビルドコマンドを明示する</h3>\n<pre><code>「変更を加えたら npm run build を実行して、\n型エラーがないことを確認して」\n</code></pre>\n<h3>3. 期待する出力を示す</h3>\n<pre><code>「このAPIエンドポイントは以下のJSONを返すべき:\n{\n  &quot;status&quot;: &quot;success&quot;,\n  &quot;data&quot;: { ... }\n}\n実際にcurlで叩いて確認して」\n</code></pre>\n<hr>\n<h2>よくある落とし穴</h2>\n<h3>「動いてるように見える」罠</h3>\n<p>検証基準を与えないと、Claudeは以下のような状態で完了と判断してしまうことがある：</p>\n<ul>\n<li>構文エラーはないが、ロジックが間違っている</li>\n<li>一見正しいが、エッジケースで失敗する</li>\n<li>型は通るが、実行時にクラッシュする</li>\n</ul>\n<h3>対策</h3>\n<ul>\n<li><strong>明示的なテストケース</strong>を提供する</li>\n<li><strong>失敗時の挙動</strong>も定義する</li>\n<li><strong>実行して確認</strong>という指示を含める</li>\n</ul>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「Claudeに検証手段を与えよ」</p>\n</blockquote>\n<p>これが、Claude Codeを最大限に活用するための最も重要な原則である。テストの実行、スクリーンショットの比較、出力の検証—これらを指示に組み込むことで、Claudeは自律的に品質を担保しながら作業を進められるようになる。</p>\n","ベストプラクティス/02_探索から計画そして実装へ.md":"<h1>探索から計画、そして実装へ</h1>\n<h2>概要</h2>\n<p>効果的な開発は「調査」と「実装」を分離することから始まる。闇雲にコードを書き始めるのではなく、まず探索し、計画を立て、それから実装に移る。この4段階のワークフローが、間違った問題を解決してしまうリスクを大幅に減らす。</p>\n<hr>\n<h2>4段階ワークフロー</h2>\n<h3>フェーズ1: 探索（プランモード）</h3>\n<p>プランモードに入り、Claudeにファイルを読ませ、変更を加えずに質問に答えさせる。</p>\n<pre><code>claude (プランモード)\n\n質問: 「src/authを読んで、セッションとログインの\n処理方法を理解して。\nあと、シークレット用の環境変数の管理方法も確認して」\n</code></pre>\n<p><strong>ポイント</strong>: この段階では一切変更を加えない。理解に徹する。</p>\n<h3>フェーズ2: 計画</h3>\n<p>Claudeに詳細な実装計画を作成させる。</p>\n<pre><code>質問: 「Google OAuthを追加したい。\nどのファイルを変更する必要がある？\nセッションフローはどうなる？\n計画を作成して」\n</code></pre>\n<p><strong>成果物</strong>: 変更が必要なファイルのリスト、実装の順序、考慮すべきエッジケース</p>\n<h3>フェーズ3: 実装（通常モード）</h3>\n<p>通常モードに戻り、計画に基づいてClaudeにコードを書かせ、検証する。</p>\n<pre><code>質問: 「計画通りにOAuthフローを実装して。\nコールバックハンドラのテストを書いて、\nテストスイートを実行して失敗があれば修正して」\n</code></pre>\n<h3>フェーズ4: コミット</h3>\n<pre><code>質問: 「説明的なメッセージでコミットして、PRを開いて」\n</code></pre>\n<hr>\n<h2>計画をスキップしてもいい場合</h2>\n<p>以下のような単純で明確な修正の場合は、直接実行を依頼してOK：</p>\n<ul>\n<li><strong>タイポの修正</strong></li>\n<li><strong>ログ行の追加</strong></li>\n<li><strong>変数名の変更</strong></li>\n</ul>\n<blockquote>\n<p>計画のオーバーヘッドが価値を持つのは、アプローチが不確実な場合、複数ファイルにまたがる変更、または不慣れなコードを扱う場合。</p>\n</blockquote>\n<hr>\n<h2>プランモードの使い方</h2>\n<h3>基本コマンド</h3>\n<pre><code class=\"language-bash\"># プランモードに入る\n/plan\n\n# 通常モードに戻る\n（プランモードで計画を立てた後、実装開始を指示）\n</code></pre>\n<h3>プランモードでできること</h3>\n<ul>\n<li>ファイルの読み取り</li>\n<li>コードベースの探索</li>\n<li>質問への回答</li>\n<li>計画の作成</li>\n</ul>\n<h3>プランモードでできないこと</h3>\n<ul>\n<li>ファイルの編集</li>\n<li>コマンドの実行（読み取り以外）</li>\n<li>実際の変更</li>\n</ul>\n<hr>\n<h2>実践例: 認証システムの追加</h2>\n<h3>Step 1: 探索</h3>\n<pre><code>/plan\n\n「このプロジェクトの認証の仕組みを調べて。\n- 既存のユーザー管理はある？\n- セッション管理はどうなってる？\n- 使われてる認証ライブラリは？」\n</code></pre>\n<h3>Step 2: 計画</h3>\n<pre><code>「JWTベースの認証を追加したい。計画を立てて：\n1. 必要なパッケージ\n2. 変更するファイル\n3. 実装の順序\n4. テスト戦略」\n</code></pre>\n<h3>Step 3: 実装</h3>\n<pre><code>「計画に従って実装を開始して。\nまずユーザーモデルとauth middlewareから。\n各ステップでテストを実行して」\n</code></pre>\n<hr>\n<h2>なぜこのワークフローが効果的なのか</h2>\n<h3>1. コンテキストの効率的な利用</h3>\n<p>探索フェーズで全体像を把握してから実装に移ることで、手戻りが減る。</p>\n<h3>2. 明確な成功基準</h3>\n<p>計画段階で「何をもって完了とするか」が明確になる。</p>\n<h3>3. 分離された関心事</h3>\n<ul>\n<li>探索 = 理解</li>\n<li>計画 = 設計</li>\n<li>実装 = コーディング</li>\n<li>コミット = 記録</li>\n</ul>\n<p>それぞれの段階で異なる思考モードが必要であり、分離することで各段階に集中できる。</p>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「まず探索し、次に計画し、それから実装せよ」</p>\n</blockquote>\n<p>この原則に従うことで、間違った方向に進むリスクを最小化し、効率的な開発が可能になる。特に複雑なタスクや不慣れなコードベースでは、このワークフローが真価を発揮する。</p>\n","ベストプラクティス/03_具体的なコンテキストを提供する.md":"<h1>具体的なコンテキストを提供する</h1>\n<h2>概要</h2>\n<p>より精密な指示は、より少ない修正で済む結果につながる。曖昧な依頼は曖昧な結果を生み、具体的な依頼は具体的な結果を生む。</p>\n<hr>\n<h2>具体性がもたらす効果</h2>\n<h3>Before と After</h3>\n<table>\n<thead>\n<tr>\n<th>戦略</th>\n<th>改善前</th>\n<th>改善後</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>タスクのスコープを絞る</strong></td>\n<td>「foo.pyにテストを追加して」</td>\n<td>「foo.pyにテストを書いて。ユーザーがログアウトしている場合のエッジケースをカバー。モックは避けて」</td>\n</tr>\n<tr>\n<td><strong>ソースを指定する</strong></td>\n<td>「なぜExecutionFactoryはこんな変なAPIなの？」</td>\n<td>「ExecutionFactoryのgit履歴を調べて、APIがどのように変遷してきたかまとめて」</td>\n</tr>\n<tr>\n<td><strong>既存パターンを参照する</strong></td>\n<td>「カレンダーウィジェットを追加して」</td>\n<td>「ホームページにある既存のウィジェットの実装を見て、パターンを理解して。HotDogWidget.phpが良い例。そのパターンに従って、月を選択して年を前後にページネーションできる新しいカレンダーウィジェットを実装して。コードベースで既に使われているもの以外のライブラリは使わずスクラッチで構築して」</td>\n</tr>\n<tr>\n<td><strong>症状を記述する</strong></td>\n<td>「ログインのバグを直して」</td>\n<td>「セッションタイムアウト後にログインが失敗するとユーザーから報告があった。src/auth/のauthフローを調べて、特にトークンリフレッシュ周り。問題を再現する失敗テストを書いてから修正して」</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>良いプロンプトの構成要素</h2>\n<h3>1. 何をするか（What）</h3>\n<p>具体的なゴールを明示する。</p>\n<pre><code>✗ 「コードを改善して」\n✓ 「validateUserInput関数のエラーハンドリングを追加して」\n</code></pre>\n<h3>2. どこで（Where）</h3>\n<p>対象となるファイルやモジュールを指定する。</p>\n<pre><code>✗ 「認証を修正して」\n✓ 「src/services/auth/tokenRefresh.tsのリフレッシュロジックを修正して」\n</code></pre>\n<h3>3. どのように（How）</h3>\n<p>期待する実装方法やパターンを示す。</p>\n<pre><code>✗ 「テストを書いて」\n✓ 「既存のsrc/tests/のパターンに従って、Jest + Testing Libraryでテストを書いて」\n</code></pre>\n<h3>4. なぜ（Why）</h3>\n<p>背景を共有することで、より適切な判断ができる。</p>\n<pre><code>✗ 「APIレスポンスを変更して」\n✓ 「モバイルアプリのパフォーマンス向上のため、不要なフィールドを削除してレスポンスサイズを減らしたい」\n</code></pre>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「具体的な指示は具体的な結果を生む」</p>\n</blockquote>\n<p>曖昧さを排除し、コンテキストを豊富に提供することで、Claudeはより正確で期待通りの結果を出せる。</p>\n","ベストプラクティス/04_リッチなコンテンツを提供する.md":"<h1>リッチなコンテンツを提供する</h1>\n<h2>概要</h2>\n<p>テキストだけでなく、ファイル参照、画像、URL、パイプ入力—あらゆる形式でコンテキストを提供できる。</p>\n<hr>\n<h2>コンテンツ提供の方法</h2>\n<h3><code>@</code>でファイルを参照</h3>\n<p>場所を説明する代わりに、ファイルを直接参照する。</p>\n<pre><code>@src/auth/handlers.ts\n@README.md\n</code></pre>\n<p>Claudeは応答前にファイルを読み込む。</p>\n<h3>画像を直接貼り付け</h3>\n<ul>\n<li><strong>コピー&amp;ペースト</strong>: スクリーンショットをそのまま貼り付け</li>\n<li><strong>ドラッグ&amp;ドロップ</strong>: 画像ファイルをプロンプトにドロップ</li>\n</ul>\n<h3>URLを提供</h3>\n<p>ドキュメントのURLを与える。<code>/permissions</code>でドメインを許可リストに追加できる。</p>\n<pre><code>「このドキュメントを参考に実装して:\nhttps://docs.example.com/api/v2」\n</code></pre>\n<h3>パイプでデータを渡す</h3>\n<pre><code class=\"language-bash\">cat error.log | claude\n</code></pre>\n<p>ファイル内容を直接送信できる。</p>\n<h3>Claudeに自分で取得させる</h3>\n<p>Bashコマンド、MCPツール、ファイル読み取りを使って、Claudeに必要なコンテキストを自分で収集させることもできる。</p>\n<pre><code>「src/configディレクトリを読んで、\n設定の構造を理解してから作業を開始して」\n</code></pre>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「リッチなコンテキストがリッチな結果を生む」</p>\n</blockquote>\n<p>テキストだけでなく、ファイル参照、画像、URL、パイプ入力を組み合わせることで、Claudeに必要なすべてのコンテキストを提供できる。</p>\n","ベストプラクティス/05_環境を設定する.md":"<h1>環境を設定する</h1>\n<h2>概要</h2>\n<p>Claude Codeは高度にカスタマイズ可能。CLAUDE.md、パーミッション、MCPサーバー、カスタムコマンド、プラグイン、フック、サブエージェント、スキル—これらを適切に設定することで、あなたのワークフローに最適化された開発環境を構築できる。</p>\n<hr>\n<h2>5.1 効果的なCLAUDE.mdを書く</h2>\n<h3>スターターファイルを生成</h3>\n<pre><code class=\"language-bash\">/init\n</code></pre>\n<h3>CLAUDE.mdの例</h3>\n<pre><code class=\"language-markdown\"># コードスタイル\n- ES modules構文（import/export）を使用、CommonJS（require）は使わない\n- importはできるだけ分割代入する（例: import { foo } from &#39;bar&#39;）\n\n# ワークフロー\n- コード変更の一連の作業が終わったら必ず型チェックを実行\n- パフォーマンスのため、テストスイート全体ではなく単一テストを優先\n</code></pre>\n<h3>含めるべきもの</h3>\n<p>✅ <strong>含める:</strong></p>\n<ul>\n<li>Claudeが推測できないBashコマンド</li>\n<li>デフォルトと異なるコードスタイルルール</li>\n<li>テスト実行の指示と好みのテストランナー</li>\n<li>リポジトリのエチケット（ブランチ命名、PRの慣習）</li>\n<li>プロジェクト固有のアーキテクチャ決定</li>\n<li>開発環境の癖（必須の環境変数など）</li>\n<li>よくある落とし穴や非自明な挙動</li>\n</ul>\n<p>❌ <strong>含めない:</strong></p>\n<ul>\n<li>コードを読めばわかること</li>\n<li>Claudeがすでに知っている標準的な言語の慣習</li>\n<li>詳細なAPIドキュメント（代わりにリンクを貼る）</li>\n<li>頻繁に変わる情報</li>\n<li>長い説明やチュートリアル</li>\n<li>「きれいなコードを書く」のような自明なプラクティス</li>\n</ul>\n<h3>追加ファイルのインポート</h3>\n<pre><code class=\"language-markdown\">プロジェクト概要は @README.md、npmコマンドは @package.json を参照。\n\n# 追加指示\n- Git ワークフロー: @docs/git-instructions.md\n- 個人設定: @~/.claude/my-project-instructions.md\n</code></pre>\n<h3>CLAUDE.mdの配置場所</h3>\n<table>\n<thead>\n<tr>\n<th>場所</th>\n<th>用途</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>~/.claude/CLAUDE.md</code></td>\n<td>すべてのセッションに適用</td>\n</tr>\n<tr>\n<td><code>./CLAUDE.md</code></td>\n<td>プロジェクトルート（gitにコミット、またはチームと共有、または<code>CLAUDE.local.md</code>として.gitignore）</td>\n</tr>\n<tr>\n<td>親ディレクトリ</td>\n<td>モノレポで便利</td>\n</tr>\n<tr>\n<td>子ディレクトリ</td>\n<td>Claudeがオンデマンドで読み込み</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>5.2 パーミッションの設定</h2>\n<pre><code class=\"language-bash\">/permissions\n</code></pre>\n<p>2つのアプローチ:</p>\n<ul>\n<li><strong>パーミッション許可リスト</strong>: 安全とわかっている特定のツールを許可</li>\n<li><strong>サンドボックス</strong>: OSレベルの分離を有効化</li>\n</ul>\n<h3>危険なコマンド（注意）</h3>\n<pre><code class=\"language-bash\">claude --dangerously-skip-permissions\n</code></pre>\n<p>⚠️ インターネットアクセスのないサンドボックスでのみ使用。</p>\n<hr>\n<h2>5.3 CLIツールの活用</h2>\n<p>Claudeに以下のCLIツールを使わせる:</p>\n<ul>\n<li><code>gh</code> - GitHub CLI</li>\n<li><code>aws</code> - AWS CLI</li>\n<li><code>gcloud</code> - Google Cloud CLI</li>\n<li><code>sentry-cli</code> - Sentry CLI</li>\n</ul>\n<p>プロンプト例:</p>\n<pre><code>&#39;foo-cli-tool --help&#39;を使ってfooツールについて学び、それを使ってA、B、Cを解決して。\n</code></pre>\n<hr>\n<h2>5.4 MCPサーバーの接続</h2>\n<pre><code class=\"language-bash\">claude mcp add\n</code></pre>\n<p>以下と統合可能:</p>\n<ul>\n<li>Notion</li>\n<li>Figma</li>\n<li>データベース</li>\n<li>モニタリングツール</li>\n<li>Issueトラッカー</li>\n</ul>\n<hr>\n<h2>5.5 カスタムスラッシュコマンド</h2>\n<p><strong>場所:</strong> <code>.claude/commands/</code>（プロジェクト）または <code>~/.claude/commands/</code>（グローバル）</p>\n<h3>例: .claude/commands/fix-github-issue.md</h3>\n<pre><code class=\"language-markdown\">---\ndescription: GitHub issueを修正\n---\nGitHub issue: $ARGUMENTS を分析して修正してください。\n\n以下の手順に従ってください:\n1. `gh issue view`でissueの詳細を取得\n2. issueに記述された問題を理解\n3. 関連ファイルをコードベースから検索\n4. 問題を修正するために必要な変更を実装\n5. 修正を検証するテストを書いて実行\n6. リントと型チェックをパス\n7. 説明的なコミットメッセージを作成\n8. プッシュしてPRを作成\n</code></pre>\n<p><strong>使用方法:</strong></p>\n<pre><code class=\"language-bash\">/fix-github-issue 1234\n</code></pre>\n<p><strong>特殊キーワード:</strong></p>\n<ul>\n<li><code>$ARGUMENTS</code> - すべてのパラメータを渡す</li>\n<li><code>$1</code>, <code>$2</code>, etc. - 位置引数</li>\n</ul>\n<hr>\n<h2>5.6 プラグインのインストール</h2>\n<pre><code class=\"language-bash\">/plugin\n</code></pre>\n<p>マーケットプレイスで事前構築された機能を閲覧:</p>\n<ul>\n<li>特定ワークフロー用のカスタムコマンド</li>\n<li>事前設定済みのMCPサーバー</li>\n<li>専門化されたサブエージェント</li>\n<li>ドメイン知識スキル</li>\n</ul>\n<hr>\n<h2>5.7 フックの設定</h2>\n<pre><code class=\"language-bash\">/hooks\n</code></pre>\n<p>ワークフローの特定のポイントでスクリプトを自動実行:</p>\n<p><strong>ユースケース:</strong></p>\n<ul>\n<li>編集後の自動フォーマット</li>\n<li>変更ファイルのリント</li>\n<li>機密ファイルへの変更をブロック</li>\n<li>すべてのコマンドをログ</li>\n<li>Claudeが待機中に通知</li>\n</ul>\n<p><strong>プロンプト例:</strong></p>\n<pre><code>ファイル編集後にeslintを実行するフックを書いて\nmigrationsフォルダへの書き込みをブロックするフックを書いて\n</code></pre>\n<p><strong>設定方法:</strong></p>\n<ul>\n<li>インタラクティブ: <code>/hooks</code></li>\n<li>手動: <code>.claude/settings.json</code>を編集</li>\n</ul>\n<h3>フックとCLAUDE.mdの使い分け</h3>\n<table>\n<thead>\n<tr>\n<th>機能</th>\n<th>特徴</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>フック</strong></td>\n<td>決定論的制御（必ず実行される）</td>\n</tr>\n<tr>\n<td><strong>CLAUDE.md</strong></td>\n<td>アドバイス的ガイダンス（判断ベース）</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>5.8 カスタムサブエージェント</h2>\n<p><strong>場所:</strong> <code>.claude/agents/</code></p>\n<h3>例: .claude/agents/security-reviewer.md</h3>\n<pre><code class=\"language-markdown\">---\nname: security-reviewer\ndescription: セキュリティ脆弱性のコードレビュー\ntools: Read, Grep, Glob, Bash\nmodel: opus\n---\nあなたはシニアセキュリティエンジニアです。以下の観点でコードをレビューしてください:\n- インジェクション脆弱性（SQL、XSS、コマンドインジェクション）\n- 認証・認可の欠陥\n- コード内のシークレットや認証情報\n- 安全でないデータ処理\n\n具体的な行番号の参照と修正案を提供してください。\n</code></pre>\n<p><strong>使用方法:</strong></p>\n<pre><code>サブエージェントを使ってこのコードのセキュリティ問題をレビューして。\n</code></pre>\n<p><strong>ユースケース:</strong></p>\n<ul>\n<li>メイン会話のバイアスなしでコードレビュー</li>\n<li>不慣れなコードの調査</li>\n<li>専門タスク（セキュリティ、ドキュメント、テスト）</li>\n<li>メインエージェントの作業の検証</li>\n</ul>\n<hr>\n<h2>5.9 エージェントスキル</h2>\n<p><strong>場所:</strong> <code>.claude/skills/</code></p>\n<h3>例: .claude/skills/api-conventions.md</h3>\n<pre><code class=\"language-markdown\">---\nname: api-conventions\ndescription: サービスのREST API設計規約\n---\n# API規約\n- URLパスにはケバブケースを使用\n- JSONプロパティにはキャメルケースを使用\n- リストエンドポイントには必ずページネーションを含める\n- URLパスでAPIをバージョニング（/v1/、/v2/）\n</code></pre>\n<h3>機能の使い分け</h3>\n<table>\n<thead>\n<tr>\n<th>機能</th>\n<th>トリガー</th>\n<th>最適な用途</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>CLAUDE.md</td>\n<td>常に読み込み</td>\n<td>グローバルなプロジェクトコンテキスト</td>\n</tr>\n<tr>\n<td>スラッシュコマンド</td>\n<td>明示的な<code>/command</code></td>\n<td>繰り返しワークフロー</td>\n</tr>\n<tr>\n<td>スキル</td>\n<td>コンテキスト（自動）</td>\n<td>ドメイン知識</td>\n</tr>\n<tr>\n<td>サブエージェント</td>\n<td>委任</td>\n<td>分離されたタスク</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「環境設定は一度の投資で継続的なリターンを生む」</p>\n</blockquote>\n<p>CLAUDE.md、パーミッション、フック、カスタムコマンド、サブエージェント、スキル—これらを適切に設定することで、Claude Codeはあなた専用の開発環境に進化する。</p>\n","ベストプラクティス/06_効果的にコミュニケーションする.md":"<h1>効果的にコミュニケーションする</h1>\n<h2>概要</h2>\n<p>Claude Codeとの対話は、シニアエンジニアとの対話と同じように考えよう。コードベースについて質問したり、インタビュー形式で要件を深掘りしたり。効果的なコミュニケーションが、効果的な結果につながる。</p>\n<hr>\n<h2>コードベースについて質問する</h2>\n<h3>シニアエンジニアに聞くように質問する</h3>\n<p>Claudeには、あなたがシニアエンジニアに聞くのと同じ質問ができる:</p>\n<pre><code>- ロギングはどう動いてる？\n- 新しいAPIエンドポイントはどうやって作る？\n- foo.rsの134行目の `async move { ... }` は何をしてる？\n- CustomerOnboardingFlowImplはどんなエッジケースを処理してる？\n- なぜこのコードは333行目で bar() ではなく foo() を呼んでるの？\n</code></pre>\n<h3>質問の種類</h3>\n<h4>アーキテクチャの理解</h4>\n<pre><code>「このプロジェクトのディレクトリ構造を説明して。\n各ディレクトリの役割は？」\n</code></pre>\n<h4>実装の詳細</h4>\n<pre><code>「認証フローを追ってくれる？\nログインからトークン発行までの流れを説明して」\n</code></pre>\n<h4>設計判断の背景</h4>\n<pre><code>「なぜここでReduxを使ってるの？\nContext APIではダメだった理由は？」\n</code></pre>\n<h4>コードの挙動</h4>\n<pre><code>「この再帰関数の終了条件は何？\n無限ループになる可能性は？」\n</code></pre>\n<hr>\n<h2>Claudeにインタビューさせる</h2>\n<h3>大きな機能の場合</h3>\n<p>より大きな機能を作る場合、まずClaudeにインタビューをさせることで、見落としがちなポイントを洗い出せる。</p>\n<pre><code>質問: 「[簡単な説明]を作りたい。AskUserQuestionツールを使って\n詳細にインタビューして。\n\n技術的な実装、UI/UX、エッジケース、懸念点、トレードオフについて\n質問して。明らかな質問はしないで、私が考えていなかった\n難しい部分を掘り下げて。\n\nすべてカバーするまでインタビューを続けて、\nその後完全な仕様書をSPEC.mdに書いて」\n</code></pre>\n<h3>なぜインタビューが効果的か</h3>\n<ol>\n<li><strong>盲点の発見</strong>: 自分では気づかなかった考慮点が見つかる</li>\n<li><strong>要件の明確化</strong>: 曖昧な部分が具体的になる</li>\n<li><strong>実装前の問題発見</strong>: コーディング後ではなく前に問題を発見できる</li>\n</ol>\n<h3>インタビュー後のワークフロー</h3>\n<p>インタビューで仕様が固まったら、新しいセッションを開始して実装に集中:</p>\n<pre><code class=\"language-bash\"># 新しいセッションで\nclaude --continue  # または新規セッション\n\n「SPEC.mdの仕様に従って実装を開始して」\n</code></pre>\n<blockquote>\n<p>新しいセッションを開始することで、実装に完全に集中できるクリーンなコンテキストが得られる。</p>\n</blockquote>\n<hr>\n<h2>質問の仕方のコツ</h2>\n<h3>具体的に聞く</h3>\n<p><strong>悪い例:</strong></p>\n<pre><code>「このコードどう思う？」\n</code></pre>\n<p><strong>良い例:</strong></p>\n<pre><code>「このコードのパフォーマンスは問題ない？\nN+1クエリの可能性は？」\n</code></pre>\n<h3>コンテキストを含める</h3>\n<p><strong>悪い例:</strong></p>\n<pre><code>「バグがある」\n</code></pre>\n<p><strong>良い例:</strong></p>\n<pre><code>「ユーザー登録でメール確認後に500エラーが発生する。\n再現手順: 1) 登録 2) メール確認リンクをクリック 3) エラー」\n</code></pre>\n<h3>期待する回答の形式を示す</h3>\n<pre><code>「このAPIの認証フローを説明して。\nシーケンス図のマークダウン形式で」\n</code></pre>\n<hr>\n<h2>対話のパターン</h2>\n<h3>探索的対話</h3>\n<pre><code>User: 「このプロジェクトの認証の仕組みを教えて」\nClaude: [説明]\nUser: 「JWTトークンの有効期限はどこで設定されてる？」\nClaude: [説明]\nUser: 「リフレッシュトークンの実装はある？」\nClaude: [説明]\n</code></pre>\n<h3>決定支援対話</h3>\n<pre><code>User: 「状態管理にReduxとZustandのどちらを使うべき？」\nClaude: [両方の特徴と推奨]\nUser: 「このプロジェクトの規模だとどちら？」\nClaude: [具体的な推奨]\n</code></pre>\n<h3>実装ガイド対話</h3>\n<pre><code>User: 「新しいAPIエンドポイントの追加方法を教えて」\nClaude: [ステップバイステップの説明]\nUser: 「認証が必要なエンドポイントの場合は？」\nClaude: [追加説明]\n</code></pre>\n<hr>\n<h2>フィードバックループ</h2>\n<h3>早めの軌道修正</h3>\n<p>Claudeの回答が期待と違う場合は、すぐにフィードバックする:</p>\n<pre><code>User: 「そうじゃなくて、クライアント側のバリデーションの話」\n</code></pre>\n<pre><code>User: 「もっと詳しく。特にエラーハンドリングについて」\n</code></pre>\n<pre><code>User: 「シンプルにして。フレームワークは使わないで」\n</code></pre>\n<h3>確認を求める</h3>\n<p>重要な判断の前には確認を求める:</p>\n<pre><code>「この理解で合ってる？\n- ユーザーはメール認証必須\n- セッションは24時間で期限切れ\n- リフレッシュトークンはなし\n\n合ってたら実装を始めて」\n</code></pre>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「シニアエンジニアと話すように対話せよ」</p>\n</blockquote>\n<p>Claude Codeとの効果的なコミュニケーションは、明確な質問、適切なコンテキスト、そしてインタラクティブな対話から生まれる。インタビュー機能を活用して要件を深掘りし、具体的な質問で必要な情報を引き出そう。</p>\n","ベストプラクティス/07_セッションを管理する.md":"<h1>セッションを管理する</h1>\n<h2>概要</h2>\n<p>Claude Codeの最大の制約はコンテキストウィンドウだ。コンテキストが埋まると、パフォーマンスが低下する。セッションを効果的に管理することで、常に最高のパフォーマンスを維持できる。</p>\n<hr>\n<h2>7.1 早期かつ頻繁に軌道修正する</h2>\n<h3>ショートカット</h3>\n<table>\n<thead>\n<tr>\n<th>ショートカット</th>\n<th>動作</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong><code>Esc</code></strong></td>\n<td>Claudeの作業を途中で停止（コンテキストは保持）</td>\n</tr>\n<tr>\n<td><strong><code>Esc + Esc</code></strong> or <strong><code>/rewind</code></strong></td>\n<td>リワインドメニューを開き、会話とコード状態を復元</td>\n</tr>\n<tr>\n<td><strong><code>「それを元に戻して」</code></strong></td>\n<td>Claudeに変更を取り消させる</td>\n</tr>\n<tr>\n<td><strong><code>/clear</code></strong></td>\n<td>無関係なタスク間でコンテキストをリセット</td>\n</tr>\n</tbody></table>\n<h3>ルール</h3>\n<blockquote>\n<p>同じセッションで同じ問題を2回修正したら、<code>/clear</code>して、学んだことを組み込んだより良いプロンプトでやり直す。</p>\n</blockquote>\n<hr>\n<h2>7.2 コンテキストを積極的に管理する</h2>\n<pre><code class=\"language-bash\">/clear                    # コンテキストを完全にリセット\n/compact &lt;instructions&gt;   # 特定のフォーカスで自動圧縮\n</code></pre>\n<h3>自動圧縮</h3>\n<ul>\n<li>コンテキスト制限に近づくとトリガーされる</li>\n<li><strong>保持</strong>: コードパターン、ファイル状態、重要な決定</li>\n<li><strong>削除</strong>: 無関係な会話履歴、ファイル内容、古いコマンド</li>\n</ul>\n<hr>\n<h2>7.3 サブエージェントで調査を委任</h2>\n<pre><code>サブエージェントを使って、認証システムがトークンリフレッシュを\nどう処理しているか調査して。また、再利用すべき既存の\nOAuthユーティリティがあるかも確認して。\n</code></pre>\n<h3>メリット</h3>\n<ul>\n<li>探索用の別コンテキストウィンドウ</li>\n<li>メイン会話をクリーンに保つ</li>\n<li>サブエージェントがコンテキストを散らかさずに結果を報告</li>\n</ul>\n<h3>検証に使う場合</h3>\n<pre><code>サブエージェントを使ってこのコードのエッジケースをレビューして。\n</code></pre>\n<hr>\n<h2>7.4 チェックポイントでリワインド</h2>\n<h3>アクセス方法</h3>\n<ul>\n<li><code>Escape</code>をダブルタップ</li>\n<li><code>/rewind</code>を実行</li>\n</ul>\n<h3>機能</h3>\n<ul>\n<li>会話のみ復元（コード変更は保持）</li>\n<li>コードのみ復元（会話は保持）</li>\n<li>両方復元</li>\n<li>セッションをまたいで永続化</li>\n</ul>\n<p>⚠️ <strong>注意:</strong> Claudeの変更のみ追跡。外部プロセスの変更はgitを使う。</p>\n<hr>\n<h2>7.5 会話を再開する</h2>\n<pre><code class=\"language-bash\">claude --continue    # 最新の会話を再開\nclaude --resume      # 最近の会話から選択\n</code></pre>\n<h3>セッションの命名</h3>\n<pre><code class=\"language-bash\">/rename &quot;oauth-migration&quot;\n/rename &quot;debugging-memory-leak&quot;\n</code></pre>\n<blockquote>\n<p>セッションをブランチのように使う—異なるワークストリーム用に永続的なコンテキストを持たせる。</p>\n</blockquote>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「コンテキストは貴重なリソース。賢く管理せよ」</p>\n</blockquote>\n<p>セッション管理は、Claude Codeのパフォーマンスを最大化する鍵。<code>/clear</code>で定期的にリセットし、サブエージェントで調査を委任し、チェックポイントを活用して安全に実験しよう。</p>\n","ベストプラクティス/08_自動化とスケーリング.md":"<h1>自動化とスケーリング</h1>\n<h2>概要</h2>\n<p>Claude Codeは単なる対話ツールではない。CI/CD、プリコミットフック、スクリプトに組み込んで自動化できる。複数のセッションを並列実行することで、開発速度を大幅に向上させられる。</p>\n<hr>\n<h2>8.1 ヘッドレスモードで実行</h2>\n<pre><code class=\"language-bash\"># ワンオフクエリ\nclaude -p &quot;このプロジェクトが何をしているか説明して&quot;\n\n# スクリプト用の構造化出力\nclaude -p &quot;すべてのAPIエンドポイントをリストして&quot; --output-format json\n\n# リアルタイム処理用ストリーミング\nclaude -p &quot;このログファイルを分析して&quot; --output-format stream-json\n</code></pre>\n<h3>出力フォーマット</h3>\n<ul>\n<li>プレーンテキスト</li>\n<li>JSON</li>\n<li>ストリーミングJSON</li>\n</ul>\n<hr>\n<h2>8.2 複数のClaudeセッションを実行</h2>\n<h3>2つのアプローチ</h3>\n<ol>\n<li><p><strong>Claude Desktop</strong> - 複数のローカルセッションを視覚的に管理</p>\n<ul>\n<li>各セッションが分離されたワークツリーを持つ</li>\n</ul>\n</li>\n<li><p><strong>Claude Code on the Web</strong> - クラウドインフラ</p>\n<ul>\n<li>Anthropicのセキュアなインフラで実行</li>\n<li>分離されたVM</li>\n</ul>\n</li>\n</ol>\n<h3>品質ワークフロー - Writer/Reviewerパターン</h3>\n<p><strong>セッションA（Writer）:</strong></p>\n<pre><code>APIエンドポイントにレートリミッターを実装して\n</code></pre>\n<p><strong>セッションB（Reviewer）:</strong></p>\n<pre><code>@src/middleware/rateLimiter.ts のレートリミッター実装をレビューして。\nエッジケース、レース条件、既存のミドルウェアパターンとの一貫性を確認して。\n</code></pre>\n<p><strong>セッションA（対応）:</strong></p>\n<pre><code>レビューのフィードバック: [セッションBの出力]。これらの問題に対処して。\n</code></pre>\n<h3>代替パターン</h3>\n<ul>\n<li>一方のClaudeがテストを書き、もう一方がそれをパスするコードを書く</li>\n<li>コードレビュー用のフレッシュなコンテキスト（書いた時のバイアスなし）</li>\n</ul>\n<hr>\n<h2>8.3 ファイル全体にファンアウト</h2>\n<h3>大規模なマイグレーション/分析向け</h3>\n<p><strong>Step 1:</strong> タスクリストを生成</p>\n<pre><code class=\"language-bash\">マイグレーションが必要な2,000個のPythonファイルをすべてリストして\n</code></pre>\n<p><strong>Step 2:</strong> ループスクリプトを作成</p>\n<pre><code class=\"language-bash\">for file in $(cat files.txt); do\n  claude -p &quot;$file をReactからVueにマイグレート。OKまたはFAILを返して&quot; \\\n    --allowedTools &quot;Edit,Bash(git commit:*)&quot;\ndone\n</code></pre>\n<p><strong>Step 3:</strong> 数ファイルでテストしてからスケール</p>\n<ul>\n<li>最初の2-3ファイルでプロンプトを改良</li>\n<li><code>--allowedTools</code>で無人実行用にフルセットを実行</li>\n</ul>\n<h3>結果をパイプ</h3>\n<pre><code class=\"language-bash\">claude -p &quot;&lt;プロンプト&gt;&quot; --output-format json | your_command\n</code></pre>\n<h3>デバッグ</h3>\n<pre><code class=\"language-bash\">--verbose  # 詳細を表示（開発時）\n</code></pre>\n<hr>\n<h2>8.4 安全な自律モード</h2>\n<pre><code class=\"language-bash\">claude --dangerously-skip-permissions\n</code></pre>\n<h3>ユースケース</h3>\n<ul>\n<li>リントエラーの修正</li>\n<li>ボイラープレートの生成</li>\n</ul>\n<h3>リスク</h3>\n<ul>\n<li>データ損失、システム破損、データ流出</li>\n<li>インターネットなしのコンテナでのみ使用</li>\n</ul>\n<h3>より安全な代替</h3>\n<p>代わりに<code>/sandbox</code>でサンドボックスを使用。</p>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「Claude Codeは対話ツールを超えた自動化プラットフォーム」</p>\n</blockquote>\n<p>ヘッドレスモード、並列セッション、ファンアウトパターン—これらを組み合わせることで、開発ワークフローを大幅に効率化できる。</p>\n","ベストプラクティス/09_よくある失敗パターンを避ける.md":"<h1>よくある失敗パターンを避ける</h1>\n<h2>概要</h2>\n<p>Claude Codeを使っていると、誰もが陥りがちな失敗パターンがある。これらを認識し、事前に対策することで、より効果的にClaudeを活用できる。</p>\n<hr>\n<h2>失敗パターン一覧</h2>\n<table>\n<thead>\n<tr>\n<th>パターン</th>\n<th>問題</th>\n<th>解決策</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>キッチンシンク・セッション</strong></td>\n<td>無関係なタスクがコンテキストをノイズで埋める</td>\n<td>無関係なタスク間で<code>/clear</code>を実行</td>\n</tr>\n<tr>\n<td><strong>繰り返しの修正</strong></td>\n<td>失敗したアプローチがコンテキストを汚染</td>\n<td>2回失敗したら: <code>/clear</code> + より良いプロンプト</td>\n</tr>\n<tr>\n<td><strong>過剰なCLAUDE.md</strong></td>\n<td>長いファイルで重要なルールが無視される</td>\n<td>容赦なく削減、自明なプラクティスは削除</td>\n</tr>\n<tr>\n<td><strong>信頼してから検証のギャップ</strong></td>\n<td>もっともらしいコードにエッジケースのバグ</td>\n<td>常に検証を提供（テスト、スクリプト、スクリーンショット）</td>\n</tr>\n<tr>\n<td><strong>無限の探索</strong></td>\n<td>調査プロンプトが数百のファイルを読む</td>\n<td>スコープを狭くするか、サブエージェントを使う</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>詳細解説</h2>\n<h3>キッチンシンク・セッション</h3>\n<pre><code>悪い例:\n「ログイン機能を実装して」→ 完了\n「データベースのバックアップスクリプトを書いて」→ 完了\n「CSSのバグを直して」→ コンテキストがごちゃ混ぜ\n</code></pre>\n<pre><code>良い例:\n「ログイン機能を実装して」→ 完了\n/clear\n「データベースのバックアップスクリプトを書いて」→ 完了\n/clear\n「CSSのバグを直して」\n</code></pre>\n<h3>繰り返しの修正</h3>\n<pre><code>悪い例:\n「ES Modulesを使って」→ CommonJSで書かれる\n「だからES Modulesで」→ また間違える\n「import/exportを使って」→ まだ間違える...\n</code></pre>\n<pre><code>良い例:\n「ES Modulesを使って」→ CommonJSで書かれる\n「だからES Modulesで」→ まだ間違える\n\n/clear\n\n「ES Modules構文（import/export）でモジュールを書いて。\nrequire()は絶対に使わないこと。\n例: import { foo } from &#39;./bar.js&#39;」\n</code></pre>\n<h3>過剰なCLAUDE.md</h3>\n<pre><code>悪い例:\n# コードスタイル\n- インデントは2スペース\n- セミコロンを使う\n- シングルクォートを使う\n- ... (50行続く)\n</code></pre>\n<pre><code>良い例:\n# 重要なルール\n- ES Modules構文を使用（CommonJS禁止）\n- テストは`npm test -- --watch=false`で実行\n</code></pre>\n<h3>信頼してから検証のギャップ</h3>\n<pre><code>悪い例:\n「メールバリデーション関数を書いて」\n→ 実装を受け取る\n→ そのまま使う\n→ 本番で「user@.com」が通ってしまう\n</code></pre>\n<pre><code>良い例:\n「メールバリデーション関数を書いて。\nテストケース:\n- user@example.com → true\n- invalid → false\n- user@.com → false\n\nテストを書いて実行して」\n</code></pre>\n<h3>無限の探索</h3>\n<pre><code>悪い例:\n「このコードベースを調査して、問題点を報告して」\n→ 何百ものファイルを読み始める\n</code></pre>\n<pre><code>良い例:\n「src/auth/ディレクトリを調査して、\nセキュリティ上の懸念点を報告して」\n\nまたは:\n\n「サブエージェントを使って認証モジュールを調査して。\n特にトークン処理に焦点を当てて」\n</code></pre>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「失敗パターンを知ることは、成功パターンを知ることと同じくらい重要」</p>\n</blockquote>\n<p>キッチンシンク・セッション、繰り返しの修正、過剰なCLAUDE.md、検証の欠如、無限の探索—これらの失敗パターンを認識し、事前に対策しよう。</p>\n","ベストプラクティス/10_直感を養う.md":"<h1>直感を養う</h1>\n<h2>概要</h2>\n<p><strong>ルールは絶対ではない。</strong> 時間をかけて、以下の直感を養おう:</p>\n<ul>\n<li>いつコンテキストを蓄積し、いつクリアすべきか</li>\n<li>いつ計画し、いつ探索すべきか</li>\n<li>いつ具体的に、いつ曖昧に指示すべきか</li>\n<li>いつ手を動かし、いつ任せるべきか</li>\n</ul>\n<hr>\n<h2>時にはルールを破る</h2>\n<h3>コンテキストを蓄積させるべき時</h3>\n<blockquote>\n<p>通常: 無関係なタスク間で<code>/clear</code></p>\n</blockquote>\n<p><strong>例外</strong>: 1つの複雑な問題を深く掘り下げている時、履歴は価値がある。</p>\n<h3>計画をスキップすべき時</h3>\n<blockquote>\n<p>通常: 探索 → 計画 → 実装</p>\n</blockquote>\n<p><strong>例外</strong>: タスクが探索的で、結果が予測できない場合。</p>\n<h3>曖昧なプロンプトを使うべき時</h3>\n<blockquote>\n<p>通常: 具体的なプロンプトが具体的な結果を生む</p>\n</blockquote>\n<p><strong>例外</strong>: Claudeの解釈を見てから制約を加えたい場合。</p>\n<hr>\n<h2>観察から学ぶ</h2>\n<h3>素晴らしい出力が得られた時</h3>\n<p>何を違うようにしたか気づく:</p>\n<ul>\n<li>プロンプトの構造</li>\n<li>提供したコンテキスト</li>\n<li>セッションの状態</li>\n</ul>\n<h3>Claudeが苦戦している時</h3>\n<p>なぜかを考える:</p>\n<ul>\n<li>ノイズの多いコンテキスト？</li>\n<li>曖昧なプロンプト？</li>\n<li>大きすぎるタスク？</li>\n</ul>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「ルールを知り、いつ破るかを知れ」</p>\n</blockquote>\n<p>このガイドのパターンは出発点。最終的には、あなた自身のワークフローに最適化されたアプローチを見つけることが目標だ。</p>\n"};</script>
+<script>window.__ARTICLES__ = {"ベストプラクティス/01_検証方法を提供する.md":"<h1>検証方法を提供する</h1>\n<h2>概要</h2>\n<p>Claude Codeを使う上で、最も効果を発揮する単一のアドバイス。それは「Claudeが自分の作業を検証できる方法を与える」ということである。</p>\n<p>テストを実行させる、スクリーンショットを比較させる、出力を検証させる。明確な成功基準がなければ、見た目は正しくても動かないコードを生成してしまう可能性がある。</p>\n<hr>\n<h2>なぜ検証が重要なのか</h2>\n<h3>自律的な品質保証</h3>\n<p>Claudeは指示されたタスクを実行する際、自分自身で結果を確認できると、劇的にパフォーマンスが向上する。これは人間のエンジニアが「書いたコードをテストする」のと同じ理由だ。</p>\n<blockquote>\n<p>検証なしでは、Claudeは「それっぽいもの」を作ることはできても、「確実に動くもの」を作ることは難しい。</p>\n</blockquote>\n<h3>フィードバックループの確立</h3>\n<p>検証を組み込むことで、以下のサイクルが回る：</p>\n<ol>\n<li><strong>実装</strong> → コードを書く</li>\n<li><strong>検証</strong> → テストを実行する</li>\n<li><strong>修正</strong> → 失敗した部分を直す</li>\n<li><strong>再検証</strong> → 再度テストを実行する</li>\n</ol>\n<hr>\n<h2>具体的な改善例</h2>\n<h3>検証基準を提供する</h3>\n<table>\n<thead>\n<tr>\n<th>改善前</th>\n<th>改善後</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>「メールアドレスを検証する関数を実装して」</td>\n<td>「validateEmail関数を書いて。テストケース: <code>test@example.com</code>はtrue、<code>invalid</code>はfalse、<code>@missing.com</code>はfalse。実装後にテストを実行して」</td>\n</tr>\n</tbody></table>\n<h3>UI変更を視覚的に検証する</h3>\n<table>\n<thead>\n<tr>\n<th>改善前</th>\n<th>改善後</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>「ダッシュボードをもっと良くして」</td>\n<td>「[スクリーンショットを貼り付け] このデザインを実装して。結果のスクリーンショットを撮って元と比較し、差分をリストアップして修正して」</td>\n</tr>\n</tbody></table>\n<h3>根本原因に対処する</h3>\n<table>\n<thead>\n<tr>\n<th>改善前</th>\n<th>改善後</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>「ビルドが失敗してる」</td>\n<td>「このエラーでビルドが失敗してる: [エラーを貼り付け]。修正してビルドが成功することを確認して。エラーを抑制するんじゃなく、根本原因に対処して」</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>実践的なヒント</h2>\n<h3>1. テストファイルを指定する</h3>\n<pre><code>「src/utils/validation.ts に変更を加えたら、\n対応する src/utils/validation.test.ts のテストを実行して\nすべてパスすることを確認して」\n</code></pre>\n<h3>2. ビルドコマンドを明示する</h3>\n<pre><code>「変更を加えたら npm run build を実行して、\n型エラーがないことを確認して」\n</code></pre>\n<h3>3. 期待する出力を示す</h3>\n<pre><code>「このAPIエンドポイントは以下のJSONを返すべき:\n{\n  &quot;status&quot;: &quot;success&quot;,\n  &quot;data&quot;: { ... }\n}\n実際にcurlで叩いて確認して」\n</code></pre>\n<hr>\n<h2>よくある落とし穴</h2>\n<h3>「動いてるように見える」罠</h3>\n<p>検証基準を与えないと、Claudeは以下のような状態で完了と判断してしまうことがある：</p>\n<ul>\n<li>構文エラーはないが、ロジックが間違っている</li>\n<li>一見正しいが、エッジケースで失敗する</li>\n<li>型は通るが、実行時にクラッシュする</li>\n</ul>\n<h3>対策</h3>\n<ul>\n<li><strong>明示的なテストケース</strong>を提供する</li>\n<li><strong>失敗時の挙動</strong>も定義する</li>\n<li><strong>実行して確認</strong>という指示を含める</li>\n</ul>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「Claudeに検証手段を与えよ」</p>\n</blockquote>\n<p>これが、Claude Codeを最大限に活用するための最も重要な原則である。テストの実行、スクリーンショットの比較、出力の検証—これらを指示に組み込むことで、Claudeは自律的に品質を担保しながら作業を進められるようになる。</p>\n","ベストプラクティス/02_探索から計画そして実装へ.md":"<h1>探索から計画、そして実装へ</h1>\n<h2>概要</h2>\n<p>効果的な開発は「調査」と「実装」を分離することから始まる。闇雲にコードを書き始めるのではなく、まず探索し、計画を立て、それから実装に移る。この4段階のワークフローが、間違った問題を解決してしまうリスクを大幅に減らす。</p>\n<hr>\n<h2>4段階ワークフロー</h2>\n<h3>フェーズ1: 探索（プランモード）</h3>\n<p>プランモードに入り、Claudeにファイルを読ませ、変更を加えずに質問に答えさせる。</p>\n<pre><code>claude (プランモード)\n\n質問: 「src/authを読んで、セッションとログインの\n処理方法を理解して。\nあと、シークレット用の環境変数の管理方法も確認して」\n</code></pre>\n<p><strong>ポイント</strong>: この段階では一切変更を加えない。理解に徹する。</p>\n<h3>フェーズ2: 計画</h3>\n<p>Claudeに詳細な実装計画を作成させる。</p>\n<pre><code>質問: 「Google OAuthを追加したい。\nどのファイルを変更する必要がある？\nセッションフローはどうなる？\n計画を作成して」\n</code></pre>\n<p><strong>成果物</strong>: 変更が必要なファイルのリスト、実装の順序、考慮すべきエッジケース</p>\n<h3>フェーズ3: 実装（通常モード）</h3>\n<p>通常モードに戻り、計画に基づいてClaudeにコードを書かせ、検証する。</p>\n<pre><code>質問: 「計画通りにOAuthフローを実装して。\nコールバックハンドラのテストを書いて、\nテストスイートを実行して失敗があれば修正して」\n</code></pre>\n<h3>フェーズ4: コミット</h3>\n<pre><code>質問: 「説明的なメッセージでコミットして、PRを開いて」\n</code></pre>\n<hr>\n<h2>計画をスキップしてもいい場合</h2>\n<p>以下のような単純で明確な修正の場合は、直接実行を依頼してOK：</p>\n<ul>\n<li><strong>タイポの修正</strong></li>\n<li><strong>ログ行の追加</strong></li>\n<li><strong>変数名の変更</strong></li>\n</ul>\n<blockquote>\n<p>計画のオーバーヘッドが価値を持つのは、アプローチが不確実な場合、複数ファイルにまたがる変更、または不慣れなコードを扱う場合。</p>\n</blockquote>\n<hr>\n<h2>プランモードの使い方</h2>\n<h3>基本コマンド</h3>\n<pre><code class=\"language-bash\"># プランモードに入る\n/plan\n\n# 通常モードに戻る\n（プランモードで計画を立てた後、実装開始を指示）\n</code></pre>\n<h3>プランモードでできること</h3>\n<ul>\n<li>ファイルの読み取り</li>\n<li>コードベースの探索</li>\n<li>質問への回答</li>\n<li>計画の作成</li>\n</ul>\n<h3>プランモードでできないこと</h3>\n<ul>\n<li>ファイルの編集</li>\n<li>コマンドの実行（読み取り以外）</li>\n<li>実際の変更</li>\n</ul>\n<hr>\n<h2>実践例: 認証システムの追加</h2>\n<h3>Step 1: 探索</h3>\n<pre><code>/plan\n\n「このプロジェクトの認証の仕組みを調べて。\n- 既存のユーザー管理はある？\n- セッション管理はどうなってる？\n- 使われてる認証ライブラリは？」\n</code></pre>\n<h3>Step 2: 計画</h3>\n<pre><code>「JWTベースの認証を追加したい。計画を立てて：\n1. 必要なパッケージ\n2. 変更するファイル\n3. 実装の順序\n4. テスト戦略」\n</code></pre>\n<h3>Step 3: 実装</h3>\n<pre><code>「計画に従って実装を開始して。\nまずユーザーモデルとauth middlewareから。\n各ステップでテストを実行して」\n</code></pre>\n<hr>\n<h2>なぜこのワークフローが効果的なのか</h2>\n<h3>1. コンテキストの効率的な利用</h3>\n<p>探索フェーズで全体像を把握してから実装に移ることで、手戻りが減る。</p>\n<h3>2. 明確な成功基準</h3>\n<p>計画段階で「何をもって完了とするか」が明確になる。</p>\n<h3>3. 分離された関心事</h3>\n<ul>\n<li>探索 = 理解</li>\n<li>計画 = 設計</li>\n<li>実装 = コーディング</li>\n<li>コミット = 記録</li>\n</ul>\n<p>それぞれの段階で異なる思考モードが必要であり、分離することで各段階に集中できる。</p>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「まず探索し、次に計画し、それから実装せよ」</p>\n</blockquote>\n<p>この原則に従うことで、間違った方向に進むリスクを最小化し、効率的な開発が可能になる。特に複雑なタスクや不慣れなコードベースでは、このワークフローが真価を発揮する。</p>\n","ベストプラクティス/03_具体的なコンテキストを提供する.md":"<h1>具体的なコンテキストを提供する</h1>\n<h2>概要</h2>\n<p>より精密な指示は、より少ない修正で済む結果につながる。曖昧な依頼は曖昧な結果を生み、具体的な依頼は具体的な結果を生む。</p>\n<hr>\n<h2>具体性がもたらす効果</h2>\n<h3>Before と After</h3>\n<table>\n<thead>\n<tr>\n<th>戦略</th>\n<th>改善前</th>\n<th>改善後</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>タスクのスコープを絞る</strong></td>\n<td>「foo.pyにテストを追加して」</td>\n<td>「foo.pyにテストを書いて。ユーザーがログアウトしている場合のエッジケースをカバー。モックは避けて」</td>\n</tr>\n<tr>\n<td><strong>ソースを指定する</strong></td>\n<td>「なぜExecutionFactoryはこんな変なAPIなの？」</td>\n<td>「ExecutionFactoryのgit履歴を調べて、APIがどのように変遷してきたかまとめて」</td>\n</tr>\n<tr>\n<td><strong>既存パターンを参照する</strong></td>\n<td>「カレンダーウィジェットを追加して」</td>\n<td>「ホームページにある既存のウィジェットの実装を見て、パターンを理解して。HotDogWidget.phpが良い例。そのパターンに従って、月を選択して年を前後にページネーションできる新しいカレンダーウィジェットを実装して。コードベースで既に使われているもの以外のライブラリは使わずスクラッチで構築して」</td>\n</tr>\n<tr>\n<td><strong>症状を記述する</strong></td>\n<td>「ログインのバグを直して」</td>\n<td>「セッションタイムアウト後にログインが失敗するとユーザーから報告があった。src/auth/のauthフローを調べて、特にトークンリフレッシュ周り。問題を再現する失敗テストを書いてから修正して」</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>良いプロンプトの構成要素</h2>\n<h3>1. 何をするか（What）</h3>\n<p>具体的なゴールを明示する。</p>\n<pre><code>✗ 「コードを改善して」\n✓ 「validateUserInput関数のエラーハンドリングを追加して」\n</code></pre>\n<h3>2. どこで（Where）</h3>\n<p>対象となるファイルやモジュールを指定する。</p>\n<pre><code>✗ 「認証を修正して」\n✓ 「src/services/auth/tokenRefresh.tsのリフレッシュロジックを修正して」\n</code></pre>\n<h3>3. どのように（How）</h3>\n<p>期待する実装方法やパターンを示す。</p>\n<pre><code>✗ 「テストを書いて」\n✓ 「既存のsrc/tests/のパターンに従って、Jest + Testing Libraryでテストを書いて」\n</code></pre>\n<h3>4. なぜ（Why）</h3>\n<p>背景を共有することで、より適切な判断ができる。</p>\n<pre><code>✗ 「APIレスポンスを変更して」\n✓ 「モバイルアプリのパフォーマンス向上のため、不要なフィールドを削除してレスポンスサイズを減らしたい」\n</code></pre>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「具体的な指示は具体的な結果を生む」</p>\n</blockquote>\n<p>曖昧さを排除し、コンテキストを豊富に提供することで、Claudeはより正確で期待通りの結果を出せる。</p>\n","ベストプラクティス/04_リッチなコンテンツを提供する.md":"<h1>リッチなコンテンツを提供する</h1>\n<h2>概要</h2>\n<p>テキストだけでなく、ファイル参照、画像、URL、パイプ入力—あらゆる形式でコンテキストを提供できる。</p>\n<hr>\n<h2>コンテンツ提供の方法</h2>\n<h3><code>@</code>でファイルを参照</h3>\n<p>場所を説明する代わりに、ファイルを直接参照する。</p>\n<pre><code>@src/auth/handlers.ts\n@README.md\n</code></pre>\n<p>Claudeは応答前にファイルを読み込む。</p>\n<h3>画像を直接貼り付け</h3>\n<ul>\n<li><strong>コピー&amp;ペースト</strong>: スクリーンショットをそのまま貼り付け</li>\n<li><strong>ドラッグ&amp;ドロップ</strong>: 画像ファイルをプロンプトにドロップ</li>\n</ul>\n<h3>URLを提供</h3>\n<p>ドキュメントのURLを与える。<code>/permissions</code>でドメインを許可リストに追加できる。</p>\n<pre><code>「このドキュメントを参考に実装して:\nhttps://docs.example.com/api/v2」\n</code></pre>\n<h3>パイプでデータを渡す</h3>\n<pre><code class=\"language-bash\">cat error.log | claude\n</code></pre>\n<p>ファイル内容を直接送信できる。</p>\n<h3>Claudeに自分で取得させる</h3>\n<p>Bashコマンド、MCPツール、ファイル読み取りを使って、Claudeに必要なコンテキストを自分で収集させることもできる。</p>\n<pre><code>「src/configディレクトリを読んで、\n設定の構造を理解してから作業を開始して」\n</code></pre>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「リッチなコンテキストがリッチな結果を生む」</p>\n</blockquote>\n<p>テキストだけでなく、ファイル参照、画像、URL、パイプ入力を組み合わせることで、Claudeに必要なすべてのコンテキストを提供できる。</p>\n","ベストプラクティス/05_環境を設定する.md":"<h1>環境を設定する</h1>\n<h2>概要</h2>\n<p>Claude Codeは高度にカスタマイズ可能。CLAUDE.md、パーミッション、MCPサーバー、カスタムコマンド、プラグイン、フック、サブエージェント、スキル—これらを適切に設定することで、あなたのワークフローに最適化された開発環境を構築できる。</p>\n<hr>\n<h2>5.1 効果的なCLAUDE.mdを書く</h2>\n<h3>スターターファイルを生成</h3>\n<pre><code class=\"language-bash\">/init\n</code></pre>\n<h3>CLAUDE.mdの例</h3>\n<pre><code class=\"language-markdown\"># コードスタイル\n- ES modules構文（import/export）を使用、CommonJS（require）は使わない\n- importはできるだけ分割代入する（例: import { foo } from &#39;bar&#39;）\n\n# ワークフロー\n- コード変更の一連の作業が終わったら必ず型チェックを実行\n- パフォーマンスのため、テストスイート全体ではなく単一テストを優先\n</code></pre>\n<h3>含めるべきもの</h3>\n<p>✅ <strong>含める:</strong></p>\n<ul>\n<li>Claudeが推測できないBashコマンド</li>\n<li>デフォルトと異なるコードスタイルルール</li>\n<li>テスト実行の指示と好みのテストランナー</li>\n<li>リポジトリのエチケット（ブランチ命名、PRの慣習）</li>\n<li>プロジェクト固有のアーキテクチャ決定</li>\n<li>開発環境の癖（必須の環境変数など）</li>\n<li>よくある落とし穴や非自明な挙動</li>\n</ul>\n<p>❌ <strong>含めない:</strong></p>\n<ul>\n<li>コードを読めばわかること</li>\n<li>Claudeがすでに知っている標準的な言語の慣習</li>\n<li>詳細なAPIドキュメント（代わりにリンクを貼る）</li>\n<li>頻繁に変わる情報</li>\n<li>長い説明やチュートリアル</li>\n<li>「きれいなコードを書く」のような自明なプラクティス</li>\n</ul>\n<h3>追加ファイルのインポート</h3>\n<pre><code class=\"language-markdown\">プロジェクト概要は @README.md、npmコマンドは @package.json を参照。\n\n# 追加指示\n- Git ワークフロー: @docs/git-instructions.md\n- 個人設定: @~/.claude/my-project-instructions.md\n</code></pre>\n<h3>CLAUDE.mdの配置場所</h3>\n<table>\n<thead>\n<tr>\n<th>場所</th>\n<th>用途</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>~/.claude/CLAUDE.md</code></td>\n<td>すべてのセッションに適用</td>\n</tr>\n<tr>\n<td><code>./CLAUDE.md</code></td>\n<td>プロジェクトルート（gitにコミット、またはチームと共有、または<code>CLAUDE.local.md</code>として.gitignore）</td>\n</tr>\n<tr>\n<td>親ディレクトリ</td>\n<td>モノレポで便利</td>\n</tr>\n<tr>\n<td>子ディレクトリ</td>\n<td>Claudeがオンデマンドで読み込み</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>5.2 パーミッションの設定</h2>\n<pre><code class=\"language-bash\">/permissions\n</code></pre>\n<p>2つのアプローチ:</p>\n<ul>\n<li><strong>パーミッション許可リスト</strong>: 安全とわかっている特定のツールを許可</li>\n<li><strong>サンドボックス</strong>: OSレベルの分離を有効化</li>\n</ul>\n<h3>危険なコマンド（注意）</h3>\n<pre><code class=\"language-bash\">claude --dangerously-skip-permissions\n</code></pre>\n<p>⚠️ インターネットアクセスのないサンドボックスでのみ使用。</p>\n<hr>\n<h2>5.3 CLIツールの活用</h2>\n<p>Claudeに以下のCLIツールを使わせる:</p>\n<ul>\n<li><code>gh</code> - GitHub CLI</li>\n<li><code>aws</code> - AWS CLI</li>\n<li><code>gcloud</code> - Google Cloud CLI</li>\n<li><code>sentry-cli</code> - Sentry CLI</li>\n</ul>\n<p>プロンプト例:</p>\n<pre><code>&#39;foo-cli-tool --help&#39;を使ってfooツールについて学び、それを使ってA、B、Cを解決して。\n</code></pre>\n<hr>\n<h2>5.4 MCPサーバーの接続</h2>\n<pre><code class=\"language-bash\">claude mcp add\n</code></pre>\n<p>以下と統合可能:</p>\n<ul>\n<li>Notion</li>\n<li>Figma</li>\n<li>データベース</li>\n<li>モニタリングツール</li>\n<li>Issueトラッカー</li>\n</ul>\n<hr>\n<h2>5.5 カスタムスラッシュコマンド</h2>\n<p><strong>場所:</strong> <code>.claude/commands/</code>（プロジェクト）または <code>~/.claude/commands/</code>（グローバル）</p>\n<h3>例: .claude/commands/fix-github-issue.md</h3>\n<pre><code class=\"language-markdown\">---\ndescription: GitHub issueを修正\n---\nGitHub issue: $ARGUMENTS を分析して修正してください。\n\n以下の手順に従ってください:\n1. `gh issue view`でissueの詳細を取得\n2. issueに記述された問題を理解\n3. 関連ファイルをコードベースから検索\n4. 問題を修正するために必要な変更を実装\n5. 修正を検証するテストを書いて実行\n6. リントと型チェックをパス\n7. 説明的なコミットメッセージを作成\n8. プッシュしてPRを作成\n</code></pre>\n<p><strong>使用方法:</strong></p>\n<pre><code class=\"language-bash\">/fix-github-issue 1234\n</code></pre>\n<p><strong>特殊キーワード:</strong></p>\n<ul>\n<li><code>$ARGUMENTS</code> - すべてのパラメータを渡す</li>\n<li><code>$1</code>, <code>$2</code>, etc. - 位置引数</li>\n</ul>\n<hr>\n<h2>5.6 プラグインのインストール</h2>\n<pre><code class=\"language-bash\">/plugin\n</code></pre>\n<p>マーケットプレイスで事前構築された機能を閲覧:</p>\n<ul>\n<li>特定ワークフロー用のカスタムコマンド</li>\n<li>事前設定済みのMCPサーバー</li>\n<li>専門化されたサブエージェント</li>\n<li>ドメイン知識スキル</li>\n</ul>\n<hr>\n<h2>5.7 フックの設定</h2>\n<pre><code class=\"language-bash\">/hooks\n</code></pre>\n<p>ワークフローの特定のポイントでスクリプトを自動実行:</p>\n<p><strong>ユースケース:</strong></p>\n<ul>\n<li>編集後の自動フォーマット</li>\n<li>変更ファイルのリント</li>\n<li>機密ファイルへの変更をブロック</li>\n<li>すべてのコマンドをログ</li>\n<li>Claudeが待機中に通知</li>\n</ul>\n<p><strong>プロンプト例:</strong></p>\n<pre><code>ファイル編集後にeslintを実行するフックを書いて\nmigrationsフォルダへの書き込みをブロックするフックを書いて\n</code></pre>\n<p><strong>設定方法:</strong></p>\n<ul>\n<li>インタラクティブ: <code>/hooks</code></li>\n<li>手動: <code>.claude/settings.json</code>を編集</li>\n</ul>\n<h3>フックとCLAUDE.mdの使い分け</h3>\n<table>\n<thead>\n<tr>\n<th>機能</th>\n<th>特徴</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>フック</strong></td>\n<td>決定論的制御（必ず実行される）</td>\n</tr>\n<tr>\n<td><strong>CLAUDE.md</strong></td>\n<td>アドバイス的ガイダンス（判断ベース）</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>5.8 カスタムサブエージェント</h2>\n<p><strong>場所:</strong> <code>.claude/agents/</code></p>\n<h3>例: .claude/agents/security-reviewer.md</h3>\n<pre><code class=\"language-markdown\">---\nname: security-reviewer\ndescription: セキュリティ脆弱性のコードレビュー\ntools: Read, Grep, Glob, Bash\nmodel: opus\n---\nあなたはシニアセキュリティエンジニアです。以下の観点でコードをレビューしてください:\n- インジェクション脆弱性（SQL、XSS、コマンドインジェクション）\n- 認証・認可の欠陥\n- コード内のシークレットや認証情報\n- 安全でないデータ処理\n\n具体的な行番号の参照と修正案を提供してください。\n</code></pre>\n<p><strong>使用方法:</strong></p>\n<pre><code>サブエージェントを使ってこのコードのセキュリティ問題をレビューして。\n</code></pre>\n<p><strong>ユースケース:</strong></p>\n<ul>\n<li>メイン会話のバイアスなしでコードレビュー</li>\n<li>不慣れなコードの調査</li>\n<li>専門タスク（セキュリティ、ドキュメント、テスト）</li>\n<li>メインエージェントの作業の検証</li>\n</ul>\n<hr>\n<h2>5.9 エージェントスキル</h2>\n<p><strong>場所:</strong> <code>.claude/skills/</code></p>\n<h3>例: .claude/skills/api-conventions.md</h3>\n<pre><code class=\"language-markdown\">---\nname: api-conventions\ndescription: サービスのREST API設計規約\n---\n# API規約\n- URLパスにはケバブケースを使用\n- JSONプロパティにはキャメルケースを使用\n- リストエンドポイントには必ずページネーションを含める\n- URLパスでAPIをバージョニング（/v1/、/v2/）\n</code></pre>\n<h3>機能の使い分け</h3>\n<table>\n<thead>\n<tr>\n<th>機能</th>\n<th>トリガー</th>\n<th>最適な用途</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>CLAUDE.md</td>\n<td>常に読み込み</td>\n<td>グローバルなプロジェクトコンテキスト</td>\n</tr>\n<tr>\n<td>スラッシュコマンド</td>\n<td>明示的な<code>/command</code></td>\n<td>繰り返しワークフロー</td>\n</tr>\n<tr>\n<td>スキル</td>\n<td>コンテキスト（自動）</td>\n<td>ドメイン知識</td>\n</tr>\n<tr>\n<td>サブエージェント</td>\n<td>委任</td>\n<td>分離されたタスク</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「環境設定は一度の投資で継続的なリターンを生む」</p>\n</blockquote>\n<p>CLAUDE.md、パーミッション、フック、カスタムコマンド、サブエージェント、スキル—これらを適切に設定することで、Claude Codeはあなた専用の開発環境に進化する。</p>\n","ベストプラクティス/06_効果的にコミュニケーションする.md":"<h1>効果的にコミュニケーションする</h1>\n<h2>概要</h2>\n<p>Claude Codeとの対話は、シニアエンジニアとの対話と同じように考えよう。コードベースについて質問したり、インタビュー形式で要件を深掘りしたり。効果的なコミュニケーションが、効果的な結果につながる。</p>\n<hr>\n<h2>コードベースについて質問する</h2>\n<h3>シニアエンジニアに聞くように質問する</h3>\n<p>Claudeには、あなたがシニアエンジニアに聞くのと同じ質問ができる:</p>\n<pre><code>- ロギングはどう動いてる？\n- 新しいAPIエンドポイントはどうやって作る？\n- foo.rsの134行目の `async move { ... }` は何をしてる？\n- CustomerOnboardingFlowImplはどんなエッジケースを処理してる？\n- なぜこのコードは333行目で bar() ではなく foo() を呼んでるの？\n</code></pre>\n<h3>質問の種類</h3>\n<h4>アーキテクチャの理解</h4>\n<pre><code>「このプロジェクトのディレクトリ構造を説明して。\n各ディレクトリの役割は？」\n</code></pre>\n<h4>実装の詳細</h4>\n<pre><code>「認証フローを追ってくれる？\nログインからトークン発行までの流れを説明して」\n</code></pre>\n<h4>設計判断の背景</h4>\n<pre><code>「なぜここでReduxを使ってるの？\nContext APIではダメだった理由は？」\n</code></pre>\n<h4>コードの挙動</h4>\n<pre><code>「この再帰関数の終了条件は何？\n無限ループになる可能性は？」\n</code></pre>\n<hr>\n<h2>Claudeにインタビューさせる</h2>\n<h3>大きな機能の場合</h3>\n<p>より大きな機能を作る場合、まずClaudeにインタビューをさせることで、見落としがちなポイントを洗い出せる。</p>\n<pre><code>質問: 「[簡単な説明]を作りたい。AskUserQuestionツールを使って\n詳細にインタビューして。\n\n技術的な実装、UI/UX、エッジケース、懸念点、トレードオフについて\n質問して。明らかな質問はしないで、私が考えていなかった\n難しい部分を掘り下げて。\n\nすべてカバーするまでインタビューを続けて、\nその後完全な仕様書をSPEC.mdに書いて」\n</code></pre>\n<h3>なぜインタビューが効果的か</h3>\n<ol>\n<li><strong>盲点の発見</strong>: 自分では気づかなかった考慮点が見つかる</li>\n<li><strong>要件の明確化</strong>: 曖昧な部分が具体的になる</li>\n<li><strong>実装前の問題発見</strong>: コーディング後ではなく前に問題を発見できる</li>\n</ol>\n<h3>インタビュー後のワークフロー</h3>\n<p>インタビューで仕様が固まったら、新しいセッションを開始して実装に集中:</p>\n<pre><code class=\"language-bash\"># 新しいセッションで\nclaude --continue  # または新規セッション\n\n「SPEC.mdの仕様に従って実装を開始して」\n</code></pre>\n<blockquote>\n<p>新しいセッションを開始することで、実装に完全に集中できるクリーンなコンテキストが得られる。</p>\n</blockquote>\n<hr>\n<h2>質問の仕方のコツ</h2>\n<h3>具体的に聞く</h3>\n<p><strong>悪い例:</strong></p>\n<pre><code>「このコードどう思う？」\n</code></pre>\n<p><strong>良い例:</strong></p>\n<pre><code>「このコードのパフォーマンスは問題ない？\nN+1クエリの可能性は？」\n</code></pre>\n<h3>コンテキストを含める</h3>\n<p><strong>悪い例:</strong></p>\n<pre><code>「バグがある」\n</code></pre>\n<p><strong>良い例:</strong></p>\n<pre><code>「ユーザー登録でメール確認後に500エラーが発生する。\n再現手順: 1) 登録 2) メール確認リンクをクリック 3) エラー」\n</code></pre>\n<h3>期待する回答の形式を示す</h3>\n<pre><code>「このAPIの認証フローを説明して。\nシーケンス図のマークダウン形式で」\n</code></pre>\n<hr>\n<h2>対話のパターン</h2>\n<h3>探索的対話</h3>\n<pre><code>User: 「このプロジェクトの認証の仕組みを教えて」\nClaude: [説明]\nUser: 「JWTトークンの有効期限はどこで設定されてる？」\nClaude: [説明]\nUser: 「リフレッシュトークンの実装はある？」\nClaude: [説明]\n</code></pre>\n<h3>決定支援対話</h3>\n<pre><code>User: 「状態管理にReduxとZustandのどちらを使うべき？」\nClaude: [両方の特徴と推奨]\nUser: 「このプロジェクトの規模だとどちら？」\nClaude: [具体的な推奨]\n</code></pre>\n<h3>実装ガイド対話</h3>\n<pre><code>User: 「新しいAPIエンドポイントの追加方法を教えて」\nClaude: [ステップバイステップの説明]\nUser: 「認証が必要なエンドポイントの場合は？」\nClaude: [追加説明]\n</code></pre>\n<hr>\n<h2>フィードバックループ</h2>\n<h3>早めの軌道修正</h3>\n<p>Claudeの回答が期待と違う場合は、すぐにフィードバックする:</p>\n<pre><code>User: 「そうじゃなくて、クライアント側のバリデーションの話」\n</code></pre>\n<pre><code>User: 「もっと詳しく。特にエラーハンドリングについて」\n</code></pre>\n<pre><code>User: 「シンプルにして。フレームワークは使わないで」\n</code></pre>\n<h3>確認を求める</h3>\n<p>重要な判断の前には確認を求める:</p>\n<pre><code>「この理解で合ってる？\n- ユーザーはメール認証必須\n- セッションは24時間で期限切れ\n- リフレッシュトークンはなし\n\n合ってたら実装を始めて」\n</code></pre>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「シニアエンジニアと話すように対話せよ」</p>\n</blockquote>\n<p>Claude Codeとの効果的なコミュニケーションは、明確な質問、適切なコンテキスト、そしてインタラクティブな対話から生まれる。インタビュー機能を活用して要件を深掘りし、具体的な質問で必要な情報を引き出そう。</p>\n","ベストプラクティス/07_セッションを管理する.md":"<h1>セッションを管理する</h1>\n<h2>概要</h2>\n<p>Claude Codeの最大の制約はコンテキストウィンドウだ。コンテキストが埋まると、パフォーマンスが低下する。セッションを効果的に管理することで、常に最高のパフォーマンスを維持できる。</p>\n<hr>\n<h2>7.1 早期かつ頻繁に軌道修正する</h2>\n<h3>ショートカット</h3>\n<table>\n<thead>\n<tr>\n<th>ショートカット</th>\n<th>動作</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong><code>Esc</code></strong></td>\n<td>Claudeの作業を途中で停止（コンテキストは保持）</td>\n</tr>\n<tr>\n<td><strong><code>Esc + Esc</code></strong> or <strong><code>/rewind</code></strong></td>\n<td>リワインドメニューを開き、会話とコード状態を復元</td>\n</tr>\n<tr>\n<td><strong><code>「それを元に戻して」</code></strong></td>\n<td>Claudeに変更を取り消させる</td>\n</tr>\n<tr>\n<td><strong><code>/clear</code></strong></td>\n<td>無関係なタスク間でコンテキストをリセット</td>\n</tr>\n</tbody></table>\n<h3>ルール</h3>\n<blockquote>\n<p>同じセッションで同じ問題を2回修正したら、<code>/clear</code>して、学んだことを組み込んだより良いプロンプトでやり直す。</p>\n</blockquote>\n<hr>\n<h2>7.2 コンテキストを積極的に管理する</h2>\n<pre><code class=\"language-bash\">/clear                    # コンテキストを完全にリセット\n/compact &lt;instructions&gt;   # 特定のフォーカスで自動圧縮\n</code></pre>\n<h3>自動圧縮</h3>\n<ul>\n<li>コンテキスト制限に近づくとトリガーされる</li>\n<li><strong>保持</strong>: コードパターン、ファイル状態、重要な決定</li>\n<li><strong>削除</strong>: 無関係な会話履歴、ファイル内容、古いコマンド</li>\n</ul>\n<hr>\n<h2>7.3 サブエージェントで調査を委任</h2>\n<pre><code>サブエージェントを使って、認証システムがトークンリフレッシュを\nどう処理しているか調査して。また、再利用すべき既存の\nOAuthユーティリティがあるかも確認して。\n</code></pre>\n<h3>メリット</h3>\n<ul>\n<li>探索用の別コンテキストウィンドウ</li>\n<li>メイン会話をクリーンに保つ</li>\n<li>サブエージェントがコンテキストを散らかさずに結果を報告</li>\n</ul>\n<h3>検証に使う場合</h3>\n<pre><code>サブエージェントを使ってこのコードのエッジケースをレビューして。\n</code></pre>\n<hr>\n<h2>7.4 チェックポイントでリワインド</h2>\n<h3>アクセス方法</h3>\n<ul>\n<li><code>Escape</code>をダブルタップ</li>\n<li><code>/rewind</code>を実行</li>\n</ul>\n<h3>機能</h3>\n<ul>\n<li>会話のみ復元（コード変更は保持）</li>\n<li>コードのみ復元（会話は保持）</li>\n<li>両方復元</li>\n<li>セッションをまたいで永続化</li>\n</ul>\n<p>⚠️ <strong>注意:</strong> Claudeの変更のみ追跡。外部プロセスの変更はgitを使う。</p>\n<hr>\n<h2>7.5 会話を再開する</h2>\n<pre><code class=\"language-bash\">claude --continue    # 最新の会話を再開\nclaude --resume      # 最近の会話から選択\n</code></pre>\n<h3>セッションの命名</h3>\n<pre><code class=\"language-bash\">/rename &quot;oauth-migration&quot;\n/rename &quot;debugging-memory-leak&quot;\n</code></pre>\n<blockquote>\n<p>セッションをブランチのように使う—異なるワークストリーム用に永続的なコンテキストを持たせる。</p>\n</blockquote>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「コンテキストは貴重なリソース。賢く管理せよ」</p>\n</blockquote>\n<p>セッション管理は、Claude Codeのパフォーマンスを最大化する鍵。<code>/clear</code>で定期的にリセットし、サブエージェントで調査を委任し、チェックポイントを活用して安全に実験しよう。</p>\n","ベストプラクティス/08_自動化とスケーリング.md":"<h1>自動化とスケーリング</h1>\n<h2>概要</h2>\n<p>Claude Codeは単なる対話ツールではない。CI/CD、プリコミットフック、スクリプトに組み込んで自動化できる。複数のセッションを並列実行することで、開発速度を大幅に向上させられる。</p>\n<hr>\n<h2>8.1 ヘッドレスモードで実行</h2>\n<pre><code class=\"language-bash\"># ワンオフクエリ\nclaude -p &quot;このプロジェクトが何をしているか説明して&quot;\n\n# スクリプト用の構造化出力\nclaude -p &quot;すべてのAPIエンドポイントをリストして&quot; --output-format json\n\n# リアルタイム処理用ストリーミング\nclaude -p &quot;このログファイルを分析して&quot; --output-format stream-json\n</code></pre>\n<h3>出力フォーマット</h3>\n<ul>\n<li>プレーンテキスト</li>\n<li>JSON</li>\n<li>ストリーミングJSON</li>\n</ul>\n<hr>\n<h2>8.2 複数のClaudeセッションを実行</h2>\n<h3>2つのアプローチ</h3>\n<ol>\n<li><p><strong>Claude Desktop</strong> - 複数のローカルセッションを視覚的に管理</p>\n<ul>\n<li>各セッションが分離されたワークツリーを持つ</li>\n</ul>\n</li>\n<li><p><strong>Claude Code on the Web</strong> - クラウドインフラ</p>\n<ul>\n<li>Anthropicのセキュアなインフラで実行</li>\n<li>分離されたVM</li>\n</ul>\n</li>\n</ol>\n<h3>品質ワークフロー - Writer/Reviewerパターン</h3>\n<p><strong>セッションA（Writer）:</strong></p>\n<pre><code>APIエンドポイントにレートリミッターを実装して\n</code></pre>\n<p><strong>セッションB（Reviewer）:</strong></p>\n<pre><code>@src/middleware/rateLimiter.ts のレートリミッター実装をレビューして。\nエッジケース、レース条件、既存のミドルウェアパターンとの一貫性を確認して。\n</code></pre>\n<p><strong>セッションA（対応）:</strong></p>\n<pre><code>レビューのフィードバック: [セッションBの出力]。これらの問題に対処して。\n</code></pre>\n<h3>代替パターン</h3>\n<ul>\n<li>一方のClaudeがテストを書き、もう一方がそれをパスするコードを書く</li>\n<li>コードレビュー用のフレッシュなコンテキスト（書いた時のバイアスなし）</li>\n</ul>\n<hr>\n<h2>8.3 ファイル全体にファンアウト</h2>\n<h3>大規模なマイグレーション/分析向け</h3>\n<p><strong>Step 1:</strong> タスクリストを生成</p>\n<pre><code class=\"language-bash\">マイグレーションが必要な2,000個のPythonファイルをすべてリストして\n</code></pre>\n<p><strong>Step 2:</strong> ループスクリプトを作成</p>\n<pre><code class=\"language-bash\">for file in $(cat files.txt); do\n  claude -p &quot;$file をReactからVueにマイグレート。OKまたはFAILを返して&quot; \\\n    --allowedTools &quot;Edit,Bash(git commit:*)&quot;\ndone\n</code></pre>\n<p><strong>Step 3:</strong> 数ファイルでテストしてからスケール</p>\n<ul>\n<li>最初の2-3ファイルでプロンプトを改良</li>\n<li><code>--allowedTools</code>で無人実行用にフルセットを実行</li>\n</ul>\n<h3>結果をパイプ</h3>\n<pre><code class=\"language-bash\">claude -p &quot;&lt;プロンプト&gt;&quot; --output-format json | your_command\n</code></pre>\n<h3>デバッグ</h3>\n<pre><code class=\"language-bash\">--verbose  # 詳細を表示（開発時）\n</code></pre>\n<hr>\n<h2>8.4 安全な自律モード</h2>\n<pre><code class=\"language-bash\">claude --dangerously-skip-permissions\n</code></pre>\n<h3>ユースケース</h3>\n<ul>\n<li>リントエラーの修正</li>\n<li>ボイラープレートの生成</li>\n</ul>\n<h3>リスク</h3>\n<ul>\n<li>データ損失、システム破損、データ流出</li>\n<li>インターネットなしのコンテナでのみ使用</li>\n</ul>\n<h3>より安全な代替</h3>\n<p>代わりに<code>/sandbox</code>でサンドボックスを使用。</p>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「Claude Codeは対話ツールを超えた自動化プラットフォーム」</p>\n</blockquote>\n<p>ヘッドレスモード、並列セッション、ファンアウトパターン—これらを組み合わせることで、開発ワークフローを大幅に効率化できる。</p>\n","ベストプラクティス/09_よくある失敗パターンを避ける.md":"<h1>よくある失敗パターンを避ける</h1>\n<h2>概要</h2>\n<p>Claude Codeを使っていると、誰もが陥りがちな失敗パターンがある。これらを認識し、事前に対策することで、より効果的にClaudeを活用できる。</p>\n<hr>\n<h2>失敗パターン一覧</h2>\n<table>\n<thead>\n<tr>\n<th>パターン</th>\n<th>問題</th>\n<th>解決策</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>キッチンシンク・セッション</strong></td>\n<td>無関係なタスクがコンテキストをノイズで埋める</td>\n<td>無関係なタスク間で<code>/clear</code>を実行</td>\n</tr>\n<tr>\n<td><strong>繰り返しの修正</strong></td>\n<td>失敗したアプローチがコンテキストを汚染</td>\n<td>2回失敗したら: <code>/clear</code> + より良いプロンプト</td>\n</tr>\n<tr>\n<td><strong>過剰なCLAUDE.md</strong></td>\n<td>長いファイルで重要なルールが無視される</td>\n<td>容赦なく削減、自明なプラクティスは削除</td>\n</tr>\n<tr>\n<td><strong>信頼してから検証のギャップ</strong></td>\n<td>もっともらしいコードにエッジケースのバグ</td>\n<td>常に検証を提供（テスト、スクリプト、スクリーンショット）</td>\n</tr>\n<tr>\n<td><strong>無限の探索</strong></td>\n<td>調査プロンプトが数百のファイルを読む</td>\n<td>スコープを狭くするか、サブエージェントを使う</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>詳細解説</h2>\n<h3>キッチンシンク・セッション</h3>\n<pre><code>悪い例:\n「ログイン機能を実装して」→ 完了\n「データベースのバックアップスクリプトを書いて」→ 完了\n「CSSのバグを直して」→ コンテキストがごちゃ混ぜ\n</code></pre>\n<pre><code>良い例:\n「ログイン機能を実装して」→ 完了\n/clear\n「データベースのバックアップスクリプトを書いて」→ 完了\n/clear\n「CSSのバグを直して」\n</code></pre>\n<h3>繰り返しの修正</h3>\n<pre><code>悪い例:\n「ES Modulesを使って」→ CommonJSで書かれる\n「だからES Modulesで」→ また間違える\n「import/exportを使って」→ まだ間違える...\n</code></pre>\n<pre><code>良い例:\n「ES Modulesを使って」→ CommonJSで書かれる\n「だからES Modulesで」→ まだ間違える\n\n/clear\n\n「ES Modules構文（import/export）でモジュールを書いて。\nrequire()は絶対に使わないこと。\n例: import { foo } from &#39;./bar.js&#39;」\n</code></pre>\n<h3>過剰なCLAUDE.md</h3>\n<pre><code>悪い例:\n# コードスタイル\n- インデントは2スペース\n- セミコロンを使う\n- シングルクォートを使う\n- ... (50行続く)\n</code></pre>\n<pre><code>良い例:\n# 重要なルール\n- ES Modules構文を使用（CommonJS禁止）\n- テストは`npm test -- --watch=false`で実行\n</code></pre>\n<h3>信頼してから検証のギャップ</h3>\n<pre><code>悪い例:\n「メールバリデーション関数を書いて」\n→ 実装を受け取る\n→ そのまま使う\n→ 本番で「user@.com」が通ってしまう\n</code></pre>\n<pre><code>良い例:\n「メールバリデーション関数を書いて。\nテストケース:\n- user@example.com → true\n- invalid → false\n- user@.com → false\n\nテストを書いて実行して」\n</code></pre>\n<h3>無限の探索</h3>\n<pre><code>悪い例:\n「このコードベースを調査して、問題点を報告して」\n→ 何百ものファイルを読み始める\n</code></pre>\n<pre><code>良い例:\n「src/auth/ディレクトリを調査して、\nセキュリティ上の懸念点を報告して」\n\nまたは:\n\n「サブエージェントを使って認証モジュールを調査して。\n特にトークン処理に焦点を当てて」\n</code></pre>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「失敗パターンを知ることは、成功パターンを知ることと同じくらい重要」</p>\n</blockquote>\n<p>キッチンシンク・セッション、繰り返しの修正、過剰なCLAUDE.md、検証の欠如、無限の探索—これらの失敗パターンを認識し、事前に対策しよう。</p>\n","ベストプラクティス/10_直感を養う.md":"<h1>直感を養う</h1>\n<h2>概要</h2>\n<p><strong>ルールは絶対ではない。</strong> 時間をかけて、以下の直感を養おう:</p>\n<ul>\n<li>いつコンテキストを蓄積し、いつクリアすべきか</li>\n<li>いつ計画し、いつ探索すべきか</li>\n<li>いつ具体的に、いつ曖昧に指示すべきか</li>\n<li>いつ手を動かし、いつ任せるべきか</li>\n</ul>\n<hr>\n<h2>時にはルールを破る</h2>\n<h3>コンテキストを蓄積させるべき時</h3>\n<blockquote>\n<p>通常: 無関係なタスク間で<code>/clear</code></p>\n</blockquote>\n<p><strong>例外</strong>: 1つの複雑な問題を深く掘り下げている時、履歴は価値がある。</p>\n<h3>計画をスキップすべき時</h3>\n<blockquote>\n<p>通常: 探索 → 計画 → 実装</p>\n</blockquote>\n<p><strong>例外</strong>: タスクが探索的で、結果が予測できない場合。</p>\n<h3>曖昧なプロンプトを使うべき時</h3>\n<blockquote>\n<p>通常: 具体的なプロンプトが具体的な結果を生む</p>\n</blockquote>\n<p><strong>例外</strong>: Claudeの解釈を見てから制約を加えたい場合。</p>\n<hr>\n<h2>観察から学ぶ</h2>\n<h3>素晴らしい出力が得られた時</h3>\n<p>何を違うようにしたか気づく:</p>\n<ul>\n<li>プロンプトの構造</li>\n<li>提供したコンテキスト</li>\n<li>セッションの状態</li>\n</ul>\n<h3>Claudeが苦戦している時</h3>\n<p>なぜかを考える:</p>\n<ul>\n<li>ノイズの多いコンテキスト？</li>\n<li>曖昧なプロンプト？</li>\n<li>大きすぎるタスク？</li>\n</ul>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「ルールを知り、いつ破るかを知れ」</p>\n</blockquote>\n<p>このガイドのパターンは出発点。最終的には、あなた自身のワークフローに最適化されたアプローチを見つけることが目標だ。</p>\n"};</script>
+<script>window.__ARTICLES__ = {"ベストプラクティス/01_検証方法を提供する.md":"<h1>検証方法を提供する</h1>\n<h2>概要</h2>\n<p>Claude Codeを使う上で、最も効果を発揮する単一のアドバイス。それは「Claudeが自分の作業を検証できる方法を与える」ということである。</p>\n<p>テストを実行させる、スクリーンショットを比較させる、出力を検証させる。明確な成功基準がなければ、見た目は正しくても動かないコードを生成してしまう可能性がある。</p>\n<hr>\n<h2>なぜ検証が重要なのか</h2>\n<h3>自律的な品質保証</h3>\n<p>Claudeは指示されたタスクを実行する際、自分自身で結果を確認できると、劇的にパフォーマンスが向上する。これは人間のエンジニアが「書いたコードをテストする」のと同じ理由だ。</p>\n<blockquote>\n<p>検証なしでは、Claudeは「それっぽいもの」を作ることはできても、「確実に動くもの」を作ることは難しい。</p>\n</blockquote>\n<h3>フィードバックループの確立</h3>\n<p>検証を組み込むことで、以下のサイクルが回る：</p>\n<ol>\n<li><strong>実装</strong> → コードを書く</li>\n<li><strong>検証</strong> → テストを実行する</li>\n<li><strong>修正</strong> → 失敗した部分を直す</li>\n<li><strong>再検証</strong> → 再度テストを実行する</li>\n</ol>\n<hr>\n<h2>具体的な改善例</h2>\n<h3>検証基準を提供する</h3>\n<table>\n<thead>\n<tr>\n<th>改善前</th>\n<th>改善後</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>「メールアドレスを検証する関数を実装して」</td>\n<td>「validateEmail関数を書いて。テストケース: <code>test@example.com</code>はtrue、<code>invalid</code>はfalse、<code>@missing.com</code>はfalse。実装後にテストを実行して」</td>\n</tr>\n</tbody></table>\n<h3>UI変更を視覚的に検証する</h3>\n<table>\n<thead>\n<tr>\n<th>改善前</th>\n<th>改善後</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>「ダッシュボードをもっと良くして」</td>\n<td>「[スクリーンショットを貼り付け] このデザインを実装して。結果のスクリーンショットを撮って元と比較し、差分をリストアップして修正して」</td>\n</tr>\n</tbody></table>\n<h3>根本原因に対処する</h3>\n<table>\n<thead>\n<tr>\n<th>改善前</th>\n<th>改善後</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>「ビルドが失敗してる」</td>\n<td>「このエラーでビルドが失敗してる: [エラーを貼り付け]。修正してビルドが成功することを確認して。エラーを抑制するんじゃなく、根本原因に対処して」</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>実践的なヒント</h2>\n<h3>1. テストファイルを指定する</h3>\n<pre><code>「src/utils/validation.ts に変更を加えたら、\n対応する src/utils/validation.test.ts のテストを実行して\nすべてパスすることを確認して」\n</code></pre>\n<h3>2. ビルドコマンドを明示する</h3>\n<pre><code>「変更を加えたら npm run build を実行して、\n型エラーがないことを確認して」\n</code></pre>\n<h3>3. 期待する出力を示す</h3>\n<pre><code>「このAPIエンドポイントは以下のJSONを返すべき:\n{\n  &quot;status&quot;: &quot;success&quot;,\n  &quot;data&quot;: { ... }\n}\n実際にcurlで叩いて確認して」\n</code></pre>\n<hr>\n<h2>よくある落とし穴</h2>\n<h3>「動いてるように見える」罠</h3>\n<p>検証基準を与えないと、Claudeは以下のような状態で完了と判断してしまうことがある：</p>\n<ul>\n<li>構文エラーはないが、ロジックが間違っている</li>\n<li>一見正しいが、エッジケースで失敗する</li>\n<li>型は通るが、実行時にクラッシュする</li>\n</ul>\n<h3>対策</h3>\n<ul>\n<li><strong>明示的なテストケース</strong>を提供する</li>\n<li><strong>失敗時の挙動</strong>も定義する</li>\n<li><strong>実行して確認</strong>という指示を含める</li>\n</ul>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「Claudeに検証手段を与えよ」</p>\n</blockquote>\n<p>これが、Claude Codeを最大限に活用するための最も重要な原則である。テストの実行、スクリーンショットの比較、出力の検証—これらを指示に組み込むことで、Claudeは自律的に品質を担保しながら作業を進められるようになる。</p>\n","ベストプラクティス/02_探索から計画そして実装へ.md":"<h1>探索から計画、そして実装へ</h1>\n<h2>概要</h2>\n<p>効果的な開発は「調査」と「実装」を分離することから始まる。闇雲にコードを書き始めるのではなく、まず探索し、計画を立て、それから実装に移る。この4段階のワークフローが、間違った問題を解決してしまうリスクを大幅に減らす。</p>\n<hr>\n<h2>4段階ワークフロー</h2>\n<h3>フェーズ1: 探索（プランモード）</h3>\n<p>プランモードに入り、Claudeにファイルを読ませ、変更を加えずに質問に答えさせる。</p>\n<pre><code>claude (プランモード)\n\n質問: 「src/authを読んで、セッションとログインの\n処理方法を理解して。\nあと、シークレット用の環境変数の管理方法も確認して」\n</code></pre>\n<p><strong>ポイント</strong>: この段階では一切変更を加えない。理解に徹する。</p>\n<h3>フェーズ2: 計画</h3>\n<p>Claudeに詳細な実装計画を作成させる。</p>\n<pre><code>質問: 「Google OAuthを追加したい。\nどのファイルを変更する必要がある？\nセッションフローはどうなる？\n計画を作成して」\n</code></pre>\n<p><strong>成果物</strong>: 変更が必要なファイルのリスト、実装の順序、考慮すべきエッジケース</p>\n<h3>フェーズ3: 実装（通常モード）</h3>\n<p>通常モードに戻り、計画に基づいてClaudeにコードを書かせ、検証する。</p>\n<pre><code>質問: 「計画通りにOAuthフローを実装して。\nコールバックハンドラのテストを書いて、\nテストスイートを実行して失敗があれば修正して」\n</code></pre>\n<h3>フェーズ4: コミット</h3>\n<pre><code>質問: 「説明的なメッセージでコミットして、PRを開いて」\n</code></pre>\n<hr>\n<h2>計画をスキップしてもいい場合</h2>\n<p>以下のような単純で明確な修正の場合は、直接実行を依頼してOK：</p>\n<ul>\n<li><strong>タイポの修正</strong></li>\n<li><strong>ログ行の追加</strong></li>\n<li><strong>変数名の変更</strong></li>\n</ul>\n<blockquote>\n<p>計画のオーバーヘッドが価値を持つのは、アプローチが不確実な場合、複数ファイルにまたがる変更、または不慣れなコードを扱う場合。</p>\n</blockquote>\n<hr>\n<h2>プランモードの使い方</h2>\n<h3>基本コマンド</h3>\n<pre><code class=\"language-bash\"># プランモードに入る\n/plan\n\n# 通常モードに戻る\n（プランモードで計画を立てた後、実装開始を指示）\n</code></pre>\n<h3>プランモードでできること</h3>\n<ul>\n<li>ファイルの読み取り</li>\n<li>コードベースの探索</li>\n<li>質問への回答</li>\n<li>計画の作成</li>\n</ul>\n<h3>プランモードでできないこと</h3>\n<ul>\n<li>ファイルの編集</li>\n<li>コマンドの実行（読み取り以外）</li>\n<li>実際の変更</li>\n</ul>\n<hr>\n<h2>実践例: 認証システムの追加</h2>\n<h3>Step 1: 探索</h3>\n<pre><code>/plan\n\n「このプロジェクトの認証の仕組みを調べて。\n- 既存のユーザー管理はある？\n- セッション管理はどうなってる？\n- 使われてる認証ライブラリは？」\n</code></pre>\n<h3>Step 2: 計画</h3>\n<pre><code>「JWTベースの認証を追加したい。計画を立てて：\n1. 必要なパッケージ\n2. 変更するファイル\n3. 実装の順序\n4. テスト戦略」\n</code></pre>\n<h3>Step 3: 実装</h3>\n<pre><code>「計画に従って実装を開始して。\nまずユーザーモデルとauth middlewareから。\n各ステップでテストを実行して」\n</code></pre>\n<hr>\n<h2>なぜこのワークフローが効果的なのか</h2>\n<h3>1. コンテキストの効率的な利用</h3>\n<p>探索フェーズで全体像を把握してから実装に移ることで、手戻りが減る。</p>\n<h3>2. 明確な成功基準</h3>\n<p>計画段階で「何をもって完了とするか」が明確になる。</p>\n<h3>3. 分離された関心事</h3>\n<ul>\n<li>探索 = 理解</li>\n<li>計画 = 設計</li>\n<li>実装 = コーディング</li>\n<li>コミット = 記録</li>\n</ul>\n<p>それぞれの段階で異なる思考モードが必要であり、分離することで各段階に集中できる。</p>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「まず探索し、次に計画し、それから実装せよ」</p>\n</blockquote>\n<p>この原則に従うことで、間違った方向に進むリスクを最小化し、効率的な開発が可能になる。特に複雑なタスクや不慣れなコードベースでは、このワークフローが真価を発揮する。</p>\n","ベストプラクティス/03_具体的なコンテキストを提供する.md":"<h1>具体的なコンテキストを提供する</h1>\n<h2>概要</h2>\n<p>より精密な指示は、より少ない修正で済む結果につながる。曖昧な依頼は曖昧な結果を生み、具体的な依頼は具体的な結果を生む。</p>\n<hr>\n<h2>具体性がもたらす効果</h2>\n<h3>Before と After</h3>\n<table>\n<thead>\n<tr>\n<th>戦略</th>\n<th>改善前</th>\n<th>改善後</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>タスクのスコープを絞る</strong></td>\n<td>「foo.pyにテストを追加して」</td>\n<td>「foo.pyにテストを書いて。ユーザーがログアウトしている場合のエッジケースをカバー。モックは避けて」</td>\n</tr>\n<tr>\n<td><strong>ソースを指定する</strong></td>\n<td>「なぜExecutionFactoryはこんな変なAPIなの？」</td>\n<td>「ExecutionFactoryのgit履歴を調べて、APIがどのように変遷してきたかまとめて」</td>\n</tr>\n<tr>\n<td><strong>既存パターンを参照する</strong></td>\n<td>「カレンダーウィジェットを追加して」</td>\n<td>「ホームページにある既存のウィジェットの実装を見て、パターンを理解して。HotDogWidget.phpが良い例。そのパターンに従って、月を選択して年を前後にページネーションできる新しいカレンダーウィジェットを実装して。コードベースで既に使われているもの以外のライブラリは使わずスクラッチで構築して」</td>\n</tr>\n<tr>\n<td><strong>症状を記述する</strong></td>\n<td>「ログインのバグを直して」</td>\n<td>「セッションタイムアウト後にログインが失敗するとユーザーから報告があった。src/auth/のauthフローを調べて、特にトークンリフレッシュ周り。問題を再現する失敗テストを書いてから修正して」</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>良いプロンプトの構成要素</h2>\n<h3>1. 何をするか（What）</h3>\n<p>具体的なゴールを明示する。</p>\n<pre><code>✗ 「コードを改善して」\n✓ 「validateUserInput関数のエラーハンドリングを追加して」\n</code></pre>\n<h3>2. どこで（Where）</h3>\n<p>対象となるファイルやモジュールを指定する。</p>\n<pre><code>✗ 「認証を修正して」\n✓ 「src/services/auth/tokenRefresh.tsのリフレッシュロジックを修正して」\n</code></pre>\n<h3>3. どのように（How）</h3>\n<p>期待する実装方法やパターンを示す。</p>\n<pre><code>✗ 「テストを書いて」\n✓ 「既存のsrc/tests/のパターンに従って、Jest + Testing Libraryでテストを書いて」\n</code></pre>\n<h3>4. なぜ（Why）</h3>\n<p>背景を共有することで、より適切な判断ができる。</p>\n<pre><code>✗ 「APIレスポンスを変更して」\n✓ 「モバイルアプリのパフォーマンス向上のため、不要なフィールドを削除してレスポンスサイズを減らしたい」\n</code></pre>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「具体的な指示は具体的な結果を生む」</p>\n</blockquote>\n<p>曖昧さを排除し、コンテキストを豊富に提供することで、Claudeはより正確で期待通りの結果を出せる。</p>\n","ベストプラクティス/04_リッチなコンテンツを提供する.md":"<h1>リッチなコンテンツを提供する</h1>\n<h2>概要</h2>\n<p>テキストだけでなく、ファイル参照、画像、URL、パイプ入力—あらゆる形式でコンテキストを提供できる。</p>\n<hr>\n<h2>コンテンツ提供の方法</h2>\n<h3><code>@</code>でファイルを参照</h3>\n<p>場所を説明する代わりに、ファイルを直接参照する。</p>\n<pre><code>@src/auth/handlers.ts\n@README.md\n</code></pre>\n<p>Claudeは応答前にファイルを読み込む。</p>\n<h3>画像を直接貼り付け</h3>\n<ul>\n<li><strong>コピー&amp;ペースト</strong>: スクリーンショットをそのまま貼り付け</li>\n<li><strong>ドラッグ&amp;ドロップ</strong>: 画像ファイルをプロンプトにドロップ</li>\n</ul>\n<h3>URLを提供</h3>\n<p>ドキュメントのURLを与える。<code>/permissions</code>でドメインを許可リストに追加できる。</p>\n<pre><code>「このドキュメントを参考に実装して:\nhttps://docs.example.com/api/v2」\n</code></pre>\n<h3>パイプでデータを渡す</h3>\n<pre><code class=\"language-bash\">cat error.log | claude\n</code></pre>\n<p>ファイル内容を直接送信できる。</p>\n<h3>Claudeに自分で取得させる</h3>\n<p>Bashコマンド、MCPツール、ファイル読み取りを使って、Claudeに必要なコンテキストを自分で収集させることもできる。</p>\n<pre><code>「src/configディレクトリを読んで、\n設定の構造を理解してから作業を開始して」\n</code></pre>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「リッチなコンテキストがリッチな結果を生む」</p>\n</blockquote>\n<p>テキストだけでなく、ファイル参照、画像、URL、パイプ入力を組み合わせることで、Claudeに必要なすべてのコンテキストを提供できる。</p>\n","ベストプラクティス/05_環境を設定する.md":"<h1>環境を設定する</h1>\n<h2>概要</h2>\n<p>Claude Codeは高度にカスタマイズ可能。CLAUDE.md、パーミッション、MCPサーバー、カスタムコマンド、プラグイン、フック、サブエージェント、スキル—これらを適切に設定することで、あなたのワークフローに最適化された開発環境を構築できる。</p>\n<hr>\n<h2>5.1 効果的なCLAUDE.mdを書く</h2>\n<h3>スターターファイルを生成</h3>\n<pre><code class=\"language-bash\">/init\n</code></pre>\n<h3>CLAUDE.mdの例</h3>\n<pre><code class=\"language-markdown\"># コードスタイル\n- ES modules構文（import/export）を使用、CommonJS（require）は使わない\n- importはできるだけ分割代入する（例: import { foo } from &#39;bar&#39;）\n\n# ワークフロー\n- コード変更の一連の作業が終わったら必ず型チェックを実行\n- パフォーマンスのため、テストスイート全体ではなく単一テストを優先\n</code></pre>\n<h3>含めるべきもの</h3>\n<p>✅ <strong>含める:</strong></p>\n<ul>\n<li>Claudeが推測できないBashコマンド</li>\n<li>デフォルトと異なるコードスタイルルール</li>\n<li>テスト実行の指示と好みのテストランナー</li>\n<li>リポジトリのエチケット（ブランチ命名、PRの慣習）</li>\n<li>プロジェクト固有のアーキテクチャ決定</li>\n<li>開発環境の癖（必須の環境変数など）</li>\n<li>よくある落とし穴や非自明な挙動</li>\n</ul>\n<p>❌ <strong>含めない:</strong></p>\n<ul>\n<li>コードを読めばわかること</li>\n<li>Claudeがすでに知っている標準的な言語の慣習</li>\n<li>詳細なAPIドキュメント（代わりにリンクを貼る）</li>\n<li>頻繁に変わる情報</li>\n<li>長い説明やチュートリアル</li>\n<li>「きれいなコードを書く」のような自明なプラクティス</li>\n</ul>\n<h3>追加ファイルのインポート</h3>\n<pre><code class=\"language-markdown\">プロジェクト概要は @README.md、npmコマンドは @package.json を参照。\n\n# 追加指示\n- Git ワークフロー: @docs/git-instructions.md\n- 個人設定: @~/.claude/my-project-instructions.md\n</code></pre>\n<h3>CLAUDE.mdの配置場所</h3>\n<table>\n<thead>\n<tr>\n<th>場所</th>\n<th>用途</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>~/.claude/CLAUDE.md</code></td>\n<td>すべてのセッションに適用</td>\n</tr>\n<tr>\n<td><code>./CLAUDE.md</code></td>\n<td>プロジェクトルート（gitにコミット、またはチームと共有、または<code>CLAUDE.local.md</code>として.gitignore）</td>\n</tr>\n<tr>\n<td>親ディレクトリ</td>\n<td>モノレポで便利</td>\n</tr>\n<tr>\n<td>子ディレクトリ</td>\n<td>Claudeがオンデマンドで読み込み</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>5.2 パーミッションの設定</h2>\n<pre><code class=\"language-bash\">/permissions\n</code></pre>\n<p>2つのアプローチ:</p>\n<ul>\n<li><strong>パーミッション許可リスト</strong>: 安全とわかっている特定のツールを許可</li>\n<li><strong>サンドボックス</strong>: OSレベルの分離を有効化</li>\n</ul>\n<h3>危険なコマンド（注意）</h3>\n<pre><code class=\"language-bash\">claude --dangerously-skip-permissions\n</code></pre>\n<p>⚠️ インターネットアクセスのないサンドボックスでのみ使用。</p>\n<hr>\n<h2>5.3 CLIツールの活用</h2>\n<p>Claudeに以下のCLIツールを使わせる:</p>\n<ul>\n<li><code>gh</code> - GitHub CLI</li>\n<li><code>aws</code> - AWS CLI</li>\n<li><code>gcloud</code> - Google Cloud CLI</li>\n<li><code>sentry-cli</code> - Sentry CLI</li>\n</ul>\n<p>プロンプト例:</p>\n<pre><code>&#39;foo-cli-tool --help&#39;を使ってfooツールについて学び、それを使ってA、B、Cを解決して。\n</code></pre>\n<hr>\n<h2>5.4 MCPサーバーの接続</h2>\n<pre><code class=\"language-bash\">claude mcp add\n</code></pre>\n<p>以下と統合可能:</p>\n<ul>\n<li>Notion</li>\n<li>Figma</li>\n<li>データベース</li>\n<li>モニタリングツール</li>\n<li>Issueトラッカー</li>\n</ul>\n<hr>\n<h2>5.5 カスタムスラッシュコマンド</h2>\n<p><strong>場所:</strong> <code>.claude/commands/</code>（プロジェクト）または <code>~/.claude/commands/</code>（グローバル）</p>\n<h3>例: .claude/commands/fix-github-issue.md</h3>\n<pre><code class=\"language-markdown\">---\ndescription: GitHub issueを修正\n---\nGitHub issue: $ARGUMENTS を分析して修正してください。\n\n以下の手順に従ってください:\n1. `gh issue view`でissueの詳細を取得\n2. issueに記述された問題を理解\n3. 関連ファイルをコードベースから検索\n4. 問題を修正するために必要な変更を実装\n5. 修正を検証するテストを書いて実行\n6. リントと型チェックをパス\n7. 説明的なコミットメッセージを作成\n8. プッシュしてPRを作成\n</code></pre>\n<p><strong>使用方法:</strong></p>\n<pre><code class=\"language-bash\">/fix-github-issue 1234\n</code></pre>\n<p><strong>特殊キーワード:</strong></p>\n<ul>\n<li><code>$ARGUMENTS</code> - すべてのパラメータを渡す</li>\n<li><code>$1</code>, <code>$2</code>, etc. - 位置引数</li>\n</ul>\n<hr>\n<h2>5.6 プラグインのインストール</h2>\n<pre><code class=\"language-bash\">/plugin\n</code></pre>\n<p>マーケットプレイスで事前構築された機能を閲覧:</p>\n<ul>\n<li>特定ワークフロー用のカスタムコマンド</li>\n<li>事前設定済みのMCPサーバー</li>\n<li>専門化されたサブエージェント</li>\n<li>ドメイン知識スキル</li>\n</ul>\n<hr>\n<h2>5.7 フックの設定</h2>\n<pre><code class=\"language-bash\">/hooks\n</code></pre>\n<p>ワークフローの特定のポイントでスクリプトを自動実行:</p>\n<p><strong>ユースケース:</strong></p>\n<ul>\n<li>編集後の自動フォーマット</li>\n<li>変更ファイルのリント</li>\n<li>機密ファイルへの変更をブロック</li>\n<li>すべてのコマンドをログ</li>\n<li>Claudeが待機中に通知</li>\n</ul>\n<p><strong>プロンプト例:</strong></p>\n<pre><code>ファイル編集後にeslintを実行するフックを書いて\nmigrationsフォルダへの書き込みをブロックするフックを書いて\n</code></pre>\n<p><strong>設定方法:</strong></p>\n<ul>\n<li>インタラクティブ: <code>/hooks</code></li>\n<li>手動: <code>.claude/settings.json</code>を編集</li>\n</ul>\n<h3>フックとCLAUDE.mdの使い分け</h3>\n<table>\n<thead>\n<tr>\n<th>機能</th>\n<th>特徴</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>フック</strong></td>\n<td>決定論的制御（必ず実行される）</td>\n</tr>\n<tr>\n<td><strong>CLAUDE.md</strong></td>\n<td>アドバイス的ガイダンス（判断ベース）</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>5.8 カスタムサブエージェント</h2>\n<p><strong>場所:</strong> <code>.claude/agents/</code></p>\n<h3>例: .claude/agents/security-reviewer.md</h3>\n<pre><code class=\"language-markdown\">---\nname: security-reviewer\ndescription: セキュリティ脆弱性のコードレビュー\ntools: Read, Grep, Glob, Bash\nmodel: opus\n---\nあなたはシニアセキュリティエンジニアです。以下の観点でコードをレビューしてください:\n- インジェクション脆弱性（SQL、XSS、コマンドインジェクション）\n- 認証・認可の欠陥\n- コード内のシークレットや認証情報\n- 安全でないデータ処理\n\n具体的な行番号の参照と修正案を提供してください。\n</code></pre>\n<p><strong>使用方法:</strong></p>\n<pre><code>サブエージェントを使ってこのコードのセキュリティ問題をレビューして。\n</code></pre>\n<p><strong>ユースケース:</strong></p>\n<ul>\n<li>メイン会話のバイアスなしでコードレビュー</li>\n<li>不慣れなコードの調査</li>\n<li>専門タスク（セキュリティ、ドキュメント、テスト）</li>\n<li>メインエージェントの作業の検証</li>\n</ul>\n<hr>\n<h2>5.9 エージェントスキル</h2>\n<p><strong>場所:</strong> <code>.claude/skills/</code></p>\n<h3>例: .claude/skills/api-conventions.md</h3>\n<pre><code class=\"language-markdown\">---\nname: api-conventions\ndescription: サービスのREST API設計規約\n---\n# API規約\n- URLパスにはケバブケースを使用\n- JSONプロパティにはキャメルケースを使用\n- リストエンドポイントには必ずページネーションを含める\n- URLパスでAPIをバージョニング（/v1/、/v2/）\n</code></pre>\n<h3>機能の使い分け</h3>\n<table>\n<thead>\n<tr>\n<th>機能</th>\n<th>トリガー</th>\n<th>最適な用途</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>CLAUDE.md</td>\n<td>常に読み込み</td>\n<td>グローバルなプロジェクトコンテキスト</td>\n</tr>\n<tr>\n<td>スラッシュコマンド</td>\n<td>明示的な<code>/command</code></td>\n<td>繰り返しワークフロー</td>\n</tr>\n<tr>\n<td>スキル</td>\n<td>コンテキスト（自動）</td>\n<td>ドメイン知識</td>\n</tr>\n<tr>\n<td>サブエージェント</td>\n<td>委任</td>\n<td>分離されたタスク</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「環境設定は一度の投資で継続的なリターンを生む」</p>\n</blockquote>\n<p>CLAUDE.md、パーミッション、フック、カスタムコマンド、サブエージェント、スキル—これらを適切に設定することで、Claude Codeはあなた専用の開発環境に進化する。</p>\n","ベストプラクティス/06_効果的にコミュニケーションする.md":"<h1>効果的にコミュニケーションする</h1>\n<h2>概要</h2>\n<p>Claude Codeとの対話は、シニアエンジニアとの対話と同じように考えよう。コードベースについて質問したり、インタビュー形式で要件を深掘りしたり。効果的なコミュニケーションが、効果的な結果につながる。</p>\n<hr>\n<h2>コードベースについて質問する</h2>\n<h3>シニアエンジニアに聞くように質問する</h3>\n<p>Claudeには、あなたがシニアエンジニアに聞くのと同じ質問ができる:</p>\n<pre><code>- ロギングはどう動いてる？\n- 新しいAPIエンドポイントはどうやって作る？\n- foo.rsの134行目の `async move { ... }` は何をしてる？\n- CustomerOnboardingFlowImplはどんなエッジケースを処理してる？\n- なぜこのコードは333行目で bar() ではなく foo() を呼んでるの？\n</code></pre>\n<h3>質問の種類</h3>\n<h4>アーキテクチャの理解</h4>\n<pre><code>「このプロジェクトのディレクトリ構造を説明して。\n各ディレクトリの役割は？」\n</code></pre>\n<h4>実装の詳細</h4>\n<pre><code>「認証フローを追ってくれる？\nログインからトークン発行までの流れを説明して」\n</code></pre>\n<h4>設計判断の背景</h4>\n<pre><code>「なぜここでReduxを使ってるの？\nContext APIではダメだった理由は？」\n</code></pre>\n<h4>コードの挙動</h4>\n<pre><code>「この再帰関数の終了条件は何？\n無限ループになる可能性は？」\n</code></pre>\n<hr>\n<h2>Claudeにインタビューさせる</h2>\n<h3>大きな機能の場合</h3>\n<p>より大きな機能を作る場合、まずClaudeにインタビューをさせることで、見落としがちなポイントを洗い出せる。</p>\n<pre><code>質問: 「[簡単な説明]を作りたい。AskUserQuestionツールを使って\n詳細にインタビューして。\n\n技術的な実装、UI/UX、エッジケース、懸念点、トレードオフについて\n質問して。明らかな質問はしないで、私が考えていなかった\n難しい部分を掘り下げて。\n\nすべてカバーするまでインタビューを続けて、\nその後完全な仕様書をSPEC.mdに書いて」\n</code></pre>\n<h3>なぜインタビューが効果的か</h3>\n<ol>\n<li><strong>盲点の発見</strong>: 自分では気づかなかった考慮点が見つかる</li>\n<li><strong>要件の明確化</strong>: 曖昧な部分が具体的になる</li>\n<li><strong>実装前の問題発見</strong>: コーディング後ではなく前に問題を発見できる</li>\n</ol>\n<h3>インタビュー後のワークフロー</h3>\n<p>インタビューで仕様が固まったら、新しいセッションを開始して実装に集中:</p>\n<pre><code class=\"language-bash\"># 新しいセッションで\nclaude --continue  # または新規セッション\n\n「SPEC.mdの仕様に従って実装を開始して」\n</code></pre>\n<blockquote>\n<p>新しいセッションを開始することで、実装に完全に集中できるクリーンなコンテキストが得られる。</p>\n</blockquote>\n<hr>\n<h2>質問の仕方のコツ</h2>\n<h3>具体的に聞く</h3>\n<p><strong>悪い例:</strong></p>\n<pre><code>「このコードどう思う？」\n</code></pre>\n<p><strong>良い例:</strong></p>\n<pre><code>「このコードのパフォーマンスは問題ない？\nN+1クエリの可能性は？」\n</code></pre>\n<h3>コンテキストを含める</h3>\n<p><strong>悪い例:</strong></p>\n<pre><code>「バグがある」\n</code></pre>\n<p><strong>良い例:</strong></p>\n<pre><code>「ユーザー登録でメール確認後に500エラーが発生する。\n再現手順: 1) 登録 2) メール確認リンクをクリック 3) エラー」\n</code></pre>\n<h3>期待する回答の形式を示す</h3>\n<pre><code>「このAPIの認証フローを説明して。\nシーケンス図のマークダウン形式で」\n</code></pre>\n<hr>\n<h2>対話のパターン</h2>\n<h3>探索的対話</h3>\n<pre><code>User: 「このプロジェクトの認証の仕組みを教えて」\nClaude: [説明]\nUser: 「JWTトークンの有効期限はどこで設定されてる？」\nClaude: [説明]\nUser: 「リフレッシュトークンの実装はある？」\nClaude: [説明]\n</code></pre>\n<h3>決定支援対話</h3>\n<pre><code>User: 「状態管理にReduxとZustandのどちらを使うべき？」\nClaude: [両方の特徴と推奨]\nUser: 「このプロジェクトの規模だとどちら？」\nClaude: [具体的な推奨]\n</code></pre>\n<h3>実装ガイド対話</h3>\n<pre><code>User: 「新しいAPIエンドポイントの追加方法を教えて」\nClaude: [ステップバイステップの説明]\nUser: 「認証が必要なエンドポイントの場合は？」\nClaude: [追加説明]\n</code></pre>\n<hr>\n<h2>フィードバックループ</h2>\n<h3>早めの軌道修正</h3>\n<p>Claudeの回答が期待と違う場合は、すぐにフィードバックする:</p>\n<pre><code>User: 「そうじゃなくて、クライアント側のバリデーションの話」\n</code></pre>\n<pre><code>User: 「もっと詳しく。特にエラーハンドリングについて」\n</code></pre>\n<pre><code>User: 「シンプルにして。フレームワークは使わないで」\n</code></pre>\n<h3>確認を求める</h3>\n<p>重要な判断の前には確認を求める:</p>\n<pre><code>「この理解で合ってる？\n- ユーザーはメール認証必須\n- セッションは24時間で期限切れ\n- リフレッシュトークンはなし\n\n合ってたら実装を始めて」\n</code></pre>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「シニアエンジニアと話すように対話せよ」</p>\n</blockquote>\n<p>Claude Codeとの効果的なコミュニケーションは、明確な質問、適切なコンテキスト、そしてインタラクティブな対話から生まれる。インタビュー機能を活用して要件を深掘りし、具体的な質問で必要な情報を引き出そう。</p>\n","ベストプラクティス/07_セッションを管理する.md":"<h1>セッションを管理する</h1>\n<h2>概要</h2>\n<p>Claude Codeの最大の制約はコンテキストウィンドウだ。コンテキストが埋まると、パフォーマンスが低下する。セッションを効果的に管理することで、常に最高のパフォーマンスを維持できる。</p>\n<hr>\n<h2>7.1 早期かつ頻繁に軌道修正する</h2>\n<h3>ショートカット</h3>\n<table>\n<thead>\n<tr>\n<th>ショートカット</th>\n<th>動作</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong><code>Esc</code></strong></td>\n<td>Claudeの作業を途中で停止（コンテキストは保持）</td>\n</tr>\n<tr>\n<td><strong><code>Esc + Esc</code></strong> or <strong><code>/rewind</code></strong></td>\n<td>リワインドメニューを開き、会話とコード状態を復元</td>\n</tr>\n<tr>\n<td><strong><code>「それを元に戻して」</code></strong></td>\n<td>Claudeに変更を取り消させる</td>\n</tr>\n<tr>\n<td><strong><code>/clear</code></strong></td>\n<td>無関係なタスク間でコンテキストをリセット</td>\n</tr>\n</tbody></table>\n<h3>ルール</h3>\n<blockquote>\n<p>同じセッションで同じ問題を2回修正したら、<code>/clear</code>して、学んだことを組み込んだより良いプロンプトでやり直す。</p>\n</blockquote>\n<hr>\n<h2>7.2 コンテキストを積極的に管理する</h2>\n<pre><code class=\"language-bash\">/clear                    # コンテキストを完全にリセット\n/compact &lt;instructions&gt;   # 特定のフォーカスで自動圧縮\n</code></pre>\n<h3>自動圧縮</h3>\n<ul>\n<li>コンテキスト制限に近づくとトリガーされる</li>\n<li><strong>保持</strong>: コードパターン、ファイル状態、重要な決定</li>\n<li><strong>削除</strong>: 無関係な会話履歴、ファイル内容、古いコマンド</li>\n</ul>\n<hr>\n<h2>7.3 サブエージェントで調査を委任</h2>\n<pre><code>サブエージェントを使って、認証システムがトークンリフレッシュを\nどう処理しているか調査して。また、再利用すべき既存の\nOAuthユーティリティがあるかも確認して。\n</code></pre>\n<h3>メリット</h3>\n<ul>\n<li>探索用の別コンテキストウィンドウ</li>\n<li>メイン会話をクリーンに保つ</li>\n<li>サブエージェントがコンテキストを散らかさずに結果を報告</li>\n</ul>\n<h3>検証に使う場合</h3>\n<pre><code>サブエージェントを使ってこのコードのエッジケースをレビューして。\n</code></pre>\n<hr>\n<h2>7.4 チェックポイントでリワインド</h2>\n<h3>アクセス方法</h3>\n<ul>\n<li><code>Escape</code>をダブルタップ</li>\n<li><code>/rewind</code>を実行</li>\n</ul>\n<h3>機能</h3>\n<ul>\n<li>会話のみ復元（コード変更は保持）</li>\n<li>コードのみ復元（会話は保持）</li>\n<li>両方復元</li>\n<li>セッションをまたいで永続化</li>\n</ul>\n<p>⚠️ <strong>注意:</strong> Claudeの変更のみ追跡。外部プロセスの変更はgitを使う。</p>\n<hr>\n<h2>7.5 会話を再開する</h2>\n<pre><code class=\"language-bash\">claude --continue    # 最新の会話を再開\nclaude --resume      # 最近の会話から選択\n</code></pre>\n<h3>セッションの命名</h3>\n<pre><code class=\"language-bash\">/rename &quot;oauth-migration&quot;\n/rename &quot;debugging-memory-leak&quot;\n</code></pre>\n<blockquote>\n<p>セッションをブランチのように使う—異なるワークストリーム用に永続的なコンテキストを持たせる。</p>\n</blockquote>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「コンテキストは貴重なリソース。賢く管理せよ」</p>\n</blockquote>\n<p>セッション管理は、Claude Codeのパフォーマンスを最大化する鍵。<code>/clear</code>で定期的にリセットし、サブエージェントで調査を委任し、チェックポイントを活用して安全に実験しよう。</p>\n","ベストプラクティス/08_自動化とスケーリング.md":"<h1>自動化とスケーリング</h1>\n<h2>概要</h2>\n<p>Claude Codeは単なる対話ツールではない。CI/CD、プリコミットフック、スクリプトに組み込んで自動化できる。複数のセッションを並列実行することで、開発速度を大幅に向上させられる。</p>\n<hr>\n<h2>8.1 ヘッドレスモードで実行</h2>\n<pre><code class=\"language-bash\"># ワンオフクエリ\nclaude -p &quot;このプロジェクトが何をしているか説明して&quot;\n\n# スクリプト用の構造化出力\nclaude -p &quot;すべてのAPIエンドポイントをリストして&quot; --output-format json\n\n# リアルタイム処理用ストリーミング\nclaude -p &quot;このログファイルを分析して&quot; --output-format stream-json\n</code></pre>\n<h3>出力フォーマット</h3>\n<ul>\n<li>プレーンテキスト</li>\n<li>JSON</li>\n<li>ストリーミングJSON</li>\n</ul>\n<hr>\n<h2>8.2 複数のClaudeセッションを実行</h2>\n<h3>2つのアプローチ</h3>\n<ol>\n<li><p><strong>Claude Desktop</strong> - 複数のローカルセッションを視覚的に管理</p>\n<ul>\n<li>各セッションが分離されたワークツリーを持つ</li>\n</ul>\n</li>\n<li><p><strong>Claude Code on the Web</strong> - クラウドインフラ</p>\n<ul>\n<li>Anthropicのセキュアなインフラで実行</li>\n<li>分離されたVM</li>\n</ul>\n</li>\n</ol>\n<h3>品質ワークフロー - Writer/Reviewerパターン</h3>\n<p><strong>セッションA（Writer）:</strong></p>\n<pre><code>APIエンドポイントにレートリミッターを実装して\n</code></pre>\n<p><strong>セッションB（Reviewer）:</strong></p>\n<pre><code>@src/middleware/rateLimiter.ts のレートリミッター実装をレビューして。\nエッジケース、レース条件、既存のミドルウェアパターンとの一貫性を確認して。\n</code></pre>\n<p><strong>セッションA（対応）:</strong></p>\n<pre><code>レビューのフィードバック: [セッションBの出力]。これらの問題に対処して。\n</code></pre>\n<h3>代替パターン</h3>\n<ul>\n<li>一方のClaudeがテストを書き、もう一方がそれをパスするコードを書く</li>\n<li>コードレビュー用のフレッシュなコンテキスト（書いた時のバイアスなし）</li>\n</ul>\n<hr>\n<h2>8.3 ファイル全体にファンアウト</h2>\n<h3>大規模なマイグレーション/分析向け</h3>\n<p><strong>Step 1:</strong> タスクリストを生成</p>\n<pre><code class=\"language-bash\">マイグレーションが必要な2,000個のPythonファイルをすべてリストして\n</code></pre>\n<p><strong>Step 2:</strong> ループスクリプトを作成</p>\n<pre><code class=\"language-bash\">for file in $(cat files.txt); do\n  claude -p &quot;$file をReactからVueにマイグレート。OKまたはFAILを返して&quot; \\\n    --allowedTools &quot;Edit,Bash(git commit:*)&quot;\ndone\n</code></pre>\n<p><strong>Step 3:</strong> 数ファイルでテストしてからスケール</p>\n<ul>\n<li>最初の2-3ファイルでプロンプトを改良</li>\n<li><code>--allowedTools</code>で無人実行用にフルセットを実行</li>\n</ul>\n<h3>結果をパイプ</h3>\n<pre><code class=\"language-bash\">claude -p &quot;&lt;プロンプト&gt;&quot; --output-format json | your_command\n</code></pre>\n<h3>デバッグ</h3>\n<pre><code class=\"language-bash\">--verbose  # 詳細を表示（開発時）\n</code></pre>\n<hr>\n<h2>8.4 安全な自律モード</h2>\n<pre><code class=\"language-bash\">claude --dangerously-skip-permissions\n</code></pre>\n<h3>ユースケース</h3>\n<ul>\n<li>リントエラーの修正</li>\n<li>ボイラープレートの生成</li>\n</ul>\n<h3>リスク</h3>\n<ul>\n<li>データ損失、システム破損、データ流出</li>\n<li>インターネットなしのコンテナでのみ使用</li>\n</ul>\n<h3>より安全な代替</h3>\n<p>代わりに<code>/sandbox</code>でサンドボックスを使用。</p>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「Claude Codeは対話ツールを超えた自動化プラットフォーム」</p>\n</blockquote>\n<p>ヘッドレスモード、並列セッション、ファンアウトパターン—これらを組み合わせることで、開発ワークフローを大幅に効率化できる。</p>\n","ベストプラクティス/09_よくある失敗パターンを避ける.md":"<h1>よくある失敗パターンを避ける</h1>\n<h2>概要</h2>\n<p>Claude Codeを使っていると、誰もが陥りがちな失敗パターンがある。これらを認識し、事前に対策することで、より効果的にClaudeを活用できる。</p>\n<hr>\n<h2>失敗パターン一覧</h2>\n<table>\n<thead>\n<tr>\n<th>パターン</th>\n<th>問題</th>\n<th>解決策</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><strong>キッチンシンク・セッション</strong></td>\n<td>無関係なタスクがコンテキストをノイズで埋める</td>\n<td>無関係なタスク間で<code>/clear</code>を実行</td>\n</tr>\n<tr>\n<td><strong>繰り返しの修正</strong></td>\n<td>失敗したアプローチがコンテキストを汚染</td>\n<td>2回失敗したら: <code>/clear</code> + より良いプロンプト</td>\n</tr>\n<tr>\n<td><strong>過剰なCLAUDE.md</strong></td>\n<td>長いファイルで重要なルールが無視される</td>\n<td>容赦なく削減、自明なプラクティスは削除</td>\n</tr>\n<tr>\n<td><strong>信頼してから検証のギャップ</strong></td>\n<td>もっともらしいコードにエッジケースのバグ</td>\n<td>常に検証を提供（テスト、スクリプト、スクリーンショット）</td>\n</tr>\n<tr>\n<td><strong>無限の探索</strong></td>\n<td>調査プロンプトが数百のファイルを読む</td>\n<td>スコープを狭くするか、サブエージェントを使う</td>\n</tr>\n</tbody></table>\n<hr>\n<h2>詳細解説</h2>\n<h3>キッチンシンク・セッション</h3>\n<pre><code>悪い例:\n「ログイン機能を実装して」→ 完了\n「データベースのバックアップスクリプトを書いて」→ 完了\n「CSSのバグを直して」→ コンテキストがごちゃ混ぜ\n</code></pre>\n<pre><code>良い例:\n「ログイン機能を実装して」→ 完了\n/clear\n「データベースのバックアップスクリプトを書いて」→ 完了\n/clear\n「CSSのバグを直して」\n</code></pre>\n<h3>繰り返しの修正</h3>\n<pre><code>悪い例:\n「ES Modulesを使って」→ CommonJSで書かれる\n「だからES Modulesで」→ また間違える\n「import/exportを使って」→ まだ間違える...\n</code></pre>\n<pre><code>良い例:\n「ES Modulesを使って」→ CommonJSで書かれる\n「だからES Modulesで」→ まだ間違える\n\n/clear\n\n「ES Modules構文（import/export）でモジュールを書いて。\nrequire()は絶対に使わないこと。\n例: import { foo } from &#39;./bar.js&#39;」\n</code></pre>\n<h3>過剰なCLAUDE.md</h3>\n<pre><code>悪い例:\n# コードスタイル\n- インデントは2スペース\n- セミコロンを使う\n- シングルクォートを使う\n- ... (50行続く)\n</code></pre>\n<pre><code>良い例:\n# 重要なルール\n- ES Modules構文を使用（CommonJS禁止）\n- テストは`npm test -- --watch=false`で実行\n</code></pre>\n<h3>信頼してから検証のギャップ</h3>\n<pre><code>悪い例:\n「メールバリデーション関数を書いて」\n→ 実装を受け取る\n→ そのまま使う\n→ 本番で「user@.com」が通ってしまう\n</code></pre>\n<pre><code>良い例:\n「メールバリデーション関数を書いて。\nテストケース:\n- user@example.com → true\n- invalid → false\n- user@.com → false\n\nテストを書いて実行して」\n</code></pre>\n<h3>無限の探索</h3>\n<pre><code>悪い例:\n「このコードベースを調査して、問題点を報告して」\n→ 何百ものファイルを読み始める\n</code></pre>\n<pre><code>良い例:\n「src/auth/ディレクトリを調査して、\nセキュリティ上の懸念点を報告して」\n\nまたは:\n\n「サブエージェントを使って認証モジュールを調査して。\n特にトークン処理に焦点を当てて」\n</code></pre>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「失敗パターンを知ることは、成功パターンを知ることと同じくらい重要」</p>\n</blockquote>\n<p>キッチンシンク・セッション、繰り返しの修正、過剰なCLAUDE.md、検証の欠如、無限の探索—これらの失敗パターンを認識し、事前に対策しよう。</p>\n","ベストプラクティス/10_直感を養う.md":"<h1>直感を養う</h1>\n<h2>概要</h2>\n<p><strong>ルールは絶対ではない。</strong> 時間をかけて、以下の直感を養おう:</p>\n<ul>\n<li>いつコンテキストを蓄積し、いつクリアすべきか</li>\n<li>いつ計画し、いつ探索すべきか</li>\n<li>いつ具体的に、いつ曖昧に指示すべきか</li>\n<li>いつ手を動かし、いつ任せるべきか</li>\n</ul>\n<hr>\n<h2>時にはルールを破る</h2>\n<h3>コンテキストを蓄積させるべき時</h3>\n<blockquote>\n<p>通常: 無関係なタスク間で<code>/clear</code></p>\n</blockquote>\n<p><strong>例外</strong>: 1つの複雑な問題を深く掘り下げている時、履歴は価値がある。</p>\n<h3>計画をスキップすべき時</h3>\n<blockquote>\n<p>通常: 探索 → 計画 → 実装</p>\n</blockquote>\n<p><strong>例外</strong>: タスクが探索的で、結果が予測できない場合。</p>\n<h3>曖昧なプロンプトを使うべき時</h3>\n<blockquote>\n<p>通常: 具体的なプロンプトが具体的な結果を生む</p>\n</blockquote>\n<p><strong>例外</strong>: Claudeの解釈を見てから制約を加えたい場合。</p>\n<hr>\n<h2>観察から学ぶ</h2>\n<h3>素晴らしい出力が得られた時</h3>\n<p>何を違うようにしたか気づく:</p>\n<ul>\n<li>プロンプトの構造</li>\n<li>提供したコンテキスト</li>\n<li>セッションの状態</li>\n</ul>\n<h3>Claudeが苦戦している時</h3>\n<p>なぜかを考える:</p>\n<ul>\n<li>ノイズの多いコンテキスト？</li>\n<li>曖昧なプロンプト？</li>\n<li>大きすぎるタスク？</li>\n</ul>\n<hr>\n<h2>まとめ</h2>\n<blockquote>\n<p>「ルールを知り、いつ破るかを知れ」</p>\n</blockquote>\n<p>このガイドのパターンは出発点。最終的には、あなた自身のワークフローに最適化されたアプローチを見つけることが目標だ。</p>\n"};</script>
+</head>
+<body>
+    <header class="header">
+        <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="テーマ切替">
+            <svg id="sunIcon" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg id="moonIcon" viewBox="0 0 24 24" style="display:none;">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+        </button>
+        <h1>Claude Code</h1>
+        <p>ベストプラクティス<br>完全ガイド</p>
+    </header>
+
+    <div class="container">
+        <button class="back-button" id="backBtn" onclick="showList()" aria-label="戻る">
+            <svg viewBox="0 0 24 24">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        </button>
+
+        <div id="list-view"></div>
+        <button class="reset-button" id="resetBtn" onclick="resetProgress()">進捗をリセット</button>
+
+        <div id="article-view">
+            <article class="article" id="article-content"></article>
+        </div>
+
+        <button class="scroll-top" id="scrollTop" onclick="scrollToTop()" aria-label="トップへ戻る">
+            <svg viewBox="0 0 24 24">
+                <polyline points="18 15 12 9 6 15"></polyline>
+            </svg>
+        </button>
+    </div>
+
+    <script>
+        const practices = [
+            {
+                title: "検証方法を提供する",
+                path: "ベストプラクティス/01_検証方法を提供する.md",
+                icon: "images/icons/checkmark.png",
+                desc: "最も効果を発揮する単一のアドバイス",
+                anchor: "#give-claude-a-way-to-verify-its-work"
+            },
+            {
+                title: "探索から計画、そして実装へ",
+                path: "ベストプラクティス/02_探索から計画そして実装へ.md",
+                icon: "images/icons/compass.png",
+                desc: "4段階ワークフロー",
+                anchor: "#explore-first-then-plan-then-code"
+            },
+            {
+                title: "具体的なコンテキストを提供する",
+                path: "ベストプラクティス/03_具体的なコンテキストを提供する.md",
+                icon: "images/icons/target.png",
+                desc: "精密な指示で修正を減らす",
+                anchor: "#provide-specific-context-in-your-prompts"
+            },
+            {
+                title: "リッチなコンテンツを提供する",
+                path: "ベストプラクティス/04_リッチなコンテンツを提供する.md",
+                icon: "images/icons/image_icon.png",
+                desc: "画像、URL、パイプ入力",
+                anchor: "#provide-rich-content"
+            },
+            {
+                title: "環境を設定する",
+                path: "ベストプラクティス/05_環境を設定する.md",
+                icon: "images/icons/gear.png",
+                desc: "CLAUDE.md、フック、カスタムコマンド",
+                anchor: "#configure-your-environment"
+            },
+            {
+                title: "効果的にコミュニケーションする",
+                path: "ベストプラクティス/06_効果的にコミュニケーションする.md",
+                icon: "images/icons/speech_bubble.png",
+                desc: "他のエンジニアに聞くように",
+                anchor: "#communicate-effectively"
+            },
+            {
+                title: "セッションを管理する",
+                path: "ベストプラクティス/07_セッションを管理する.md",
+                icon: "images/icons/window.png",
+                desc: "コンテキストを賢く管理",
+                anchor: "#manage-your-session"
+            },
+            {
+                title: "自動化とスケーリング",
+                path: "ベストプラクティス/08_自動化とスケーリング.md",
+                icon: "images/icons/robot.png",
+                desc: "CI/CD、並列実行、バッチ処理",
+                anchor: "#automate-and-scale"
+            },
+            {
+                title: "よくある失敗パターンを避ける",
+                path: "ベストプラクティス/09_よくある失敗パターンを避ける.md",
+                icon: "images/icons/warning.png",
+                desc: "陥りがちな罠と対策",
+                anchor: "#avoid-common-failure-patterns"
+            },
+            {
+                title: "直感を養う",
+                path: "ベストプラクティス/10_直感を養う.md",
+                icon: "images/icons/lightbulb.png",
+                desc: "ルールを知り、いつ破るかを知る",
+                anchor: "#develop-your-intuition"
+            }
+        ];
+
+        // Tap effect
+        function addTapEffect(card) {
+            card.addEventListener('touchstart', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = ((e.touches[0].clientX - rect.left) / rect.width) * 100;
+                const y = ((e.touches[0].clientY - rect.top) / rect.height) * 100;
+                card.style.setProperty('--tap-x', x + '%');
+                card.style.setProperty('--tap-y', y + '%');
+                card.classList.add('tapped');
+            }, { passive: true });
+
+            card.addEventListener('touchend', () => {
+                setTimeout(() => card.classList.remove('tapped'), 150);
+            }, { passive: true });
+        }
+
+        function getAllArticles() {
+            return practices.map(p => ({
+                path: p.path,
+                title: p.title,
+                desc: p.desc,
+                icon: p.icon
+            }));
+        }
+
+        const originalDocUrl = "https://code.claude.com/docs/en/best-practices";
+
+        function buildSourceLink(currentPath) {
+            const practice = practices.find(p => p.path === currentPath);
+            const anchor = practice ? practice.anchor : "";
+            const fullUrl = originalDocUrl + anchor;
+            return `
+                <div class="source-link">
+                    <a href="${fullUrl}" target="_blank" rel="noopener noreferrer">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                        </svg>
+                        原文を読む（英語）
+                    </a>
+                </div>
+            `;
+        }
+
+        function buildArticleNav(currentPath) {
+            const allArticles = getAllArticles();
+            const currentIndex = allArticles.findIndex(a => a.path === currentPath);
+            const nextArticle = allArticles[currentIndex + 1];
+
+            const sourceLink = buildSourceLink(currentPath);
+
+            if (!nextArticle) {
+                const firstArticle = allArticles[0];
+                return `
+                    ${sourceLink}
+                    <div class="article-nav">
+                        <div class="article-nav-label">最初から読む</div>
+                        <div class="article-nav-card" onclick="showArticle('${firstArticle.path}')">
+                            <img class="article-nav-icon" src="${firstArticle.icon}" alt="">
+                            <div class="article-nav-content">
+                                <div class="article-nav-title">${firstArticle.title}</div>
+                                <div class="article-nav-desc">${firstArticle.desc}</div>
+                            </div>
+                            <svg class="article-nav-arrow" viewBox="0 0 24 24">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                ${sourceLink}
+                <div class="article-nav">
+                    <div class="article-nav-label">Next</div>
+                    <div class="article-nav-card" onclick="showArticle('${nextArticle.path}')">
+                        <img class="article-nav-icon" src="${nextArticle.icon}" alt="">
+                        <div class="article-nav-content">
+                            <div class="article-nav-title">${nextArticle.title}</div>
+                            <div class="article-nav-desc">${nextArticle.desc}</div>
+                        </div>
+                        <svg class="article-nav-arrow" viewBox="0 0 24 24">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+                </div>
+            `;
+        }
+
+        function buildListView() {
+            const listView = document.getElementById('list-view');
+
+            const section = document.createElement('section');
+            section.className = 'section';
+            section.innerHTML = `
+                <div class="section-header">
+                    <span class="section-icon">📚</span>
+                    <span class="section-title">Best Practices</span>
+                </div>
+                <div class="card-grid"></div>
+            `;
+            const grid = section.querySelector('.card-grid');
+
+            practices.forEach((practice, index) => {
+                const card = document.createElement('div');
+                card.className = 'card' + (isArticleRead(practice.path) ? ' read' : '');
+                card.dataset.path = practice.path;
+                card.innerHTML = `
+                    <img class="card-icon" src="${practice.icon}" alt="" loading="lazy">
+                    <span class="card-label">Chapter ${index + 1}</span>
+                    <div class="card-title">${practice.title}</div>
+                    <div class="card-subtitle">${practice.desc}</div>
+                `;
+                card.onclick = () => showArticle(practice.path);
+                addTapEffect(card);
+                grid.appendChild(card);
+            });
+
+            listView.appendChild(section);
+        }
+
+        async function showArticle(path) {
+            const listView = document.getElementById('list-view');
+            const articleView = document.getElementById('article-view');
+            const content = document.getElementById('article-content');
+            const backBtn = document.getElementById('backBtn');
+            const resetBtn = document.getElementById('resetBtn');
+
+            listView.classList.add('hidden');
+            resetBtn.style.display = 'none';
+            articleView.classList.add('visible');
+            backBtn.classList.add('visible');
+
+            const practice = practices.find(p => p.path === path);
+            const iconSrc = practice ? practice.icon : 'images/icons/robot.png';
+
+            content.innerHTML = `
+                <div class="loading">
+                    <div class="skeleton skeleton-icon"></div>
+                    <div class="skeleton skeleton-title"></div>
+                    <div class="skeleton skeleton-line"></div>
+                    <div class="skeleton skeleton-line"></div>
+                    <div class="skeleton skeleton-line"></div>
+                </div>
+            `;
+
+            window.scrollTo({ top: 0, behavior: 'instant' });
+
+            try {
+                let articleHtml;
+                if (window.__ARTICLES__ && window.__ARTICLES__[path]) {
+                    articleHtml = window.__ARTICLES__[path];
+                } else {
+                    const response = await fetch(path);
+                    if (!response.ok) throw new Error();
+                    const text = await response.text();
+                    articleHtml = marked.parse(text);
+                }
+                const navHtml = buildArticleNav(path);
+                content.innerHTML = `
+                    <div class="article-hero">
+                        <img src="${iconSrc}" alt="" class="article-hero-icon">
+                    </div>
+                    ${articleHtml}
+                    ${navHtml}
+                `;
+                markAsRead(path);
+            } catch (e) {
+                content.innerHTML = '<div class="loading"><p style="color: var(--text-tertiary);">読み込めませんでした</p></div>';
+            }
+
+            history.pushState({ path }, '', `#${encodeURIComponent(path)}`);
+        }
+
+        function showList() {
+            document.getElementById('list-view').classList.remove('hidden');
+            document.getElementById('resetBtn').style.display = 'block';
+            document.getElementById('article-view').classList.remove('visible');
+            document.getElementById('backBtn').classList.remove('visible');
+            window.scrollTo({ top: 0, behavior: 'instant' });
+            history.pushState(null, '', window.location.pathname);
+            updateCardReadStatus();
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Scroll handling
+        let lastScrollY = 0;
+        let scrollTimeout;
+        window.addEventListener('scroll', () => {
+            const currentScrollY = window.scrollY;
+            const backBtn = document.getElementById('backBtn');
+            const scrollTopBtn = document.getElementById('scrollTop');
+
+            if (backBtn.classList.contains('visible')) {
+                if (currentScrollY > lastScrollY && currentScrollY > 100) {
+                    backBtn.classList.add('hidden-scroll');
+                } else {
+                    backBtn.classList.remove('hidden-scroll');
+                }
+            }
+
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                if (currentScrollY > 400) {
+                    scrollTopBtn.classList.add('visible');
+                } else {
+                    scrollTopBtn.classList.remove('visible');
+                }
+            }, 100);
+
+            lastScrollY = currentScrollY;
+        }, { passive: true });
+
+        // Swipe back
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        document.addEventListener('touchend', (e) => {
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = Math.abs(touchEndY - touchStartY);
+
+            if (touchStartX < 30 && deltaX > 80 && deltaY < 100) {
+                const articleView = document.getElementById('article-view');
+                if (articleView.classList.contains('visible')) {
+                    showList();
+                }
+            }
+        }, { passive: true });
+
+        window.onpopstate = e => e.state?.path ? showArticle(e.state.path) : showList();
+
+        // Read articles
+        const READ_STORAGE_KEY = 'claude-code-bp-read';
+
+        function getReadArticles() {
+            try {
+                return JSON.parse(localStorage.getItem(READ_STORAGE_KEY) || '[]');
+            } catch {
+                return [];
+            }
+        }
+
+        function isArticleRead(path) {
+            return getReadArticles().includes(path);
+        }
+
+        function markAsRead(path) {
+            const read = getReadArticles();
+            if (!read.includes(path)) {
+                read.push(path);
+                localStorage.setItem(READ_STORAGE_KEY, JSON.stringify(read));
+            }
+        }
+
+        function updateCardReadStatus() {
+            const cards = document.querySelectorAll('.card[data-path]');
+            const read = getReadArticles();
+            cards.forEach(card => {
+                if (read.includes(card.dataset.path)) {
+                    card.classList.add('read');
+                } else {
+                    card.classList.remove('read');
+                }
+            });
+        }
+
+        function resetProgress() {
+            if (confirm('進捗をリセットしますか？')) {
+                localStorage.removeItem(READ_STORAGE_KEY);
+                updateCardReadStatus();
+            }
+        }
+
+        // Theme
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            updateThemeIcon(isDark);
+        }
+
+        function updateThemeIcon(isDark) {
+            document.getElementById('sunIcon').style.display = isDark ? 'none' : 'block';
+            document.getElementById('moonIcon').style.display = isDark ? 'block' : 'none';
+        }
+
+        function initTheme() {
+            const saved = localStorage.getItem('theme');
+            const isDark = saved === 'dark';
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+            }
+            updateThemeIcon(isDark);
+        }
+
+        initTheme();
+        buildListView();
+        if (window.location.hash) showArticle(decodeURIComponent(window.location.hash.slice(1)));
+    </script>
+</body>
+</html>

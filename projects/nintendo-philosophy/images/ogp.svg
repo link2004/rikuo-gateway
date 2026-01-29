@@ -1,0 +1,23 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <pattern id="dots" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="2" fill="rgba(0,0,0,0.1)"/>
+    </pattern>
+    <style>
+      image { image-rendering: pixelated; image-rendering: crisp-edges; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#fafafa"/>
+  <rect width="1200" height="630" fill="url(#dots)"/>
+
+  <!-- 6 icons in 3x2 grid -->
+  <image xlink:href="person_icons/miyamoto_profile.png" x="200" y="55" width="240" height="240"/>
+  <image xlink:href="icons/star.png" x="480" y="55" width="240" height="240"/>
+  <image xlink:href="icons/lightbulb.png" x="760" y="55" width="240" height="240"/>
+
+  <image xlink:href="icons/heart.png" x="200" y="335" width="240" height="240"/>
+  <image xlink:href="icons/handheld.png" x="480" y="335" width="240" height="240"/>
+  <image xlink:href="icons/book.png" x="760" y="335" width="240" height="240"/>
+</svg>

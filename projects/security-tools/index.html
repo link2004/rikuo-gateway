@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#fafafa">
+    <title>Security Tools Knowledge</title>
+    <meta name="description" content="セキュリティツールナレッジベース - ペネトレーションテスト・セキュリティ評価ツールの知識集">
+
+    <link rel="icon" type="image/png" href="images/icons/security.png">
+    <link rel="apple-touch-icon" href="images/icons/security.png">
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --bg: #fafafa;
+            --card-bg: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #6b6b6b;
+            --text-tertiary: #9a9a9a;
+            --border: rgba(0,0,0,0.06);
+            --dot-color: rgba(0,0,0,0.06);
+            --accent: #00cc6a;
+            --radius: 24px;
+            --shadow: 0 2px 40px rgba(0,0,0,0.04);
+            --shadow-hover: 0 12px 60px rgba(0,0,0,0.1);
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
+            --safe-left: env(safe-area-inset-left);
+            --safe-right: env(safe-area-inset-right);
+        }
+
+        html {
+            scroll-behavior: smooth;
+            overscroll-behavior: none;
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -webkit-text-size-adjust: 100%;
+            padding-top: var(--safe-top);
+            padding-bottom: var(--safe-bottom);
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+        }
+
+        .header {
+            position: relative;
+            padding: 80px 24px 60px;
+            text-align: center;
+            max-width: 680px;
+            margin: 0 auto;
+            padding-left: max(24px, var(--safe-left));
+            padding-right: max(24px, var(--safe-right));
+        }
+
+        .header h1 {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            margin-bottom: 16px;
+        }
+
+        .header p {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.03em;
+            line-height: 1.25;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px calc(100px + var(--safe-bottom));
+            padding-left: max(20px, var(--safe-left));
+            padding-right: max(20px, var(--safe-right));
+        }
+
+        .section {
+            margin-bottom: 64px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 24px;
+            padding: 0 4px;
+        }
+
+        .section-icon {
+            font-size: 18px;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 40px 28px 36px;
+            cursor: pointer;
+            transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1),
+                        box-shadow 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            will-change: transform;
+            touch-action: manipulation;
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .card:active {
+            transform: scale(0.96);
+            transition: transform 0.12s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: var(--radius);
+            background: radial-gradient(circle at var(--tap-x, 50%) var(--tap-y, 50%), rgba(0,0,0,0.06) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .card.tapped::after {
+            opacity: 1;
+        }
+
+        .card.read::before {
+            content: '★ CLEAR';
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #34c759;
+            background: rgba(52, 199, 89, 0.1);
+            padding: 4px 10px;
+            border-radius: 999px;
+            letter-spacing: 0.5px;
+        }
+
+        .card-icon {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 24px;
+            image-rendering: pixelated;
+            transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            filter: drop-shadow(0 12px 24px rgba(0,0,0,0.1));
+        }
+
+        .card:hover .card-icon,
+        .card:active .card-icon {
+            transform: scale(1.08);
+        }
+
+        .card-label {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            margin-bottom: 10px;
+        }
+
+        .card-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.45;
+            letter-spacing: -0.01em;
+        }
+
+        .card-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 6px;
+        }
+
+        .back-button {
+            position: fixed;
+            top: max(20px, var(--safe-top));
+            left: max(14px, var(--safe-left));
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 30%;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+            touch-action: manipulation;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .back-button svg {
+            width: 20px;
+            height: 20px;
+            stroke: var(--text-primary);
+            stroke-width: 2.5;
+            fill: none;
+        }
+
+        .back-button:active {
+            transform: scale(0.9) !important;
+            transition: transform 0.1s;
+        }
+
+        .back-button.visible {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+        #article-view {
+            display: none;
+            animation: slideIn 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        #article-view.visible {
+            display: block;
+        }
+
+        #list-view {
+            transition: opacity 0.3s;
+        }
+
+        #list-view.hidden {
+            display: none;
+        }
+
+        .article {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 60px 24px calc(120px + var(--safe-bottom));
+            padding-left: max(24px, var(--safe-left));
+            padding-right: max(24px, var(--safe-right));
+        }
+
+        .article h1 {
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: -0.025em;
+            margin-bottom: 48px;
+            color: var(--text-primary);
+        }
+
+        .article h2 {
+            font-size: 22px;
+            font-weight: 600;
+            margin: 56px 0 20px;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .article h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 40px 0 14px;
+            color: var(--text-primary);
+        }
+
+        .article p {
+            font-size: 16px;
+            line-height: 1.9;
+            margin-bottom: 24px;
+            color: var(--text-secondary);
+        }
+
+        .article ul, .article ol {
+            margin: 24px 0 32px 20px;
+            line-height: 1.85;
+        }
+
+        .article li {
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        .article blockquote {
+            border-left: 3px solid var(--text-primary);
+            padding: 20px 24px;
+            margin: 40px 0;
+            background: rgba(0,0,0,0.02);
+            border-radius: 0 16px 16px 0;
+        }
+
+        .article blockquote p {
+            font-size: 16px;
+            font-style: italic;
+            color: var(--text-primary);
+            margin-bottom: 0;
+            line-height: 1.75;
+        }
+
+        .article a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        .article a:active {
+            opacity: 0.5;
+        }
+
+        .article strong {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .article code {
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+            background: rgba(0,0,0,0.05);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .article pre {
+            background: #1a1a1a;
+            color: #e0e0e0;
+            padding: 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 24px 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .article pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+
+        .article table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 32px 0;
+            font-size: 14px;
+            overflow-x: auto;
+            display: block;
+        }
+
+        .article th, .article td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .article th {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .article hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 48px 0;
+        }
+
+        .article-nav {
+            margin-top: 80px;
+            padding-top: 40px;
+            border-top: 1px solid var(--border);
+        }
+
+        .article-nav-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            margin-bottom: 16px;
+        }
+
+        .article-nav-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            box-shadow: var(--shadow);
+        }
+
+        .article-nav-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .article-nav-card:active {
+            transform: scale(0.98);
+        }
+
+        .article-nav-icon {
+            width: 64px;
+            height: 64px;
+            image-rendering: pixelated;
+            flex-shrink: 0;
+        }
+
+        .article-nav-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .article-nav-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .article-nav-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .article-nav-arrow {
+            width: 24px;
+            height: 24px;
+            stroke: var(--text-tertiary);
+            stroke-width: 2;
+            fill: none;
+            flex-shrink: 0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 80px 24px;
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, var(--border) 25%, rgba(0,0,0,0.03) 50%, var(--border) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+
+        .skeleton-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 32px;
+            border-radius: 20px;
+        }
+
+        .skeleton-title {
+            height: 32px;
+            width: 80%;
+            margin-bottom: 48px;
+        }
+
+        .skeleton-line {
+            height: 16px;
+            margin-bottom: 16px;
+        }
+
+        .article-hero {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .article-hero-icon {
+            width: 120px;
+            height: 120px;
+            image-rendering: pixelated;
+            filter: drop-shadow(0 16px 32px rgba(0,0,0,0.12));
+            animation: heroFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes heroFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .card {
+            opacity: 0;
+            animation: fadeIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+
+        .card:nth-child(1) { animation-delay: 0.03s; }
+        .card:nth-child(2) { animation-delay: 0.06s; }
+        .card:nth-child(3) { animation-delay: 0.09s; }
+        .card:nth-child(4) { animation-delay: 0.12s; }
+        .card:nth-child(5) { animation-delay: 0.15s; }
+        .card:nth-child(6) { animation-delay: 0.18s; }
+        .card:nth-child(7) { animation-delay: 0.21s; }
+        .card:nth-child(8) { animation-delay: 0.24s; }
+
+        .scroll-top {
+            position: fixed;
+            bottom: calc(24px + var(--safe-bottom));
+            right: max(14px, var(--safe-right));
+            width: 40px;
+            height: 40px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 30%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            pointer-events: none;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+            z-index: 90;
+            touch-action: manipulation;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .scroll-top svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--text-primary);
+            stroke-width: 2.5;
+            fill: none;
+        }
+
+        .scroll-top.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .scroll-top:active {
+            transform: scale(0.92);
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 30%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            touch-action: manipulation;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .theme-toggle svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--text-primary);
+            stroke-width: 2;
+            fill: none;
+            transition: transform 0.3s;
+        }
+
+        .theme-toggle:active {
+            transform: scale(0.9);
+        }
+
+        .theme-toggle:active svg {
+            transform: rotate(30deg);
+        }
+
+        html.dark {
+            --bg: #0a0a0a;
+            --card-bg: #1a1a1a;
+            --text-primary: #f5f5f5;
+            --text-secondary: #a0a0a0;
+            --text-tertiary: #666666;
+            --border: rgba(255,255,255,0.08);
+            --dot-color: rgba(255,255,255,0.06);
+        }
+
+        html.dark .back-button,
+        html.dark .scroll-top {
+            background: rgba(40,40,40,0.95);
+        }
+
+        html.dark .theme-toggle {
+            background: rgba(40,40,40,0.95);
+        }
+
+        html.dark .article pre {
+            background: #0d0d0d;
+        }
+
+        html.dark .article code {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .reset-button {
+            display: block;
+            margin: 60px auto 20px;
+            padding: 8px 16px;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-tertiary);
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .reset-button:hover {
+            color: var(--text-secondary);
+            border-color: var(--text-tertiary);
+        }
+
+        .reset-button:active {
+            transform: scale(0.95);
+        }
+
+        .back-button.hidden-scroll {
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 60px 14px 48px;
+            }
+
+            .header p {
+                font-size: 28px;
+            }
+
+            .container {
+                padding-left: 14px;
+                padding-right: 14px;
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+
+            .card {
+                padding: 28px 20px 24px;
+                border-radius: 20px;
+            }
+
+            .card-icon {
+                width: 80px;
+                height: 80px;
+                margin-bottom: 20px;
+            }
+
+            .card-title {
+                font-size: 16px;
+            }
+
+            .article {
+                padding: 48px 14px calc(100px + var(--safe-bottom));
+            }
+
+            .article h1 {
+                font-size: 26px;
+                margin-bottom: 40px;
+            }
+
+            .article h2 {
+                font-size: 20px;
+                margin: 48px 0 16px;
+            }
+
+            .article p, .article li {
+                font-size: 15px;
+                line-height: 1.85;
+            }
+
+            .section {
+                margin-bottom: 48px;
+            }
+        }
+
+        @media (max-width: 375px) {
+            .header p {
+                font-size: 24px;
+            }
+
+            .article h1 {
+                font-size: 24px;
+            }
+
+            .card-icon {
+                width: 72px;
+                height: 72px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="テーマ切替">
+            <svg id="sunIcon" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg id="moonIcon" viewBox="0 0 24 24" style="display:none;">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+        </button>
+        <h1>Security Tools</h1>
+        <p>ペネトレーションテストと<br>セキュリティ評価の知識集</p>
+    </header>
+
+    <div class="container">
+        <button class="back-button" id="backBtn" onclick="showList()" aria-label="戻る">
+            <svg viewBox="0 0 24 24">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        </button>
+
+        <div id="list-view"></div>
+        <button class="reset-button" id="resetBtn" onclick="resetProgress()">進捗リセット</button>
+
+        <div id="article-view">
+            <article class="article" id="article-content"></article>
+        </div>
+
+        <button class="scroll-top" id="scrollTop" onclick="scrollToTop()" aria-label="トップへ戻る">
+            <svg viewBox="0 0 24 24">
+                <polyline points="18 15 12 9 6 15"></polyline>
+            </svg>
+        </button>
+    </div>
+
+    <!-- ARTICLES_PLACEHOLDER -->
+
+    <script>
+        const articles = [
+            { path: './README.md', title: 'はじめに', label: 'Overview', icon: 'images/icons/security.png', desc: 'このナレッジベースについて' },
+            { path: './web-scanners.md', title: 'Webスキャナー', label: 'Web Security', icon: 'images/icons/web-scanner.png', desc: 'Burp Suite, OWASP ZAP, SQLMap, Nikto' },
+            { path: './network-tools.md', title: 'ネットワークツール', label: 'Network', icon: 'images/icons/network.png', desc: 'Nmap, Wireshark, Nessus, Masscan' },
+            { path: './exploitation-frameworks.md', title: 'エクスプロイト', label: 'Exploitation', icon: 'images/icons/exploit.png', desc: 'Metasploit, Cobalt Strike, Empire' },
+            { path: './password-wireless.md', title: 'パスワード・無線LAN', label: 'Password', icon: 'images/icons/password.png', desc: 'John the Ripper, Hashcat, Aircrack-ng' },
+            { path: './osint.md', title: 'OSINT', label: 'Intelligence', icon: 'images/icons/osint.png', desc: 'Maltego, Shodan, theHarvester' },
+            { path: './forensics.md', title: 'フォレンジック', label: 'Forensics', icon: 'images/icons/forensics.png', desc: 'Autopsy, Volatility, binwalk' },
+            { path: './reverse-engineering.md', title: 'リバースエンジニアリング', label: 'Reversing', icon: 'images/icons/reverse.png', desc: 'Ghidra, IDA Pro, radare2, gdb' }
+        ];
+
+        function addTapEffect(card) {
+            card.addEventListener('touchstart', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = ((e.touches[0].clientX - rect.left) / rect.width) * 100;
+                const y = ((e.touches[0].clientY - rect.top) / rect.height) * 100;
+                card.style.setProperty('--tap-x', x + '%');
+                card.style.setProperty('--tap-y', y + '%');
+                card.classList.add('tapped');
+            }, { passive: true });
+
+            card.addEventListener('touchend', () => {
+                setTimeout(() => card.classList.remove('tapped'), 150);
+            }, { passive: true });
+        }
+
+        function buildListView() {
+            const listView = document.getElementById('list-view');
+
+            const section = document.createElement('section');
+            section.className = 'section';
+            section.innerHTML = `
+                <div class="section-header">
+                    <span class="section-icon">🔐</span>
+                    <span class="section-title">Knowledge Base</span>
+                </div>
+                <div class="card-grid"></div>
+            `;
+            const grid = section.querySelector('.card-grid');
+
+            articles.forEach(article => {
+                const card = document.createElement('div');
+                card.className = 'card' + (isArticleRead(article.path) ? ' read' : '');
+                card.dataset.path = article.path;
+                card.innerHTML = `
+                    <img class="card-icon" src="${article.icon}" alt="" loading="lazy">
+                    <span class="card-label">${article.label}</span>
+                    <div class="card-title">${article.title}</div>
+                    <div class="card-subtitle">${article.desc}</div>
+                `;
+                card.onclick = () => showArticle(article.path, article.icon);
+                addTapEffect(card);
+                grid.appendChild(card);
+            });
+
+            listView.appendChild(section);
+        }
+
+        function buildArticleNav(currentPath) {
+            const currentIndex = articles.findIndex(a => a.path === currentPath);
+            const nextArticle = articles[currentIndex + 1];
+
+            if (!nextArticle) {
+                // 最後の記事の場合は最初に戻る
+                const firstArticle = articles[0];
+                return `
+                    <div class="article-nav">
+                        <div class="article-nav-label">最初から読む</div>
+                        <div class="article-nav-card" onclick="showArticle('${firstArticle.path}', '${firstArticle.icon}')">
+                            <img class="article-nav-icon" src="${firstArticle.icon}" alt="">
+                            <div class="article-nav-content">
+                                <div class="article-nav-title">${firstArticle.title}</div>
+                                <div class="article-nav-desc">${firstArticle.desc}</div>
+                            </div>
+                            <svg class="article-nav-arrow" viewBox="0 0 24 24">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="article-nav">
+                    <div class="article-nav-label">Next</div>
+                    <div class="article-nav-card" onclick="showArticle('${nextArticle.path}', '${nextArticle.icon}')">
+                        <img class="article-nav-icon" src="${nextArticle.icon}" alt="">
+                        <div class="article-nav-content">
+                            <div class="article-nav-title">${nextArticle.title}</div>
+                            <div class="article-nav-desc">${nextArticle.desc}</div>
+                        </div>
+                        <svg class="article-nav-arrow" viewBox="0 0 24 24">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function showArticle(path, iconSrc) {
+            const listView = document.getElementById('list-view');
+            const articleView = document.getElementById('article-view');
+            const content = document.getElementById('article-content');
+            const backBtn = document.getElementById('backBtn');
+            const resetBtn = document.getElementById('resetBtn');
+
+            listView.classList.add('hidden');
+            resetBtn.style.display = 'none';
+            articleView.classList.add('visible');
+            backBtn.classList.add('visible');
+
+            content.innerHTML = `
+                <div class="loading">
+                    <div class="skeleton skeleton-icon"></div>
+                    <div class="skeleton skeleton-title"></div>
+                    <div class="skeleton skeleton-line"></div>
+                    <div class="skeleton skeleton-line"></div>
+                    <div class="skeleton skeleton-line"></div>
+                </div>
+            `;
+
+            window.scrollTo({ top: 0, behavior: 'instant' });
+
+            try {
+                let articleHtml;
+                if (window.__ARTICLES__ && window.__ARTICLES__[path]) {
+                    articleHtml = window.__ARTICLES__[path];
+                } else {
+                    const response = await fetch(path);
+                    if (!response.ok) throw new Error();
+                    const text = await response.text();
+                    articleHtml = marked.parse(text);
+                }
+                const navHtml = buildArticleNav(path);
+                content.innerHTML = `
+                    <div class="article-hero">
+                        <img src="${iconSrc}" alt="" class="article-hero-icon">
+                    </div>
+                    ${articleHtml}
+                    ${navHtml}
+                `;
+                markAsRead(path);
+            } catch (e) {
+                content.innerHTML = '<div class="loading"><p style="color: var(--text-tertiary);">読み込めませんでした</p></div>';
+            }
+
+            history.pushState({ path, iconSrc }, '', `#${encodeURIComponent(path)}`);
+        }
+
+        function showList() {
+            document.getElementById('list-view').classList.remove('hidden');
+            document.getElementById('resetBtn').style.display = 'block';
+            document.getElementById('article-view').classList.remove('visible');
+            document.getElementById('backBtn').classList.remove('visible');
+            window.scrollTo({ top: 0, behavior: 'instant' });
+            history.pushState(null, '', window.location.pathname);
+            updateCardReadStatus();
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        let lastScrollY = 0;
+        let scrollTimeout;
+        window.addEventListener('scroll', () => {
+            const currentScrollY = window.scrollY;
+            const backBtn = document.getElementById('backBtn');
+            const scrollTopBtn = document.getElementById('scrollTop');
+
+            if (backBtn.classList.contains('visible')) {
+                if (currentScrollY > lastScrollY && currentScrollY > 100) {
+                    backBtn.classList.add('hidden-scroll');
+                } else {
+                    backBtn.classList.remove('hidden-scroll');
+                }
+            }
+
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                if (currentScrollY > 400) {
+                    scrollTopBtn.classList.add('visible');
+                } else {
+                    scrollTopBtn.classList.remove('visible');
+                }
+            }, 100);
+
+            lastScrollY = currentScrollY;
+        }, { passive: true });
+
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        document.addEventListener('touchend', (e) => {
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = Math.abs(touchEndY - touchStartY);
+
+            if (touchStartX < 30 && deltaX > 80 && deltaY < 100) {
+                const articleView = document.getElementById('article-view');
+                if (articleView.classList.contains('visible')) {
+                    showList();
+                }
+            }
+        }, { passive: true });
+
+        window.onpopstate = e => {
+            if (e.state?.path) {
+                const article = articles.find(a => a.path === e.state.path);
+                showArticle(e.state.path, article?.icon || e.state.iconSrc);
+            } else {
+                showList();
+            }
+        };
+
+        const READ_STORAGE_KEY = 'security-tools-read';
+
+        function getReadArticles() {
+            try {
+                return JSON.parse(localStorage.getItem(READ_STORAGE_KEY) || '[]');
+            } catch {
+                return [];
+            }
+        }
+
+        function isArticleRead(path) {
+            return getReadArticles().includes(path);
+        }
+
+        function markAsRead(path) {
+            const read = getReadArticles();
+            if (!read.includes(path)) {
+                read.push(path);
+                localStorage.setItem(READ_STORAGE_KEY, JSON.stringify(read));
+            }
+        }
+
+        function updateCardReadStatus() {
+            const cards = document.querySelectorAll('.card[data-path]');
+            const read = getReadArticles();
+            cards.forEach(card => {
+                if (read.includes(card.dataset.path)) {
+                    card.classList.add('read');
+                } else {
+                    card.classList.remove('read');
+                }
+            });
+        }
+
+        function resetProgress() {
+            if (confirm('進捗をリセットしますか？')) {
+                localStorage.removeItem(READ_STORAGE_KEY);
+                updateCardReadStatus();
+            }
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            updateThemeIcon(isDark);
+        }
+
+        function updateThemeIcon(isDark) {
+            document.getElementById('sunIcon').style.display = isDark ? 'none' : 'block';
+            document.getElementById('moonIcon').style.display = isDark ? 'block' : 'none';
+        }
+
+        function initTheme() {
+            const saved = localStorage.getItem('theme');
+            const isDark = saved !== 'light'; // デフォルトはダークモード
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+            }
+            updateThemeIcon(isDark);
+        }
+
+        initTheme();
+        buildListView();
+        if (window.location.hash) {
+            const path = decodeURIComponent(window.location.hash.slice(1));
+            const article = articles.find(a => a.path === path);
+            if (article) showArticle(path, article.icon);
+        }
+    </script>
+</body>
+</html>

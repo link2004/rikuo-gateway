@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#fafafa">
+    <title>Nintendo Legends</title>
+    <meta name="description" content="任天堂を作った伝説の人々と哲学 - 岩田聡、宮本茂、桜井政博のエピソードと任天堂の哲学を紹介">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="images/icons/controller.png">
+    <link rel="apple-touch-icon" href="images/icons/controller.png">
+
+    <!-- OGP -->
+    <meta property="og:title" content="Nintendo Legends - 任天堂を作った伝説の人々と哲学">
+    <meta property="og:description" content="岩田聡、宮本茂、桜井政博のエピソードと任天堂の哲学を紹介">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://rikuo.pages.dev/nintendo-philosophy/">
+    <meta property="og:image" content="https://rikuo.pages.dev/nintendo-philosophy/images/ogp.svg">
+    <meta property="og:locale" content="ja_JP">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Nintendo Legends - 任天堂を作った伝説の人々と哲学">
+    <meta name="twitter:description" content="岩田聡、宮本茂、桜井政博のエピソードと任天堂の哲学を紹介">
+    <meta name="twitter:image" content="https://rikuo.pages.dev/nintendo-philosophy/images/ogp.svg">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --bg: #fafafa;
+            --card-bg: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #6b6b6b;
+            --text-tertiary: #9a9a9a;
+            --border: rgba(0,0,0,0.06);
+            --dot-color: rgba(0,0,0,0.06);
+            --accent: #ff3b30;
+            --radius: 24px;
+            --shadow: 0 2px 40px rgba(0,0,0,0.04);
+            --shadow-hover: 0 12px 60px rgba(0,0,0,0.1);
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
+            --safe-left: env(safe-area-inset-left);
+            --safe-right: env(safe-area-inset-right);
+        }
+
+        html {
+            scroll-behavior: smooth;
+            overscroll-behavior: none;
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -webkit-text-size-adjust: 100%;
+            padding-top: var(--safe-top);
+            padding-bottom: var(--safe-bottom);
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+        }
+
+        /* Header */
+        .header {
+            position: relative;
+            padding: 80px 24px 60px;
+            text-align: center;
+            max-width: 680px;
+            margin: 0 auto;
+            padding-left: max(24px, var(--safe-left));
+            padding-right: max(24px, var(--safe-right));
+        }
+
+        .header h1 {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            margin-bottom: 16px;
+        }
+
+        .header p {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.03em;
+            line-height: 1.25;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px calc(100px + var(--safe-bottom));
+            padding-left: max(20px, var(--safe-left));
+            padding-right: max(20px, var(--safe-right));
+        }
+
+        /* Section */
+        .section {
+            margin-bottom: 64px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 24px;
+            padding: 0 4px;
+        }
+
+        .section-icon {
+            font-size: 18px;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        /* Card Grid - Horizontal scroll on mobile */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        /* Card */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 40px 28px 36px;
+            cursor: pointer;
+            transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1),
+                        box-shadow 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            will-change: transform;
+            touch-action: manipulation;
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .card:active {
+            transform: scale(0.96);
+            transition: transform 0.12s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        /* Ripple effect */
+        .card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: var(--radius);
+            background: radial-gradient(circle at var(--tap-x, 50%) var(--tap-y, 50%), rgba(0,0,0,0.06) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .card.tapped::after {
+            opacity: 1;
+        }
+
+        /* Read/Clear badge */
+        .card.read::before {
+            content: '★ CLEAR';
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #34c759;
+            background: rgba(52, 199, 89, 0.1);
+            padding: 4px 10px;
+            border-radius: 999px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Card Icon */
+        .card-icon {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 24px;
+            image-rendering: pixelated;
+            transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            filter: drop-shadow(0 12px 24px rgba(0,0,0,0.1));
+        }
+
+        .card:hover .card-icon,
+        .card:active .card-icon {
+            transform: scale(1.08);
+        }
+
+        .card-label {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            margin-bottom: 10px;
+        }
+
+        .card-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.45;
+            letter-spacing: -0.01em;
+        }
+
+        .card-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 6px;
+        }
+
+        /* Profile Card */
+        .card.profile-card .card-icon {
+            width: 120px;
+            height: 120px;
+        }
+
+        /* Back Button - Fixed */
+        .back-button {
+            position: fixed;
+            top: max(20px, var(--safe-top));
+            left: max(14px, var(--safe-left));
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 30%;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+            touch-action: manipulation;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .back-button svg {
+            width: 20px;
+            height: 20px;
+            stroke: var(--text-primary);
+            stroke-width: 2.5;
+            fill: none;
+        }
+
+        .back-button:active {
+            transform: scale(0.9) !important;
+            transition: transform 0.1s;
+        }
+
+        .back-button.visible {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+        /* Article View */
+        #article-view {
+            display: none;
+            animation: slideIn 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        #article-view.visible {
+            display: block;
+        }
+
+        #list-view {
+            transition: opacity 0.3s;
+        }
+
+        #list-view.hidden {
+            display: none;
+        }
+
+        .article {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 60px 24px calc(120px + var(--safe-bottom));
+            padding-left: max(24px, var(--safe-left));
+            padding-right: max(24px, var(--safe-right));
+        }
+
+        .article h1 {
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: -0.025em;
+            margin-bottom: 48px;
+            color: var(--text-primary);
+        }
+
+        .article h2 {
+            font-size: 22px;
+            font-weight: 600;
+            margin: 56px 0 20px;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .article h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 40px 0 14px;
+            color: var(--text-primary);
+        }
+
+        .article p {
+            font-size: 16px;
+            line-height: 1.9;
+            margin-bottom: 24px;
+            color: var(--text-secondary);
+        }
+
+        .article ul, .article ol {
+            margin: 24px 0 32px 20px;
+            line-height: 1.85;
+        }
+
+        .article li {
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        .article blockquote {
+            border-left: 3px solid var(--text-primary);
+            padding: 20px 24px;
+            margin: 40px 0;
+            background: rgba(0,0,0,0.02);
+            border-radius: 0 16px 16px 0;
+        }
+
+        .article blockquote p {
+            font-size: 16px;
+            font-style: italic;
+            color: var(--text-primary);
+            margin-bottom: 0;
+            line-height: 1.75;
+        }
+
+        .article a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        .article a:active {
+            opacity: 0.5;
+        }
+
+        .article strong {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .article table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 32px 0;
+            font-size: 14px;
+            overflow-x: auto;
+            display: block;
+        }
+
+        .article th, .article td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .article th {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Skeleton Loading */
+        .loading {
+            text-align: center;
+            padding: 80px 24px;
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, var(--border) 25%, rgba(0,0,0,0.03) 50%, var(--border) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+
+        .skeleton-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 32px;
+            border-radius: 20px;
+        }
+
+        .skeleton-title {
+            height: 32px;
+            width: 80%;
+            margin-bottom: 48px;
+        }
+
+        .skeleton-line {
+            height: 16px;
+            margin-bottom: 16px;
+        }
+
+        .skeleton-line:nth-child(3) { width: 100%; }
+        .skeleton-line:nth-child(4) { width: 95%; }
+        .skeleton-line:nth-child(5) { width: 90%; }
+        .skeleton-line:nth-child(6) { width: 85%; }
+
+        /* Article Hero */
+        .article-hero {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .article-hero-icon {
+            width: 120px;
+            height: 120px;
+            image-rendering: pixelated;
+            filter: drop-shadow(0 16px 32px rgba(0,0,0,0.12));
+            animation: heroFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes heroFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* References */
+        .article .references {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-top: 64px;
+            padding-top: 28px;
+            border-top: 1px solid var(--border);
+        }
+
+        .article .references h3 {
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin: 20px 0 10px;
+            color: var(--text-tertiary);
+        }
+
+        .article .references ul {
+            margin: 0 0 14px 16px;
+        }
+
+        .article .references li {
+            font-size: 12px;
+            line-height: 1.6;
+            margin-bottom: 6px;
+        }
+
+        .article .references a {
+            color: var(--text-tertiary);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 60px 14px 48px;
+            }
+
+            .header p {
+                font-size: 28px;
+            }
+
+            .container {
+                padding-left: 14px;
+                padding-right: 14px;
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+
+            .card {
+                padding: 28px 20px 24px;
+                border-radius: 20px;
+            }
+
+            .card-icon {
+                width: 80px;
+                height: 80px;
+                margin-bottom: 20px;
+            }
+
+            .card.profile-card .card-icon {
+                width: 100px;
+                height: 100px;
+            }
+
+            .card-title {
+                font-size: 16px;
+            }
+
+            .article {
+                padding: 48px 14px calc(100px + var(--safe-bottom));
+            }
+
+            .article h1 {
+                font-size: 26px;
+                margin-bottom: 40px;
+            }
+
+            .article h2 {
+                font-size: 20px;
+                margin: 48px 0 16px;
+            }
+
+            .article p, .article li {
+                font-size: 15px;
+                line-height: 1.85;
+            }
+
+            .section {
+                margin-bottom: 48px;
+            }
+        }
+
+        /* Small phones */
+        @media (max-width: 375px) {
+            .header p {
+                font-size: 24px;
+            }
+
+            .article h1 {
+                font-size: 24px;
+            }
+
+            .card-icon {
+                width: 72px;
+                height: 72px;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .card {
+            opacity: 0;
+            animation: fadeIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+
+        .card:nth-child(1) { animation-delay: 0.03s; }
+        .card:nth-child(2) { animation-delay: 0.06s; }
+        .card:nth-child(3) { animation-delay: 0.09s; }
+        .card:nth-child(4) { animation-delay: 0.12s; }
+        .card:nth-child(5) { animation-delay: 0.15s; }
+        .card:nth-child(6) { animation-delay: 0.18s; }
+        .card:nth-child(7) { animation-delay: 0.21s; }
+        .card:nth-child(8) { animation-delay: 0.24s; }
+
+        /* Pull to refresh hint */
+        .ptr-hint {
+            position: fixed;
+            top: var(--safe-top);
+            left: 50%;
+            transform: translateX(-50%) translateY(-100%);
+            padding: 8px 16px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--text-tertiary);
+            box-shadow: var(--shadow);
+            transition: transform 0.3s;
+            z-index: 50;
+        }
+
+        /* Scroll to top button */
+        .scroll-top {
+            position: fixed;
+            bottom: calc(24px + var(--safe-bottom));
+            right: max(14px, var(--safe-right));
+            width: 40px;
+            height: 40px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 30%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            pointer-events: none;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+            z-index: 90;
+            touch-action: manipulation;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .scroll-top svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--text-primary);
+            stroke-width: 2.5;
+            fill: none;
+        }
+
+        .scroll-top.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .scroll-top:active {
+            transform: scale(0.92);
+        }
+
+        /* Theme toggle */
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 30%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            touch-action: manipulation;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .theme-toggle svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--text-primary);
+            stroke-width: 2;
+            fill: none;
+            transition: transform 0.3s;
+        }
+
+        .theme-toggle:active {
+            transform: scale(0.9);
+        }
+
+        .theme-toggle:active svg {
+            transform: rotate(30deg);
+        }
+
+        /* Dark mode - class based */
+        html.dark {
+            --bg: #0a0a0a;
+            --card-bg: #1a1a1a;
+            --text-primary: #f5f5f5;
+            --text-secondary: #a0a0a0;
+            --text-tertiary: #666666;
+            --border: rgba(255,255,255,0.08);
+            --dot-color: rgba(255,255,255,0.06);
+        }
+
+        html.dark .back-button,
+        html.dark .scroll-top {
+            background: rgba(40,40,40,0.95);
+        }
+
+        html.dark .theme-toggle {
+            background: rgba(40,40,40,0.95);
+        }
+
+        /* Reset button */
+        .reset-button {
+            display: block;
+            margin: 60px auto 20px;
+            padding: 8px 16px;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-tertiary);
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .reset-button:hover {
+            color: var(--text-secondary);
+            border-color: var(--text-tertiary);
+        }
+
+        .reset-button:active {
+            transform: scale(0.95);
+        }
+
+        /* Back button hide on scroll down */
+        .back-button.hidden-scroll {
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+        }
+
+        /* Article Navigation */
+        .article-nav {
+            margin-top: 80px;
+            padding-top: 40px;
+            border-top: 1px solid var(--border);
+        }
+
+        .article-nav-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            margin-bottom: 16px;
+        }
+
+        .article-nav-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            box-shadow: var(--shadow);
+        }
+
+        .article-nav-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .article-nav-card:active {
+            transform: scale(0.98);
+        }
+
+        .article-nav-icon {
+            width: 64px;
+            height: 64px;
+            image-rendering: pixelated;
+            flex-shrink: 0;
+        }
+
+        .article-nav-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .article-nav-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .article-nav-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .article-nav-arrow {
+            width: 24px;
+            height: 24px;
+            stroke: var(--text-tertiary);
+            stroke-width: 2;
+            fill: none;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="テーマ切替">
+            <svg id="sunIcon" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg id="moonIcon" viewBox="0 0 24 24" style="display:none;">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+        </button>
+        <h1>Nintendo Legends</h1>
+        <p>任天堂を作った<br>伝説の人々と哲学</p>
+    </header>
+
+    <div class="container">
+        <button class="back-button" id="backBtn" onclick="showList()" aria-label="戻る">
+            <svg viewBox="0 0 24 24">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        </button>
+
+        <div id="list-view"></div>
+        <button class="reset-button" id="resetBtn" onclick="resetProgress()">ゲームリセット</button>
+
+        <div id="article-view">
+            <article class="article" id="article-content"></article>
+        </div>
+
+        <button class="scroll-top" id="scrollTop" onclick="scrollToTop()" aria-label="トップへ戻る">
+            <svg viewBox="0 0 24 24">
+                <polyline points="18 15 12 9 6 15"></polyline>
+            </svg>
+        </button>
+    </div>
+
+    <script>
+        const people = {
+            "岩田聡": {
+                icon: "🎮",
+                profile: "岩田聡/岩田聡.md",
+                episodes: [
+                    "岩田聡/エピソード/MOTHER2救済伝説.md",
+                    "岩田聡/エピソード/ポケモン金銀を救った圧縮ツール.md",
+                    "岩田聡/エピソード/スマブラDX最後のプログラマー仕事.md",
+                    "岩田聡/エピソード/高校時代HP社を驚かせた天才少年.md",
+                    "岩田聡/エピソード/社員をリストラしない経営哲学.md"
+                ]
+            },
+            "宮本茂": {
+                icon: "🍄",
+                profile: "宮本茂/宮本茂.md",
+                episodes: [
+                    "宮本茂/エピソード/ドンキーコング誕生秘話_ポパイからマリオへ.md",
+                    "宮本茂/エピソード/ちゃぶ台返し.md",
+                    "宮本茂/エピソード/幼少期の洞窟探検とゼルダの伝説.md",
+                    "宮本茂/エピソード/ゴールデンアイ007と病院での握手.md",
+                    "宮本茂/エピソード/ポール・マッカートニーにサインを求められた男.md"
+                ]
+            },
+            "桜井政博": {
+                icon: "⭐",
+                profile: "桜井政博/桜井政博.md",
+                episodes: [
+                    "桜井政博/エピソード/19歳でカービィを企画した天才新人.md",
+                    "桜井政博/エピソード/スマブラ拳で悪評を払拭した自らの宣伝活動.md",
+                    "桜井政博/エピソード/岩田聡との運命的な出会いとスマブラ誕生.md",
+                    "桜井政博/エピソード/カービィはピンクなのに白と勘違いされた話.md",
+                    "桜井政博/エピソード/9000万円自腹のYouTubeチャンネル.md"
+                ]
+            }
+        };
+
+        const philosophies = [
+            { title: "枯れた技術の水平思考", path: "哲学/01_枯れた技術の水平思考.md", author: "横井軍平" },
+            { title: "独創の精神", path: "哲学/02_独創の精神.md", author: "任天堂DNA" },
+            { title: "ゲーム人口の拡大", path: "哲学/03_ゲーム人口の拡大.md", author: "岩田聡" },
+            { title: "驚きを与える任天堂らしさ", path: "哲学/04_驚きを与える任天堂らしさ.md", author: "任天堂" },
+            { title: "娯楽に徹せよ", path: "哲学/05_娯楽に徹せよ.md", author: "山内溥" },
+            { title: "遅れて出た良いゲームは永遠に良い", path: "哲学/01_遅れて出た良いゲームは永遠に良い.md", author: "宮本茂" },
+            { title: "ちゃぶ台返し文化", path: "哲学/02_ちゃぶ台返し文化.md", author: "宮本茂" },
+            { title: "説明書を読まなくても遊べるゲーム", path: "哲学/03_説明書を読まなくても遊べるゲーム.md", author: "桜井政博" },
+            { title: "負けた側がもう一回やりたいと思えるゲーム", path: "哲学/04_負けた側がもう一回やりたいと思えるゲーム.md", author: "桜井政博" },
+            { title: "お客様は神様ではなく家族", path: "哲学/05_お客様は神様ではなく家族.md", author: "岩田聡" },
+            { title: "社員をリストラしない経営哲学", path: "哲学/01_社員をリストラしない経営哲学.md", author: "岩田聡" },
+            { title: "失敗を恐れない文化", path: "哲学/02_失敗を恐れない文化.md", author: "任天堂" },
+            { title: "1人のカリスマより100人のチーム", path: "哲学/03_1人のカリスマより100人のチーム.md", author: "任天堂" },
+            { title: "異業種からの発想", path: "哲学/04_異業種からの発想.md", author: "横井軍平" },
+            { title: "プラットフォームとソフトの両輪", path: "哲学/05_プラットフォームとソフトの両輪.md", author: "任天堂" }
+        ];
+
+        const icons = {
+            "岩田聡": "images/person_icons/iwata_profile.png",
+            "MOTHER2救済伝説": "images/person_icons/iwata_mother2.png",
+            "ポケモン金銀を救った圧縮ツール": "images/person_icons/iwata_pokemon.png",
+            "スマブラDX最後のプログラマー仕事": "images/person_icons/iwata_smash.png",
+            "高校時代HP社を驚かせた天才少年": "images/person_icons/iwata_hp.png",
+            "社員をリストラしない経営哲学_ep": "images/person_icons/iwata_handshake.png",
+            "宮本茂": "images/person_icons/miyamoto_profile.png",
+            "ドンキーコング誕生秘話 ポパイからマリオへ": "images/person_icons/miyamoto_dk.png",
+            "ちゃぶ台返し": "images/person_icons/miyamoto_chabudai.png",
+            "幼少期の洞窟探検とゼルダの伝説": "images/person_icons/miyamoto_cave.png",
+            "ゴールデンアイ007と病院での握手": "images/person_icons/miyamoto_goldeneye.png",
+            "ポール・マッカートニーにサインを求められた男": "images/person_icons/miyamoto_zelda.png",
+            "桜井政博": "images/icons/star.png",
+            "19歳でカービィを企画した天才新人": "images/person_icons/sakurai_kirby.png",
+            "スマブラ拳で悪評を払拭した自らの宣伝活動": "images/person_icons/sakurai_smash.png",
+            "岩田聡との運命的な出会いとスマブラ誕生": "images/person_icons/sakurai_talk.png",
+            "カービィはピンクなのに白と勘違いされた話": "images/person_icons/sakurai_profile.png",
+            "9000万円自腹のYouTubeチャンネル": "images/person_icons/sakurai_youtube.png",
+            "枯れた技術の水平思考": "images/icons/handheld.png",
+            "独創の精神": "images/icons/lightbulb.png",
+            "ゲーム人口の拡大": "images/icons/heart.png",
+            "驚きを与える任天堂らしさ": "images/icons/sparkle.png",
+            "娯楽に徹せよ": "images/icons/flower.png",
+            "遅れて出た良いゲームは永遠に良い": "images/icons/book.png",
+            "ちゃぶ台返し文化": "images/icons/box.png",
+            "説明書を読まなくても遊べるゲーム": "images/icons/tablet.png",
+            "負けた側がもう一回やりたいと思えるゲーム": "images/icons/circle.png",
+            "お客様は神様ではなく家族": "images/icons/heart.png",
+            "社員をリストラしない経営哲学": "images/icons/cap.png",
+            "失敗を恐れない文化": "images/icons/balloon.png",
+            "1人のカリスマより100人のチーム": "images/icons/remote.png",
+            "異業種からの発想": "images/icons/triangle.png",
+            "プラットフォームとソフトの両輪": "images/icons/controller.png",
+            "default": "images/icons/star.png"
+        };
+
+        function getFileName(path) {
+            return path.split('/').pop().replace('.md', '').replace(/_/g, ' ').replace(/^\d+\s+/, '');
+        }
+
+        function getIcon(title) {
+            return icons[title] || icons["default"];
+        }
+
+        // Build flat list of all articles for navigation
+        function getAllArticles() {
+            const allArticles = [];
+
+            // Philosophies first
+            philosophies.forEach(phil => {
+                allArticles.push({
+                    path: phil.path,
+                    title: phil.title,
+                    desc: phil.author,
+                    icon: getIcon(phil.title)
+                });
+            });
+
+            // Then people and their episodes
+            for (const [name, data] of Object.entries(people)) {
+                allArticles.push({
+                    path: data.profile,
+                    title: name,
+                    desc: 'Profile',
+                    icon: getIcon(name)
+                });
+                data.episodes.forEach(ep => {
+                    const epTitle = getFileName(ep);
+                    allArticles.push({
+                        path: ep,
+                        title: epTitle,
+                        desc: name,
+                        icon: getIcon(epTitle)
+                    });
+                });
+            }
+
+            return allArticles;
+        }
+
+        function buildArticleNav(currentPath) {
+            const allArticles = getAllArticles();
+            const currentIndex = allArticles.findIndex(a => a.path === currentPath);
+            const nextArticle = allArticles[currentIndex + 1];
+
+            if (!nextArticle) {
+                // 最後の記事の場合は最初に戻る
+                const firstArticle = allArticles[0];
+                return `
+                    <div class="article-nav">
+                        <div class="article-nav-label">最初から読む</div>
+                        <div class="article-nav-card" onclick="showArticle('${firstArticle.path}')">
+                            <img class="article-nav-icon" src="${firstArticle.icon}" alt="">
+                            <div class="article-nav-content">
+                                <div class="article-nav-title">${firstArticle.title}</div>
+                                <div class="article-nav-desc">${firstArticle.desc}</div>
+                            </div>
+                            <svg class="article-nav-arrow" viewBox="0 0 24 24">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="article-nav">
+                    <div class="article-nav-label">Next</div>
+                    <div class="article-nav-card" onclick="showArticle('${nextArticle.path}')">
+                        <img class="article-nav-icon" src="${nextArticle.icon}" alt="">
+                        <div class="article-nav-content">
+                            <div class="article-nav-title">${nextArticle.title}</div>
+                            <div class="article-nav-desc">${nextArticle.desc}</div>
+                        </div>
+                        <svg class="article-nav-arrow" viewBox="0 0 24 24">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Tap effect for cards
+        function addTapEffect(card) {
+            card.addEventListener('touchstart', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = ((e.touches[0].clientX - rect.left) / rect.width) * 100;
+                const y = ((e.touches[0].clientY - rect.top) / rect.height) * 100;
+                card.style.setProperty('--tap-x', x + '%');
+                card.style.setProperty('--tap-y', y + '%');
+                card.classList.add('tapped');
+            }, { passive: true });
+
+            card.addEventListener('touchend', () => {
+                setTimeout(() => card.classList.remove('tapped'), 150);
+            }, { passive: true });
+        }
+
+        function buildListView() {
+            const listView = document.getElementById('list-view');
+
+            // Philosophy
+            const philSection = document.createElement('section');
+            philSection.className = 'section';
+            philSection.innerHTML = `
+                <div class="section-header">
+                    <span class="section-icon">📜</span>
+                    <span class="section-title">Philosophy</span>
+                </div>
+                <div class="card-grid"></div>
+            `;
+            const philGrid = philSection.querySelector('.card-grid');
+
+            philosophies.forEach(phil => {
+                const card = document.createElement('div');
+                card.className = 'card' + (isArticleRead(phil.path) ? ' read' : '');
+                card.dataset.path = phil.path;
+                card.innerHTML = `
+                    <img class="card-icon" src="${getIcon(phil.title)}" alt="" loading="lazy">
+                    <span class="card-label">Philosophy</span>
+                    <div class="card-title">${phil.title}</div>
+                    <div class="card-subtitle">${phil.author}</div>
+                `;
+                card.onclick = () => showArticle(phil.path);
+                addTapEffect(card);
+                philGrid.appendChild(card);
+            });
+
+            listView.appendChild(philSection);
+
+            // People
+            for (const [name, data] of Object.entries(people)) {
+                const section = document.createElement('section');
+                section.className = 'section';
+                section.innerHTML = `
+                    <div class="section-header">
+                        <span class="section-icon">${data.icon}</span>
+                        <span class="section-title">${name}</span>
+                    </div>
+                    <div class="card-grid"></div>
+                `;
+                const grid = section.querySelector('.card-grid');
+
+                const profileCard = document.createElement('div');
+                profileCard.className = 'card profile-card' + (isArticleRead(data.profile) ? ' read' : '');
+                profileCard.dataset.path = data.profile;
+                profileCard.innerHTML = `
+                    <img class="card-icon" src="${getIcon(name)}" alt="" loading="lazy">
+                    <span class="card-label">Profile</span>
+                    <div class="card-title">${name}</div>
+                `;
+                profileCard.onclick = () => showArticle(data.profile);
+                addTapEffect(profileCard);
+                grid.appendChild(profileCard);
+
+                data.episodes.forEach(ep => {
+                    const card = document.createElement('div');
+                    card.className = 'card' + (isArticleRead(ep) ? ' read' : '');
+                    card.dataset.path = ep;
+                    const epTitle = getFileName(ep);
+                    card.innerHTML = `
+                        <img class="card-icon" src="${getIcon(epTitle)}" alt="" loading="lazy">
+                        <span class="card-label">Episode</span>
+                        <div class="card-title">${epTitle}</div>
+                    `;
+                    card.onclick = () => showArticle(ep);
+                    addTapEffect(card);
+                    grid.appendChild(card);
+                });
+
+                listView.appendChild(section);
+            }
+        }
+
+        async function showArticle(path) {
+            const listView = document.getElementById('list-view');
+            const articleView = document.getElementById('article-view');
+            const content = document.getElementById('article-content');
+            const backBtn = document.getElementById('backBtn');
+            const resetBtn = document.getElementById('resetBtn');
+
+            listView.classList.add('hidden');
+            resetBtn.style.display = 'none';
+            articleView.classList.add('visible');
+            backBtn.classList.add('visible');
+
+            // Get icon for this article
+            const title = getFileName(path);
+            const iconSrc = getIcon(title);
+
+            // Skeleton loading
+            content.innerHTML = `
+                <div class="loading">
+                    <div class="skeleton skeleton-icon"></div>
+                    <div class="skeleton skeleton-title"></div>
+                    <div class="skeleton skeleton-line"></div>
+                    <div class="skeleton skeleton-line"></div>
+                    <div class="skeleton skeleton-line"></div>
+                </div>
+            `;
+
+            window.scrollTo({ top: 0, behavior: 'instant' });
+
+            try {
+                let articleHtml;
+                // 事前ビルドされたデータがあればそれを使用（高速）
+                if (window.__ARTICLES__ && window.__ARTICLES__[path]) {
+                    articleHtml = window.__ARTICLES__[path];
+                } else {
+                    // フォールバック: fetchで取得
+                    const response = await fetch(path);
+                    if (!response.ok) throw new Error();
+                    const text = await response.text();
+                    articleHtml = marked.parse(text);
+                }
+                const navHtml = buildArticleNav(path);
+                content.innerHTML = `
+                    <div class="article-hero">
+                        <img src="${iconSrc}" alt="" class="article-hero-icon">
+                    </div>
+                    ${articleHtml}
+                    ${navHtml}
+                `;
+                // 読了として記録
+                markAsRead(path);
+            } catch (e) {
+                content.innerHTML = '<div class="loading"><p style="color: var(--text-tertiary);">読み込めませんでした</p></div>';
+            }
+
+            history.pushState({ path }, '', `#${encodeURIComponent(path)}`);
+        }
+
+        function showList() {
+            document.getElementById('list-view').classList.remove('hidden');
+            document.getElementById('resetBtn').style.display = 'block';
+            document.getElementById('article-view').classList.remove('visible');
+            document.getElementById('backBtn').classList.remove('visible');
+            window.scrollTo({ top: 0, behavior: 'instant' });
+            history.pushState(null, '', window.location.pathname);
+            // カードの読了状態を更新
+            updateCardReadStatus();
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Scroll handling - back button and scroll-to-top
+        let lastScrollY = 0;
+        let scrollTimeout;
+        window.addEventListener('scroll', () => {
+            const currentScrollY = window.scrollY;
+            const backBtn = document.getElementById('backBtn');
+            const scrollTopBtn = document.getElementById('scrollTop');
+
+            // Back button: hide on scroll down, show on scroll up
+            if (backBtn.classList.contains('visible')) {
+                if (currentScrollY > lastScrollY && currentScrollY > 100) {
+                    backBtn.classList.add('hidden-scroll');
+                } else {
+                    backBtn.classList.remove('hidden-scroll');
+                }
+            }
+
+            // Scroll to top button
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                if (currentScrollY > 400) {
+                    scrollTopBtn.classList.add('visible');
+                } else {
+                    scrollTopBtn.classList.remove('visible');
+                }
+            }, 100);
+
+            lastScrollY = currentScrollY;
+        }, { passive: true });
+
+        // Swipe back gesture
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        document.addEventListener('touchend', (e) => {
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = Math.abs(touchEndY - touchStartY);
+
+            // Swipe right from left edge to go back
+            if (touchStartX < 30 && deltaX > 80 && deltaY < 100) {
+                const articleView = document.getElementById('article-view');
+                if (articleView.classList.contains('visible')) {
+                    showList();
+                }
+            }
+        }, { passive: true });
+
+        window.onpopstate = e => e.state?.path ? showArticle(e.state.path) : showList();
+
+        // Read articles management
+        const READ_STORAGE_KEY = 'nintendo-legends-read';
+
+        function getReadArticles() {
+            try {
+                return JSON.parse(localStorage.getItem(READ_STORAGE_KEY) || '[]');
+            } catch {
+                return [];
+            }
+        }
+
+        function isArticleRead(path) {
+            return getReadArticles().includes(path);
+        }
+
+        function markAsRead(path) {
+            const read = getReadArticles();
+            if (!read.includes(path)) {
+                read.push(path);
+                localStorage.setItem(READ_STORAGE_KEY, JSON.stringify(read));
+            }
+        }
+
+        function updateCardReadStatus() {
+            const cards = document.querySelectorAll('.card[data-path]');
+            const read = getReadArticles();
+            cards.forEach(card => {
+                if (read.includes(card.dataset.path)) {
+                    card.classList.add('read');
+                } else {
+                    card.classList.remove('read');
+                }
+            });
+        }
+
+        function resetProgress() {
+            if (confirm('リセットしますか？')) {
+                localStorage.removeItem(READ_STORAGE_KEY);
+                updateCardReadStatus();
+            }
+        }
+
+        // Theme toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            updateThemeIcon(isDark);
+        }
+
+        function updateThemeIcon(isDark) {
+            document.getElementById('sunIcon').style.display = isDark ? 'none' : 'block';
+            document.getElementById('moonIcon').style.display = isDark ? 'block' : 'none';
+        }
+
+        // Initialize theme (default: light)
+        function initTheme() {
+            const saved = localStorage.getItem('theme');
+            // Default to light mode
+            const isDark = saved === 'dark';
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+            }
+            updateThemeIcon(isDark);
+        }
+
+        initTheme();
+        buildListView();
+        if (window.location.hash) showArticle(decodeURIComponent(window.location.hash.slice(1)));
+    </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "rikuo-gateway",
+  "version": "1.0.0",
+  "description": "rikuo.pages.dev - Knowledge Blog Monorepo",
+  "scripts": {
+    "build": "node build.js",
+    "dev": "npx serve dist"
+  },
+  "type": "commonjs",
+  "dependencies": {
+    "marked": "^17.0.1"
+  }
+}
